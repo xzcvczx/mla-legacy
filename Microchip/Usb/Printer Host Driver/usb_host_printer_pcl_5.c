@@ -86,6 +86,8 @@ Change History:
   ----------  ----------------------------------------------------------
   2.6 - 2.6a  No change
 
+  2.7         Changed the interface to _SetCurrentPosition to be able to
+              take in the printer number as a parameter.
 *******************************************************************************/
 //DOM-IGNORE-END
 
@@ -297,10 +299,10 @@ PRINTER_STATUS_PCL  printerListPCL[USB_MAX_PRINTER_DEVICES];
 #define Y_COORDINATE_IN_RANGE(y)    ((0 <= (y)) && ((y) <= printerListPCL[printer].currentHeight))
 
 
-#define _SetCurrentPosition(x,y)                 \
-    {                                            \
-        printerListPCL[printer].currentX = x;    \
-        printerListPCL[printer].currentY = y;    \
+#define _SetCurrentPosition(p,x,y)              \
+    {                                           \
+        printerListPCL[(p)].currentX = (x);     \
+        printerListPCL[(p)].currentY = (y);     \
     }
 
 
@@ -391,7 +393,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
         USB_PRINTER_COMMAND command, USB_DATA_POINTER data, DWORD size, BYTE transferFlags )
 {
     char    *buffer;
-    BYTE    printer;
+    BYTE    printer = 0;
 
     if (command != USB_PRINTER_ATTACHED)
     {
@@ -448,7 +450,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             printerListPCL[printer].printerFlags.value      = 0;
             printerListPCL[printer].currentHeight           = PRINTER_PAGE_PORTRAIT_HEIGHT;
             printerListPCL[printer].currentWidth            = PRINTER_PAGE_PORTRAIT_WIDTH;
-            _SetCurrentPosition( 0, 0 );
+            _SetCurrentPosition( printer, 0, 0 );
             if (USING_VECTOR_GRAPHICS)
             {
                 return _PrintStaticCommand( address, COMMAND_JOB_START COMMAND_GRAPHICS_ORIENT_PORTRAIT, transferFlags );
@@ -541,7 +543,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
 
         //---------------------------------------------------------------------
         case USB_PRINTER_EJECT_PAGE:
-            _SetCurrentPosition( 0, 0 );
+            _SetCurrentPosition( printer, 0, 0 );
             if (USING_VECTOR_GRAPHICS)
             {
                 if ( printerListPCL[printer].printerFlags.isLandscape)
@@ -647,7 +649,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             }
 
             sprintf( buffer, COMMAND_POSITION_HORIZONTAL COMMAND_POSITION_VERTICAL, (WORD)(size >> 16) * 10, (WORD)size * 10 );
-            _SetCurrentPosition( (WORD)(size >> 16), (WORD)size );
+            _SetCurrentPosition( printer, (WORD)(size >> 16), (WORD)size );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -935,7 +937,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             }
 
             sprintf( buffer, COMMAND_GRAPHICS_MOVE_TO, (WORD)(size >> 16) * 10, (WORD)size * 10);
-            _SetCurrentPosition( (WORD)(size >> 16), (WORD)size );
+            _SetCurrentPosition( printer, (WORD)(size >> 16), (WORD)size );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -956,7 +958,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             }
 
             sprintf( buffer, COMMAND_GRAPHICS_MOVE_RELATIVE, (int)(size >> 16) * 10, (int)(size & 0xFFFF) * 10 );
-            _SetCurrentPosition( printerListPCL[printer].currentX + (int)(size >> 16), printerListPCL[printer].currentY + (int)(size & 0xFFFF) );
+            _SetCurrentPosition( printer, printerListPCL[printer].currentX + (int)(size >> 16), printerListPCL[printer].currentY + (int)(size & 0xFFFF) );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -980,7 +982,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             sprintf( buffer, COMMAND_GRAPHICS_LINE COMMAND_GRAPHICS_PEN_UP,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sLine.x1 * 10, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sLine.y1 * 10,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sLine.x2 * 10, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sLine.y2 * 10);
-            _SetCurrentPosition( ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sLine.x2, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sLine.y2 );
+            _SetCurrentPosition( printer, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sLine.x2, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sLine.y2 );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1000,7 +1002,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             }
 
             sprintf( buffer, COMMAND_GRAPHICS_LINE_TO COMMAND_GRAPHICS_PEN_UP, (int)(size >> 16) * 10, (int)(size & 0xFFFF) * 10) ;
-            _SetCurrentPosition( (int)(size >> 16), (int)(size & 0xFFFF) );
+            _SetCurrentPosition( printer, (int)(size >> 16), (int)(size & 0xFFFF) );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1020,7 +1022,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             }
 
             sprintf( buffer, COMMAND_GRAPHICS_LINE_TO_RELATIVE COMMAND_GRAPHICS_PEN_UP, (int)(size >> 16) * 10, (int)(size & 0xFFFF) * 10 ) ;
-            _SetCurrentPosition( printerListPCL[printer].currentX + (int)(size >> 16), printerListPCL[printer].currentY + (int)(size & 0xFFFF) );
+            _SetCurrentPosition( printer, printerListPCL[printer].currentX + (int)(size >> 16), printerListPCL[printer].currentY + (int)(size & 0xFFFF) );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1130,7 +1132,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
 
                 strcat ( buffer, COMMAND_GRAPHICS_PEN_UP );
             }
-            _SetCurrentPosition( ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sArc.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sArc.yT );
+            _SetCurrentPosition( printer, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sArc.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sArc.yT );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1164,7 +1166,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             sprintf( buffer, COMMAND_GRAPHICS_MOVE_TO COMMAND_GRAPHICS_CIRCLE COMMAND_GRAPHICS_PEN_UP,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.x * 10, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.y * 10,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.r * 10 );
-            _SetCurrentPosition( ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.x, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.y );
+            _SetCurrentPosition( printer, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.x, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.y );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1199,7 +1201,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.x * 10, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.y * 10,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.x * 10, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.y * 10,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.r * 10 );
-            _SetCurrentPosition( ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.x, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.y );
+            _SetCurrentPosition( printer, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.x, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sCircle.y );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1266,7 +1268,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
             sprintf( &(buffer[strlen(buffer)]), COMMAND_GRAPHICS_ARC_RELATIVE COMMAND_GRAPHICS_PEN_UP,
                 0, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.r * -1 * 10, 90 );
 
-            _SetCurrentPosition( ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.yB );
+            _SetCurrentPosition( printer, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.yB );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1327,7 +1329,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 (((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.yB - ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.r) * 10,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.r * 10, 90, -90 );
 
-            _SetCurrentPosition( ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.yB );
+            _SetCurrentPosition( printer,  ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sBevel.yB );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1353,7 +1355,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.yT * 10,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.xR * 10,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.yB * 10 );
-            _SetCurrentPosition( ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.yB );
+            _SetCurrentPosition( printer, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.yB );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1381,7 +1383,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.yT * 10,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.xR * 10,
                 ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.yB * 10);
-            _SetCurrentPosition( ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.yB );
+            _SetCurrentPosition( printer,  ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.xL, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sRectangle.yB );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;
@@ -1429,7 +1431,7 @@ BYTE USBHostPrinterLanguagePCL5( BYTE address,
                     ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sPolygon.points[1] * 10);
             }
 
-            _SetCurrentPosition( ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sPolygon.points[0], ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sPolygon.points[1] );
+            _SetCurrentPosition( printer, ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sPolygon.points[0], ((USB_PRINTER_GRAPHICS_PARAMETERS *)(data.pointerRAM))->sPolygon.points[1] );
             USBHOSTPRINTER_SETFLAG_COPY_DATA( transferFlags );
             return USBHostPrinterWrite( printerListPCL[printer].deviceAddress, buffer, strlen(buffer), transferFlags );
             break;

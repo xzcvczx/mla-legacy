@@ -19,7 +19,8 @@ typedef enum
 
 //                            MACROS
 /////////////////////////////////////////////////////////////////////////////
-#define WAIT_UNTIL_FINISH(x)    while(!x)
+	#define WAIT_UNTIL_FINISH(x)    	while(!x)
+	
     #define GR_CLR_GRID                 LIGHTGRAY
     #define GR_CLR_BACKGROUND           BLACK
     #define GR_CLR_POINTS               BRIGHTGREEN
@@ -32,44 +33,46 @@ typedef enum
 
     // Dimensions for ECG graph area
 	#define ECG_ORIGIN_X    			((GetMaxX()-262+1)/2)
-	#define ECG_ORIGIN_Y    			0 //((20+(GetMaxY()-(CTRLBTN_HEIGHT*2))-190+1)/2)    
+	#define ECG_ORIGIN_Y    			0   
 
 	#define ECG_PANEL_LEFT   			ECG_ORIGIN_X
 	#define ECG_PANEL_RIGHT  			ECG_ORIGIN_X+262
 	#define ECG_PANEL_TOP    			ECG_ORIGIN_Y
 	#define ECG_PANEL_BOTTOM 			ECG_ORIGIN_Y+150
     
-    #define ECG_X_TEXT          ECG_PANEL_LEFT + 40
-    #define ECG_X_DIM           ECG_PANEL_RIGHT - 40
-    #define ECG_X_NUM           ECG_X_DIM - 50
-    #define ECG_Y_TEXTLINE1     ECG_PANEL_BOTTOM
-    #define ECG_Y_TEXTLINE2     ECG_Y_TEXTLINE1 + 25
+    #define ECG_X_TEXT          		ECG_PANEL_LEFT + 40
+    #define ECG_X_DIM           		ECG_PANEL_RIGHT - 40
+    #define ECG_X_NUM           		ECG_X_DIM - 50
+    #define ECG_Y_TEXTLINE1     		ECG_PANEL_BOTTOM
+    #define ECG_Y_TEXTLINE2     		ECG_Y_TEXTLINE1 + 25
 
     // Graph area borders
-    #define GR_LEFT     (ECG_PANEL_LEFT + GOL_EMBOSS_SIZE)
-    #define GR_RIGHT    (ECG_PANEL_RIGHT - GOL_EMBOSS_SIZE)
-    #define GR_TOP      (ECG_PANEL_TOP + GOL_EMBOSS_SIZE)
-    #define GR_BOTTOM   (ECG_PANEL_BOTTOM - GOL_EMBOSS_SIZE)
+    #define GR_LEFT     				(ECG_PANEL_LEFT + GOL_EMBOSS_SIZE)
+    #define GR_RIGHT    				(ECG_PANEL_RIGHT - GOL_EMBOSS_SIZE)
+    #define GR_TOP      				(ECG_PANEL_TOP + GOL_EMBOSS_SIZE)
+    #define GR_BOTTOM   				(ECG_PANEL_BOTTOM - GOL_EMBOSS_SIZE)
 
     // Scanning window size
-    #define ECG_WINDOW_SIZE 8
+    #define ECG_WINDOW_SIZE 			8
 
     // ECG data circular buffer size
-    #define ECG_BUFFER_SIZE 256
+    #define ECG_BUFFER_SIZE 			256
+    
+    #define ECG_DELAY					5
 
     /////////////////////////////////////////////////////////////////////////////
     //                            STRINGS USED
     /////////////////////////////////////////////////////////////////////////////
-    extern XCHAR            ExitStr[];
-extern XCHAR                EcgStr[];
-extern XCHAR                ExtStr[];
-extern XCHAR                NoiseStr[];
-extern XCHAR                CleanStr[];
-extern XCHAR                LabelStr[];
-extern XCHAR                RateStr[];
-extern XCHAR                AmplitudeStr[];
-extern XCHAR                BeatsStr[];
-extern XCHAR                mVStr[];
+    extern XCHAR            			ExitStr[];
+	extern XCHAR                		EcgStr[];
+	extern XCHAR                		ExtStr[];
+	extern XCHAR                		NoiseStr[];
+	extern XCHAR                		CleanStr[];
+	extern XCHAR                		LabelStr[];
+	extern XCHAR                		RateStr[];
+	extern XCHAR                		AmplitudeStr[];
+	extern XCHAR                		BeatsStr[];
+	extern XCHAR                		mVStr[];
 
 /////////////////////////////////////////////////////////////////////////////
 //                            GLOBALS
@@ -143,7 +146,7 @@ void UpdateECG(DWORD tick)
     switch(ecgStates)
     {
         case ECG_SAMPLE:
-            if((tick - prevTick) > 3)
+            if((tick - prevTick) > ECG_DELAY)
             {
                 if(potInput)
                 {
@@ -782,7 +785,7 @@ SHORT GetNoise(void)
 {
 
     // this is the noise generator
-    return (TMR4 & 0x000f);
+    return (TMR3 & 0x000f);
 }
 
 /************************************************************************

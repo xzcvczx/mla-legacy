@@ -58,6 +58,9 @@
 #ifndef __STACK_TSK_H
 #define __STACK_TSK_H
 
+#if defined (WF_CS_TRIS)
+    #include "WF_Config.h" // pull in additional defines from wireless settings
+#endif
 
 // Check for potential configuration errors in "TCPIPConfig.h"
 #if (MAX_UDP_SOCKETS <= 0 || MAX_UDP_SOCKETS > 255 )
@@ -104,8 +107,18 @@ typedef struct __attribute__((__packed__))
 	} Flags;                            // Flag structure
 	MAC_ADDR	MyMACAddr;              // Application MAC address
 
-#if defined(ZG_CS_TRIS)
-	BYTE		MySSID[32];             // Wireless SSID (if using ZG2100M)
+#if defined(WF_CS_TRIS)
+	BYTE		MySSID[32];             // Wireless SSID (if using MRF24WB0M)
+	BYTE        SsidLength;             // number of bytes in SSID
+	BYTE        SecurityMode;           // WF_SECURITY_OPEN or one of the other security modes
+	BYTE        SecurityKey[64];        // WiFi Security key, or passphrase.   
+	BYTE        SecurityKeyLength;      // number of bytes in security key (can be 0)
+	BYTE        WepKeyIndex;            // WEP key index (only valid for WEP)
+    #if defined(EZ_CONFIG_STORE) // WLAN configuration data stored to NVM
+    BYTE        dataValid;
+    BYTE        networkType;
+    BYTE        saveSecurityInfo;       // Save 32-byte PSK
+    #endif
 #endif
 	
 #if defined(STACK_USE_SNMP_SERVER)

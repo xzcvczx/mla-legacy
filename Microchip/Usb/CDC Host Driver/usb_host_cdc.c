@@ -59,13 +59,19 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
+ Change History:
  Revision     Description
  v2.6         Removed state machine 'SUBSTATE_SET_CONTROL_LINE_STATE' from normal
               enumeration process.
               Modified code to accommodate CDC devices that do not have distinct
               Communication and Data interfaces.
+
  v2.6a        No change
+
+ v2.7         Modified the code to allow connection of USB-RS232 dongles that do
+              not fully comply with CDC specifications
+              Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
+              more than 256 bytes
 ********************************************************************************/
 
 
@@ -1464,7 +1470,7 @@ BOOL USBHostCDCInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
             if (descriptor[i+1] == USB_DESCRIPTOR_INTERFACE)
             {
                 // See if the interface is a CDC - Communicaton Interface.
-                if (descriptor[i+5] == USB_CDC_COMM_INTF)
+                if ((descriptor[i+5] == USB_CDC_COMM_INTF) || (descriptor[i+5] == 0xFF))
                 {
                     validCommInterface = 1;
                     deviceInfoCDC[device].commInterface.interfaceNum  = descriptor[i+2];

@@ -155,12 +155,7 @@ state according to the definition in the USB specification.
 #define __USB_DESCRIPTORS_C
 
 /** INCLUDES *******************************************************/
-#include "GenericTypeDefs.h"
-#include "Compiler.h"
-#include "usb_config.h"
-#include "./USB/usb_common.h"
-#include "./USB/usb_ch9.h"
-#include "./USB/usb_device.h"
+#include "usb.h"
 
 #include "./USB/usb_function_hid.h"
 

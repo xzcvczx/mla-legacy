@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\USB Device - HID Mouse - C18 - PIC18F46J50 PIM
 dir_sin=
-dir_inc=C:\MCC18\h;..\..\Microchip\Include;..\..\USB Device - HID - Mouse\HID - Mouse - Firmware
+dir_inc=..\..\Microchip\Include;.;C:\MCC18\h
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]

@@ -45,7 +45,7 @@ _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
@@ -88,7 +88,7 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPD
 #define MODEKEYINDEX    12                      // index number of the mode key
 #define CLEARKEYINDEX   14                      // index number of the clear display key
 #define TEBUFFERSIZE    15                      // buffer size used in the text entry
-#define CHECKDELAY      1000
+#define CHECKDELAY      20000
 
 /////////////////////////////////////////////////////////////////////////////
 //                            DEMO STATES
@@ -154,7 +154,7 @@ XCHAR           CorrectCodeText[TEBUFFERSIZE] = {'C','o','d','e',' ','a','c','c'
 XCHAR           PassWord[PASSWORD_LEN + 1] = {'3','6','5','4',0};
 
 // this is the user entered keys buffer
-XCHAR           CodeEntered[TEBUFFERSIZE + 1] = "";
+XCHAR           CodeEntered[TEBUFFERSIZE] = "";
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -187,20 +187,20 @@ int main(void)
 {
     GOL_MSG msg;                    // GOL message structure to interact with GOL
     
-    #if (GRAPHICS_HARDWARE_PLATFORM  == DA210_DEV_BOARD)
+    #if defined(PIC24FJ256DA210_DEV_BOARD)
     
-    _ANSG8 = 0; /* S1 */
-    _ANSE9 = 0; /* S2 */
-    _ANSB5 = 0; /* S3 */
+	    _ANSG8 = 0; /* S1 */
+	    _ANSE9 = 0; /* S2 */
+	    _ANSB5 = 0; /* S3 */
         
     #else
 
-    /////////////////////////////////////////////////////////////////////////////
-    // ADC Explorer 16 Development Board Errata (work around 2)
-    // RB15 should be output
-    /////////////////////////////////////////////////////////////////////////////
-    LATBbits.LATB15 = 0;
-    TRISBbits.TRISB15 = 0;
+	    /////////////////////////////////////////////////////////////////////////////
+	    // ADC Explorer 16 Development Board Errata (work around 2)
+	    // RB15 should be output
+	    /////////////////////////////////////////////////////////////////////////////
+	    LATBbits.LATB15 = 0;
+	    TRISBbits.TRISB15 = 0;
 
     #endif
 
@@ -208,50 +208,57 @@ int main(void)
 
     #if defined(__dsPIC33F__) || defined(__PIC24H__)
 
-    // Configure Oscillator to operate the device at 40Mhz
-    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
-    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
-    PLLFBD = 38;                    // M=40
-    CLKDIVbits.PLLPOST = 0;         // N1=2
-    CLKDIVbits.PLLPRE = 0;          // N2=2
-    OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
-
-    // Disable Watch Dog Timer
-    RCONbits.SWDTEN = 0;
-
-    // Clock switching to incorporate PLL
-    __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
-
-    // Oscillator with PLL (NOSC=0b011)
-    __builtin_write_OSCCONL(0x01);  // Start clock switching
-    while(OSCCONbits.COSC != 0b011);
-
-    // Wait for Clock switch to occur	
-    // Wait for PLL to lock
-    while(OSCCONbits.LOCK != 1)
-    { };    
-    
-    // Set PMD0 pin functionality to digital
-    AD1PCFGL = AD1PCFGL | 0x1000;
+	    // Configure Oscillator to operate the device at 40Mhz
+	    // Fosc= Fin*M/(N1*N2), Fcy=Fosc/2
+	    // Fosc= 8M*40(2*2)=80Mhz for 8M input clock
+	    PLLFBD = 38;                    // M=40
+	    CLKDIVbits.PLLPOST = 0;         // N1=2
+	    CLKDIVbits.PLLPRE = 0;          // N2=2
+	    OSCTUN = 0;                     // Tune FRC oscillator, if FRC is used
+	
+	    // Disable Watch Dog Timer
+	    RCONbits.SWDTEN = 0;
+	
+	    // Clock switching to incorporate PLL
+	    __builtin_write_OSCCONH(0x03);  // Initiate Clock Switch to Primary
+	
+	    // Oscillator with PLL (NOSC=0b011)
+	    __builtin_write_OSCCONL(0x01);  // Start clock switching
+	    while(OSCCONbits.COSC != 0b011);
+	
+	    // Wait for Clock switch to occur	
+	    // Wait for PLL to lock
+	    while(OSCCONbits.LOCK != 1)
+	    { };    
+	    
+	    // Set PMD0 pin functionality to digital
+	    AD1PCFGL = AD1PCFGL | 0x1000;
     
     #elif defined(__PIC32MX__)
-    INTEnableSystemMultiVectoredInt();
-    SYSTEMConfigPerformance(GetSystemClock());
+    	INTEnableSystemMultiVectoredInt();
+    	SYSTEMConfigPerformance(GetSystemClock());
+    #ifdef MULTI_MEDIA_BOARD_DM00123
+        CPLDInitialize();
+        CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+        CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+    #endif
     #endif
     
 	GOLInit();                      // initialize graphics library &
 
-    #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
-    EEPROMInit();                   // initialize Exp.16 EEPROM SPI
-    BeepInit();
+    #if defined (GFX_PICTAIL_V2) 
+    	EEPROMInit();                   // initialize Exp.16 EEPROM SPI
+    	#if !defined (__PIC32MX__)
+    		BeepInit();
+    	#endif
     #else
-    SST25Init();                    // initialize GFX3 SST25 flash SPI
+    	SST25Init();                    // initialize GFX3 SST25 flash SPI
     #endif
         
-    TouchInit();                    // initialize touch screen
-
-    // create default style scheme for GOL
-    TickInit();                     // initialize tick counter (for random number generation)
+ 	// Initialize touch screen
+	TouchInit();            
+	// Start tick counter based on a timer. This enables the interrupt that samples the touch screen 
+	TickInit();           
 
     // Clear screen
     SetColor(WHITE);
@@ -260,50 +267,50 @@ int main(void)
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
 
     // If S3 button on Explorer 16 board is pressed calibrate touch screen
-    TRISAbits.TRISA9 = 1;
-    if(PORTAbits.RA9 == 0)
-    {
-        TRISAbits.TRISA9 = 0;
-        TouchCalibration();
-        TouchStoreCalibration();
-    }
+	    TRISAbits.TRISA9 = 1;
+	    if(PORTAbits.RA9 == 0)
+	    {
+	        TRISAbits.TRISA9 = 0;
+	        TouchCalibration();
+	        TouchStoreCalibration();
+	    }
 
     #elif defined(__PIC24FJ256DA210__)
 
-    // If S1 button on the PIC24FJ256DA210 Development board is pressed calibrate touch screen
-    if(BTN_S1 == 0)
-    {
-        TouchCalibration();
-        TouchStoreCalibration();
-    }
+	    // If S1 button on the PIC24FJ256DA210 Development board is pressed calibrate touch screen
+	    if(BTN_S1 == 0)
+	    {
+	        TouchCalibration();
+	        TouchStoreCalibration();
+	    }
 
     #else
 
-    // If S3 button on Explorer 16 board is pressed calibrate touch screen
-    if(PORTDbits.RD6 == 0)
-    {
-        TouchCalibration();
-        TouchStoreCalibration();
-    }
+	    // If S3 button on Explorer 16 board is pressed calibrate touch screen
+	    if(BTN_S3 == 0)
+	    {
+	        TouchCalibration();
+	        TouchStoreCalibration();
+	    }
 
     #endif
     else
     {
 
         // If it's a new board (EEPROM_VERSION byte is not programed) calibrate touch screen
-        #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
-        if(GRAPHICS_LIBRARY_VERSION != EEPROMReadWord(ADDRESS_VERSION))
-        {
-            TouchCalibration();
-            TouchStoreCalibration();
-        }
+        #if defined (GFX_PICTAIL_V2) || defined (GFX_PICTAIL_V1)
+	        if(GRAPHICS_LIBRARY_VERSION != EEPROMReadWord(ADDRESS_VERSION))
+	        {
+	            TouchCalibration();
+	            TouchStoreCalibration();
+	        }
 
         #else
-        if(GRAPHICS_LIBRARY_VERSION != SST25ReadWord(ADDRESS_VERSION))
-        {
-            TouchCalibration();
-            TouchStoreCalibration();
-        }
+	        if(GRAPHICS_LIBRARY_VERSION != SST25ReadWord(ADDRESS_VERSION))
+	        {
+	            TouchCalibration();
+	            TouchStoreCalibration();
+	        }
 
         #endif
 
@@ -353,6 +360,14 @@ WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 
     objectID = GetObjID(pObj);
 
+    // beep if button is pressed
+    #if !defined (__PIC32MX__)
+    if(objMsg == TE_MSG_PRESSED)
+    {
+        Beep();
+    }
+	#endif
+	
     switch(ViewState)
     {
         case INIT_SECURE_ST:
@@ -699,28 +714,30 @@ void initKeys(void)
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// Function: Timer4 ISR
+// Function: Timer3 ISR
 // Input: none
 // Output: none
 // Overview: increments tick counter. Tick is approx. 1 ms.
 /////////////////////////////////////////////////////////////////////////////
 #ifdef __PIC32MX__
-    #define __T4_ISR    __ISR(_TIMER_4_VECTOR, ipl1)
+    #define __T3_ISR    __ISR(_TIMER_3_VECTOR, ipl4)
 #else
-    #define __T4_ISR    __attribute__((interrupt, shadow, auto_psv))
+    #define __T3_ISR    __attribute__((interrupt, shadow, auto_psv))
 #endif
 
 /* */
-void __T4_ISR _T4Interrupt(void)
+void __T3_ISR _T3Interrupt(void)
 {
     tick++;
 
     // Clear flag
     #ifdef __PIC32MX__
-    mT4ClearIntFlag();
+    mT3ClearIntFlag();
     #else
-    IFS1bits.T4IF = 0;
+    IFS0bits.T3IF = 0;
     #endif
+
+	TouchProcessTouch();    
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -733,17 +750,8 @@ void __T4_ISR _T4Interrupt(void)
 /*********************************************************************
  * Section: Tick Delay
  *********************************************************************/
-#if defined(__dsPIC33F__) || defined(__PIC24H__)
-
-// for a system clock of 40 MHz
-    #define TICK_PERIOD 40000
-#elif defined(__PIC32MX__)
-    #define TICK_PERIOD (72000 / 8)
-#else
-
-// for a system clock of 32 MHz
-    #define TICK_PERIOD 16000
-#endif
+#define SAMPLE_PERIOD       500 // us
+#define TICK_PERIOD			(GetPeripheralClock() * SAMPLE_PERIOD) / 4000000
 
 /* */
 void TickInit(void)
@@ -751,13 +759,14 @@ void TickInit(void)
 
     // Initialize Timer4
     #ifdef __PIC32MX__
-    OpenTimer4(T4_ON | T4_PS_1_8, TICK_PERIOD);
-    ConfigIntTimer4(T4_INT_ON | T4_INT_PRIOR_1);
+    OpenTimer3(T3_ON | T3_PS_1_8, TICK_PERIOD);
+    ConfigIntTimer3(T3_INT_ON | T3_INT_PRIOR_4);
     #else
-    TMR4 = 0;
-    PR4 = TICK_PERIOD;
-    IFS1bits.T4IF = 0;  //Clear flag
-    IEC1bits.T4IE = 1;  //Enable interrupt
-    T4CONbits.TON = 1;  //Run timer
+    TMR3 = 0;
+    PR3 = TICK_PERIOD;
+    IFS0bits.T3IF = 0;  //Clear flag
+    IEC0bits.T3IE = 1;  //Enable interrupt
+    T3CONbits.TON = 1;  //Run timer
     #endif
+    
 }

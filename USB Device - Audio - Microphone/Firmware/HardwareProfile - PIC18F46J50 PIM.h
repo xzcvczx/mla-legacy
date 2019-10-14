@@ -36,7 +36,6 @@
                      coding style
   2.3   09/15/2008   Broke out each hardware platform into its own
                      "HardwareProfile - xxx.h" file
-  2.6   11/12/2009   no change
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC18F46J50_PIM_H
@@ -60,7 +59,7 @@
 
     //#define USE_USB_BUS_SENSE_IO
     #define tris_usb_bus_sense  TRISCbits.TRISC2    // Input
-    #define USB_BUS_SENSE       1
+    #define USB_BUS_SENSE       1 
 
     /*******************************************************************/
     /*******************************************************************/
@@ -82,16 +81,16 @@
     #define DEMO_BOARD PIC18F46J50_PIM
     #define PIC18F46J50_PIM
     #define CLOCK_FREQ 48000000
-    #define GetSystemClock() CLOCK_FREQ
+    #define GetSystemClock() CLOCK_FREQ   
 
     /** LED ************************************************************/
     #define mInitAllLEDs()      LATE &= 0xFC; TRISE &= 0xFC;
-
+    
     #define mLED_1              LATEbits.LATE0
     #define mLED_2              LATEbits.LATE1
-    #define mLED_3
-    #define mLED_4
-
+    #define mLED_3              
+    #define mLED_4              
+    
     #define mGetLED_1()         mLED_1
     #define mGetLED_2()         mLED_2
     #define mGetLED_3()         1
@@ -99,19 +98,19 @@
 
     #define mLED_1_On()         mLED_1 = 1;
     #define mLED_2_On()         mLED_2 = 1;
-    #define mLED_3_On()
-    #define mLED_4_On()
-
+    #define mLED_3_On()         
+    #define mLED_4_On()        
+    
     #define mLED_1_Off()        mLED_1 = 0;
     #define mLED_2_Off()        mLED_2 = 0;
-    #define mLED_3_Off()
-    #define mLED_4_Off()
-
+    #define mLED_3_Off()        
+    #define mLED_4_Off()        
+    
     #define mLED_1_Toggle()     mLED_1 = !mLED_1;
     #define mLED_2_Toggle()     mLED_2 = !mLED_2;
-    #define mLED_3_Toggle()
-    #define mLED_4_Toggle()
-
+    #define mLED_3_Toggle()     
+    #define mLED_4_Toggle() 
+    
     /** SWITCH *********************************************************/
     #define mInitSwitch2()      TRISBbits.TRISB2=1;
     #define mInitSwitch3()      mInitSwitch2();

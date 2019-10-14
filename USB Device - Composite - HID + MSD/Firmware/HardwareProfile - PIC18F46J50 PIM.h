@@ -133,6 +133,7 @@
     							 ANCON0bits.PCFG0 = 1;			\
     							 ADCON0=0x01;					\
     							 ADCON1=0x9E;}		// POT on HPC Explorer
+
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0

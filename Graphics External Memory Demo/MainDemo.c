@@ -148,7 +148,7 @@ int main(void)
 {
     SHORT   width, height;
 
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #if defined (PIC24FJ256DA210_DEV_BOARD)
     
     _ANSG8 = 0; /* S1 */
     _ANSE9 = 0; /* S2 */
@@ -197,7 +197,7 @@ int main(void)
     AD1PCFGL = 0xffff;
     #endif
 
-    #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #if defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD)
 
     // Initialize graphics
     InitGraph();
@@ -322,7 +322,7 @@ WORD ExternalMemoryCallback(EXTDATA *memory, LONG offset, WORD nCount, void *buf
     {
 
         // Read data requested into buffer provided
-        #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+        #if defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD)
         SST25ReadArray(memory->address + offset, // address to read from
         (BYTE *)buffer, nCount);
         #else

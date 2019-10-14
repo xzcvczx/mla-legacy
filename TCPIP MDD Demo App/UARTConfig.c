@@ -76,7 +76,7 @@ void DoUARTConfig(void)
 	while(!bQuit)
 	{
 		// Display the menu
-	    putrsUART("\r\n\r\n\rMicrochip TCP/IP Config Application ("VERSION", " __DATE__ ")\r\n\r\n");
+	    putrsUART("\r\n\r\n\rMicrochip TCP/IP Config Application ("TCPIP_STACK_VERSION", " __DATE__ ")\r\n\r\n");
 	    putrsUART("\t1: Change serial number:\t\t");
 		wvTemp.v[1] = AppConfig.MyMACAddr.v[4];
 		wvTemp.v[0] = AppConfig.MyMACAddr.v[5];
@@ -259,7 +259,7 @@ static BOOL DownloadMPFS(void)
     do
     {
         currentTick = TickGet();
-        if ( TickGetDiff(currentTick, lastTick) >= (TICK_SECOND/2) )
+        if ( currentTick - lastTick >= (TICK_SECOND/2) )
         {
             lastTick = TickGet();
 			while(BusyUART());

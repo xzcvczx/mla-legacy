@@ -56,7 +56,7 @@ Anton Alkhimenok    06_Jun-2009       Ported to PIC24
 *******************************************************************************/
 #include "MainDemo.h"
 
-#if (GRAPHICS_HARDWARE_PLATFORM != GFX_PICTAIL_V3)
+#if defined (GFX_PICTAIL_V2) || defined (GFX_PICTAIL_V1)
     #error  Error: This demo works only along with Graphics PicTail 3
 #endif
 
@@ -66,7 +66,7 @@ _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
@@ -120,9 +120,16 @@ int main (void)
     // Wait for PLL to lock
     while(OSCCONbits.LOCK != 1)
     { };
+    
     #elif defined(__PIC32MX__)
     SYSTEMConfig(GetSystemClock(), SYS_CFG_ALL);
+    #ifdef MULTI_MEDIA_BOARD_DM00123
+    CPLDInitialize();
+    CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+    CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
     #endif
+    #endif
+
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
     AD1PCFGL = 0xffff;
     #endif

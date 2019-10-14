@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *          SMSC LAN8700 PHY API for Microchip TCP/IP Stack
+ *          National DP83848 PHY API for Microchip TCP/IP Stack
  *
  *********************************************************************
  * FileName:        ETHPIC32ExtPhyDP83848.c

@@ -65,7 +65,7 @@ LISTBOX *LbCreate
     XCHAR   *pointer;
     WORD    counter;
 
-    pLb = (LISTBOX *)malloc(sizeof(LISTBOX));
+    pLb = (LISTBOX *)GFX_malloc(sizeof(LISTBOX));
 
     if(pLb == NULL)
         return (pLb);
@@ -102,7 +102,7 @@ LISTBOX *LbCreate
         {
             if(NULL == LbAddItem(pLb, NULL, pointer, NULL, 0, counter))
                 break;
-            while((unsigned XCHAR) *pointer++ > (unsigned XCHAR)31);
+            while((XCHAR) *pointer++ > (XCHAR)31);
             if(*(pointer - 1) == 0)
                 break;
             counter++;
@@ -140,7 +140,7 @@ LISTITEM *LbAddItem(LISTBOX *pLb, LISTITEM *pPrevItem, XCHAR *pText, void *pBitm
     LISTITEM    *pItem;
     LISTITEM    *pCurItem;
 
-    pItem = (LISTITEM *)malloc(sizeof(LISTITEM));
+    pItem = (LISTITEM *)GFX_malloc(sizeof(LISTITEM));
 
     if(pItem == NULL)
     {
@@ -207,7 +207,7 @@ void LbDelItem(LISTBOX *pLb, LISTITEM *pItem)
     if(pItem->pPrevItem != NULL)
         ((LISTITEM *)pItem->pPrevItem)->pNextItem = pItem->pNextItem;
 
-    free(pItem);
+    GFX_free(pItem);
 
     pLb->itemsNumber--;
 
@@ -236,7 +236,7 @@ void LbDelItemsList(LISTBOX *pLb)
     {
         pItem = pCurItem;
         pCurItem = (LISTITEM *)pCurItem->pNextItem;
-        free(pItem);
+        GFX_free(pItem);
     }
 
     pLb->pItemList = NULL;

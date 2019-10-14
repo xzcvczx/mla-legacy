@@ -63,10 +63,10 @@ $DeclareVar(PRODUCT_NAME, ASCII_STRING, SINGLE, READONLY, 43.6.1.4.1.17095.1.1)
 $StaticVar(PRODUCT_NAME, SNMPv2c Agent)
 
 $DeclareVar(PRODUCT_VERSION, ASCII_STRING, SINGLE, READONLY, 43.6.1.4.1.17095.1.2)
-$StaticVar(PRODUCT_VERSION, v5.0)
+$StaticVar(PRODUCT_VERSION, v5.25)
 
 $DeclareVar(VERSION_DATE, ASCII_STRING, SINGLE, READONLY, 43.6.1.4.1.17095.1.3)
-$StaticVar(VERSION_DATE, Apr 2009)
+$StaticVar(VERSION_DATE, May 2010)
 
 
 ----------------------------------------------------------------------------

@@ -91,7 +91,16 @@ Description:
   ----   -----------
   2.6    Changed the inplementation of the interrupt clearing macro
          to be more efficient.  
-  2.6A   Added DisableNonZeroEndpoints() function
+
+  2.6a   Added DisableNonZeroEndpoints() function
+
+  2.7    Added ConvertToPhysicalAddress() and ConvertToVirtualAddress()
+         macros.  Needed for compatiblity with PIC32.
+
+         Added USBDisableInterrupts() macro.  Fixes issue in dual role
+         example where a device in polling mode can still have interrupts
+         enabled from the host mode causing an incorrect vectoring to the
+         host interrupt controller while in device mode.
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -240,7 +249,13 @@ Description:
 #endif
 
 //STALLIE, IDLEIE, TRNIE, and URSTIE are all enabled by default and are required
-#define USBEnableInterrupts() {RCONbits.IPEN = 1;IPR2bits.USBIP = 1;PIE2bits.USBIE = 1;INTCONbits.GIEH = 1;}
+#if defined(USB_INTERRUPT)
+    #define USBEnableInterrupts() {RCONbits.IPEN = 1;IPR2bits.USBIP = 1;PIE2bits.USBIE = 1;INTCONbits.GIEH = 1;}
+#else
+    #define USBEnableInterrupts()
+#endif
+
+#define USBDisableInterrupts() {PIE2bits.USBIE = 0;}
 #if defined(USB_INTERRUPT)
     #define USBMaskInterrupts() {PIE2bits.USBIE = 0;}
     #define USBUnmaskInterrupts() {PIE2bits.USBIE = 1;}
@@ -369,7 +384,7 @@ typedef union __BDT
     {
         unsigned :8;
         unsigned :8;
-        BYTE* ADR;                      //Buffer Address
+        WORD     ADR;                      //Buffer Address
     };
     DWORD Val;
     BYTE v[4];
@@ -454,7 +469,8 @@ typedef union _POINTER
     #define USB_FULL_SPEED 0x04
     #define USB_LOW_SPEED  0x00
 
-#define ConvertToPhysicalAddress(a) a
+#define ConvertToPhysicalAddress(a) ((WORD)(a))
+#define ConvertToVirtualAddress(a)  ((void *)(a))
 #define USBClearUSBInterrupt() PIR2bits.USBIF = 0;
 
 #if !defined(USBDEVICE_C)

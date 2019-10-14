@@ -83,7 +83,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 Change History:
   Rev         Description
   ----------  ----------------------------------------------------------
-  2.6 - 2.6a  No change
+  2.6 - 2.7   No change
 
 *******************************************************************************/
 //DOM-IGNORE-END

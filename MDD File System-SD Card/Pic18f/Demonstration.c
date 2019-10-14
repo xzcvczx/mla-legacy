@@ -29,7 +29,7 @@
  * IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
- ****************************************************************************/
+*****************************************************************************/
 
 
 /*****************************************************************************
@@ -43,7 +43,8 @@
  Change History:
   Rev            Description
   ----           -----------------------
-  1.2.4 - 1.2.5  No Change
+  1.2.4 - 1.2.6  No Change
+  1.2.6          Add support for the PIC18F46J50_PIM
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -72,6 +73,31 @@
         #pragma config CCP2MX   = DEFAULT   
 #endif
 
+#if defined(PIC18F46J50_PIM)
+     #pragma config WDTEN = OFF          //WDT disabled (enabled by SWDTEN bit)
+     #pragma config PLLDIV = 3           //Divide by 3 (12 MHz oscillator input)
+     #pragma config STVREN = ON            //stack overflow/underflow reset enabled
+     #pragma config XINST = OFF          //Extended instruction set disabled
+     #pragma config CPUDIV = OSC1        //No CPU system clock divide
+     #pragma config CP0 = OFF            //Program memory is not code-protected
+     #pragma config OSC = HSPLL          //HS oscillator, PLL enabled, HSPLL used by USB
+     #pragma config T1DIG = ON           //Sec Osc clock source may be selected
+     #pragma config LPT1OSC = OFF        //high power Timer1 mode
+     #pragma config FCMEN = OFF          //Fail-Safe Clock Monitor disabled
+     #pragma config IESO = OFF           //Two-Speed Start-up disabled
+     #pragma config WDTPS = 32768        //1:32768
+     #pragma config DSWDTOSC = INTOSCREF //DSWDT uses INTOSC/INTRC as clock
+     #pragma config RTCOSC = T1OSCREF    //RTCC uses T1OSC/T1CKI as clock
+     #pragma config DSBOREN = OFF        //Zero-Power BOR disabled in Deep Sleep
+     #pragma config DSWDTEN = OFF        //Disabled
+     #pragma config DSWDTPS = 8192       //1:8,192 (8.5 seconds)
+     #pragma config IOL1WAY = OFF        //IOLOCK bit can be set and cleared
+     #pragma config MSSP7B_EN = MSK7     //7 Bit address masking
+     #pragma config WPFP = PAGE_1        //Write Protect Program Flash Page 0
+     #pragma config WPEND = PAGE_0       //Start protection at page 0
+     #pragma config WPCFG = OFF          //Write/Erase last page protect Disabled
+     #pragma config WPDIS = OFF          //WPFP[5:0], WPEND, and WPCFG bits ignored 
+#endif
 char sendBuffer[22] = "This is test string 1";
 char send2[2] = "2";
 char receiveBuffer[50];
@@ -94,11 +120,42 @@ void main (void)
 	unsigned char attributes;
 	unsigned char size = 0, i;
 
+    #if (defined(__18CXX) & !defined(PIC18F87J50_PIM))
+        ADCON1 |= 0x0F;                 // Default all pins to digital
+    #elif !defined(PIC18F87J50_PIM)
+        AD1PCFG = 0xFFFF;
+    #endif
+    #if defined(PIC18F87J50_PIM)
+    WDTCONbits.ADSHR = 1;			// Select alternate SFR location to access ANCONx registers
+    ANCON0 = 0xFF;                  // Default all pins to digital
+    ANCON1 = 0xFF;                  // Default all pins to digital
+    WDTCONbits.ADSHR = 0;			// Select normal SFR locations
+    #endif
+    #if defined(PIC18F46J50_PIM)
+    ANCON0 = 0xFF;                  // Default all pins to digital
+    ANCON1 = 0xFF;                  // Default all pins to digital
+    #endif
+    //********* Initialize Peripheral Pin Select (PPS) *************************
+    //  This section only pertains to devices that have the PPS capabilities.
+    //    When migrating code into an application, please verify that the PPS
+    //    setting is correct for the port pins that are used in the application.
+    #if defined(PIC18F46J50_PIM)
+    RPINR21 = 1;   //SDI = RP1
+    RPOR4 = 10;    //RP4 = SCK
+    RPOR2 = 9;     //RP2 = SDO
+    RPINR22 = 4;   //SCK = RP4
+
+    //enable a pull-up for the card detect, just in case the SD-Card isn't attached
+    //  then lets have a pull-up to make sure we don't think it is there.
+    INTCON2bits.RBPU = 0; 
+
+    #endif
     while (!MDD_MediaDetect());
 
 	// Initialize the library
 	while (!FSInit());
 
+#ifdef ALLOW_WRITES
 	// Set the clock value
 	// This will determine the create time for the file we're about to make
 	// This will set the time and date to 3:05:26 PM on July 27, 2007.
@@ -156,6 +213,7 @@ void main (void)
 	// Close the file
 	if (FSfclose (pointer))
 		while(1);
+#endif
 
 	// Open file 1 in read mode
 	pointer = FSfopenpgm ("FILE1.TXT", "r");
@@ -183,6 +241,7 @@ void main (void)
 		while(1);
 	}
 
+#ifdef ALLOW_DIRS
 	// Create a small directory tree
 	// Beginning the path string with a '.' will create the tree in
 	// the current directory.  Beginning with a '..' would create the
@@ -259,8 +318,12 @@ void main (void)
 	if (FSchdir (dirname7))
 		while(1);
 
+#endif
+
+#ifdef ALLOW_FILESEARCH
 	// Set attributes
 	attributes = ATTR_DIRECTORY | ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN;
+
 	// Find the first TXT file with any (or none) of those attributes that
 	// has a name beginning with the letters "FILE"
 	// These functions are more useful for finding out which files are 
@@ -278,7 +341,7 @@ void main (void)
 	// Delete file 2
 	if (FSremove (rec.filename))
 		while(1);
-
+#endif
 
 /*********************************************************************
 	The final contents of our card should look like this:

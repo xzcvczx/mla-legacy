@@ -100,10 +100,17 @@ extern BYTE     _fontOrientation;
 
 // Character type used
     #ifdef USE_MULTIBYTECHAR
-        #define XCHAR   short
+        #define XCHAR   unsigned short
     #else
         #define XCHAR   char
     #endif
+
+// bevel drawing type (0 = full bevel, 0xF0 - top bevel only, 0x0F - bottom bevel only
+extern BYTE _bevelDrawType;
+
+	#define DRAWFULLBEVEL  	0xFF 
+	#define DRAWTOPBEVEL  	0xF0 
+	#define DRAWBOTTOMBEVEL 0x0F 
 
 // Memory type enumeration to determine the source of data.
 // Used in interpreting bitmap and font from different memory sources.
@@ -112,7 +119,8 @@ typedef enum
     FLASH   = 0,            // internal flash
     EXTERNAL= 1,            // external memory
     RAM		= 2,			// RAM
-    VIDEOBUF= 3             // video buffer
+    VIDEOBUF= 3,            // video buffer
+    EDS		= 4				// EDS memory (RAM, internal PSV Flash, or external EPMP).
 } TYPE_MEMORY;
 
 /*********************************************************************
@@ -167,6 +175,17 @@ typedef struct
     TYPE_MEMORY type;       // must be RAM
     char  		*address;   // bitmap image address in RAM
 } BITMAP_RAM;
+
+/*********************************************************************
+* Overview: Structure for bitmap stored in EDS memory  (RAM, internal PSV Flash, or external EPMP).
+*
+*********************************************************************/
+typedef struct
+{
+    TYPE_MEMORY		type;       // Must be EDS
+    unsigned long	address;    // Bitmap image address in EDS
+    unsigned long	fileLength;	// Number of bytes in the image
+} BITMAP_EDS;
 
 
 // Structure for bitmap stored in EXTERNAL memory
@@ -690,6 +709,23 @@ WORD    Line(SHORT x1, SHORT y1, SHORT x2, SHORT y2);
     #else
 WORD    Circle(SHORT x, SHORT y, SHORT radius);
     #endif
+
+/*********************************************************************
+* Macro: SetBevelDrawType(type)
+*
+* Overview: This macro sets the fill bevel type to be drawn.
+*
+* Input: type - is set using the following. 
+*		 - DRAWFULLBEVEL to draw the full shape
+*		 - DRAWTOPBEVEL to draw the upper half portion
+*		 - DRAWBOTTOMBEVEL to draw the lower half portion
+*
+* Output: none
+*
+* Side Effects: none
+*
+********************************************************************/
+	#define SetBevelDrawType(type)		(_bevelDrawType = type)
 
 /*********************************************************************
 * Function: WORD Bevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)

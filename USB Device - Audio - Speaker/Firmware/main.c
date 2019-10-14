@@ -36,6 +36,10 @@
   Rev   Description
   ----  -----------------------------------------
   2.6   Initial release
+
+  2.6a  Added support for the PIC24FJ256GB210 and PIC24FJ256DA210
+
+  2.7   No change
 ********************************************************************/
 
 #ifndef MAIN_C
@@ -1487,42 +1491,6 @@ void USBCBSuspend(void)
     #endif
     #endif
 }
-
-
-/******************************************************************************
- * Function:        void _USB1Interrupt(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        This function is called when the USB interrupt bit is set
- *					In this example the interrupt is only used when the device
- *					goes to sleep when it receives a USB suspend command
- *
- * Note:            None
- *****************************************************************************/
-#if 0
-void __attribute__ ((interrupt)) _USB1Interrupt(void)
-{
-    #if !defined(self_powered)
-        if(U1OTGIRbits.ACTVIF)
-        {
-            IEC5bits.USB1IE = 0;
-            U1OTGIEbits.ACTVIE = 0;
-            IFS5bits.USB1IF = 0;
-        
-            //USBClearInterruptFlag(USBActivityIFReg,USBActivityIFBitNum);
-            USBClearInterruptFlag(USBIdleIFReg,USBIdleIFBitNum);
-            //USBSuspendControl = 0;
-        }
-    #endif
-}
-#endif
 
 /******************************************************************************
  * Function:        void USBCBWakeFromSuspend(void)

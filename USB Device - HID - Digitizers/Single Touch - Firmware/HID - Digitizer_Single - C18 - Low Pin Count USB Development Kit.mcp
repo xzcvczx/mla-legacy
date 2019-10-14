@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\HID - Digitizer_Single - C18 - Low Pin count USB Development Kit
 dir_sin=
-dir_inc=c:\mcc18\h;..\..\Microchip\Include;..\..\USB Device - HID - Digitizers\Single Touch - Firmware
+dir_inc=C:\mcc18\h;.;..\..\Microchip\Include
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]

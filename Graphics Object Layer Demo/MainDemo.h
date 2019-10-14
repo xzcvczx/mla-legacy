@@ -58,4 +58,5 @@
     #include "Beep.h"
     #include "SideButtons.h"
     #include "rtcc.h"
+    #include <cpld.h>
 #endif // _MAINDEMO_H

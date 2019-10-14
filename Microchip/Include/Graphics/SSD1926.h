@@ -38,6 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     08/27/08
  * Pradeep Budagutta    30/07/09	Added Palette Support
+ * PAT    				03/03/10	Enabled accelerated Circle() function.
  *****************************************************************************/
 #ifndef _SSD1926_H
     #define _SSD1926_H
@@ -76,7 +77,7 @@
     #endif
 
 // Define this to implement Circle function in the driver.
-//        #define USE_DRV_CIRCLE
+//   #define USE_DRV_CIRCLE - //Don't use this. The driver support for this is obsolete.
 
 // Define this to implement FillCircle function in the driver.
 //#define USE_DRV_FILLCIRCLE

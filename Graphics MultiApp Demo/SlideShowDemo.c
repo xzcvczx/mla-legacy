@@ -42,25 +42,13 @@
 /////////////////////////////////////////////////////////////////////////////
 //                            MACROS
 /////////////////////////////////////////////////////////////////////////////
-#define PIXDATAMAX  5
+#define PIXDATAMAX  2 
 
 /////////////////////////////////////////////////////////////////////////////
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
-#if (USE_EXTERNAL_IMAGES == 1)
-extern BITMAP_EXTERNAL  vegas;
-extern BITMAP_EXTERNAL  sunset1;
-extern BITMAP_EXTERNAL  sunset2;
-extern BITMAP_EXTERNAL  fallleaves;
 extern BITMAP_EXTERNAL  rose;
-
-#else
-extern BITMAP_FLASH     vegas;
-extern BITMAP_FLASH     sunset1;
-extern BITMAP_FLASH     sunset2;
-extern BITMAP_FLASH     fallleaves;
-extern BITMAP_FLASH     rose;
-#endif
+extern BITMAP_EXTERNAL  intro; 
 
 /////////////////////////////////////////////////////////////////////////////
 //                            STRING USED
@@ -122,13 +110,13 @@ void CreateSlideShowDemo(void)
     pixWidth = GetImageWidth(pPixData->pImage);
     pixHeight = GetImageHeight(pPixData->pImage);
 
-    PictCreate(ID_PICTURE2, 35, 10, GetMaxX() - 35, GetMaxY() - 40, PICT_DRAW,
-    #if (USE_EXTERNAL_IMAGES == 1)
-    1,          // scale factor is x1
-    #else
-    2,          // scale factor is x2
-    #endif
-    (void *) &vegas, SlideShowScheme);
+    PictCreate(	ID_PICTURE2, 
+    			0, 10, GetMaxX(), 			// dimensions
+    			GetMaxY() - 40, 					
+    			PICT_DRAW,							// draw the picture when created
+    			2,          						// scale factor is x2
+    			(void *) &(rose), 
+    			SlideShowScheme);
 
     // create the components of the demo
     CreateCtrlButtons(ExitStr, NULL, LeftArrowStr, RightArrowStr);
@@ -224,11 +212,8 @@ void InitPixData(void)
     {
         switch(i)
         {
-            case 0:     PixArray[i].pImage = (void *) &vegas; break;
-            case 1:     PixArray[i].pImage = (void *) &rose; break;
-            case 2:     PixArray[i].pImage = (void *) &sunset1; break;
-            case 3:     PixArray[i].pImage = (void *) &sunset2; break;
-            case 4:     PixArray[i].pImage = (void *) &fallleaves; break;
+            case 0:     PixArray[i].pImage = (void *) &rose; break;
+            case 1:     PixArray[i].pImage = (void *) &intro; break;
             default:    break;
         }
 

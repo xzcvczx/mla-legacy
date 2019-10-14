@@ -101,7 +101,6 @@ typedef BYTE SNMP_INDEX;
   Section:
 	Data Structures and Enumerations
   ***************************************************************************/
-
 typedef struct 
 {
    BYTE Size;
@@ -146,6 +145,7 @@ typedef enum
     SNMP_SET            = 0xa3,	//Snmp SET identifier
     SNMP_TRAP           = 0xa4,	//Snmp TRAP identifier
     SNMP_V2C_GET_BULK	= 0xa5,	//Snmp GET_BULK identifier
+    SNMP_V2_TRAP		= 0xa7, //Snmp v2 Trap Identifier
     SNMP_ACTION_UNKNOWN = 0		//Snmp requested action unknown
 } SNMP_ACTION;
 
@@ -178,6 +178,7 @@ extern BYTE gSendTrapFlag;//Global flag to send Trap
 extern BYTE gGenericTrapNotification;//Global flag for Generic trap notification
 extern BYTE gSpecificTrapNotification;//Global flag for vendor specific trap notification
 extern BYTE gOIDCorrespondingSnmpMibID;//Gloabal var to store SNMP ID of var for OID received in SNMP request.
+extern BYTE	gSetTrapSendFlag;
 
 
 /****************************************************************************

@@ -80,12 +80,18 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
-  Rev         Description
-  ----------  ----------------------------------------------------------
-  2.6 - 2.6a  No change
+ Change History:
+  Rev           Description
+  ----------    -----------
+  2.6 - 2.6a    No chance except stack revision number
+  2.7           Minor updates to USBHostPrinterGetStatus() header
+                to better describe the function requirements and
+                operation.
 
-*******************************************************************************/
+                Changed how transfer queues are handled to do a peek
+                now before removing the item from the queue.
+********************************************************************/
+
 //DOM-IGNORE-END
 
 #include <stdlib.h>
@@ -572,17 +578,15 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
             // Purge the IN and OUT transfer queues.
             while (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
             {
-                transfer = StructQueuePeekTail( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
-                StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
+                transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
             }
             while (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
             {
-                transfer = StructQueuePeekTail( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
+                transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                 if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                 {
                     free( transfer->data );
                 }
-                StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
             }
 
             // Tell the printer language support that the device has been detached.
@@ -615,12 +619,11 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
                     usbPrinters[currentPrinterRecord].flags.rxBusy   = 0;
                     usbPrinters[currentPrinterRecord].rxLength       = dataCount;
 
-                    transfer = StructQueuePeekTail( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
+                    transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                     if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                     {
                         free( transfer->data );
                     }
-                    StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
 
                     if (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
                     {
@@ -636,12 +639,11 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
                 {
                     usbPrinters[currentPrinterRecord].flags.txBusy   = 0;
 
-                    transfer = StructQueuePeekTail( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
+                    transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                     if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                     {
                         free( transfer->data );
                     }
-                    StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
 
                     if (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
                     {
@@ -702,12 +704,11 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
                     usbPrinters[currentPrinterRecord].flags.rxBusy   = 0;
                     usbPrinters[currentPrinterRecord].rxLength       = 0;
 
-                    transfer = StructQueuePeekTail( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
+                    transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                     if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                     {
                         free( transfer->data );
                     }
-                    StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE );
 
                     if (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueIN), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
                     {
@@ -723,12 +724,11 @@ BOOL USBHostPrinterEventHandler ( BYTE address, USB_EVENT event, void *data, DWO
                 {
                     usbPrinters[currentPrinterRecord].flags.txBusy   = 0;
 
-                    transfer = StructQueuePeekTail( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
+                    transfer = StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
                     if (transfer->flags & USB_PRINTER_TRANSFER_COPY_DATA)
                     {
                         free( transfer->data );
                     }
-                    StructQueueRemove( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE );
 
                     if (StructQueueIsNotEmpty( &(usbPrinters[currentPrinterRecord].transferQueueOUT), USB_PRINTER_TRANSFER_QUEUE_SIZE ))
                     {
@@ -1013,6 +1013,14 @@ DWORD USBHostPrinterGetRxLength( BYTE deviceAddress )
     * Bit 4 - Select; 1 = selected, 0 = not selected
     * Bit 3 - Not Error; 1 = no error, 0 = error
     * All other bits are reserved.
+
+    The *status parameter is not updated until the EVENT_PRINTER_REQUEST_DONE
+    event is thrown.  Until that point the value of *status is unknown.
+
+    The *status parameter will only be updated if this function returns
+    USB_SUCCESS.  If this function returns with any other error code then the
+    EVENT_PRINTER_REQUEST_DONE event will not be thrown and the status field
+    will not be updated.
 
   Preconditions:
     The device must be connected and enumerated.

@@ -151,4 +151,12 @@
 ********************************************************************/
 #define GOL_EMBOSS_SIZE                 1
 
+/*********************************************************************
+* Overview: Define the malloc() and free() for versatility on OS 
+*           based systems. 
+*
+*********************************************************************/
+	#define GFX_malloc(size)    	malloc(size)
+	#define GFX_free(pObj)    	    free(pObj)
+
 #endif // _GRAPHICSCONFIG_H

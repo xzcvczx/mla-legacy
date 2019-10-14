@@ -36,9 +36,14 @@
   Rev   Description
   ----  -----------------------------------------
   1.0   Initial release
+
   2.1   Updated for simplicity and to use common
-                     coding style
-  2.6A  Added button debouncing using Start-of-Frame packets
+        coding style
+
+  2.6a  Added button debouncing using Start-of-Frame packets
+
+  2.7   Updated demo to place the PIC24F devices into sleep when the
+        USB is in suspend.  
 ********************************************************************/
 
 /** INCLUDES *******************************************************/
@@ -410,12 +415,15 @@ int main(void)
 {   
     InitializeSystem();
 
-    #if defined(USB_INTERRUPT)
-        USBDeviceAttach();
-    #endif
-
     while(1)
     {
+        #if defined(USB_INTERRUPT)
+            if(USB_BUS_SENSE && (USBGetDeviceState() == DETACHED_STATE))
+            {
+                USBDeviceAttach();
+            }
+        #endif
+
         #if defined(USB_POLLING)
 		// Check bus status and service USB interrupts.
         USBDeviceTasks(); // Interrupt or polling method.  If using polling, must call
@@ -823,54 +831,9 @@ void USBCBSuspend(void)
 	
 
     #if defined(__C30__)
-    #if 0
-        U1EIR = 0xFFFF;
-        U1IR = 0xFFFF;
-        U1OTGIR = 0xFFFF;
-        IFS5bits.USB1IF = 0;
-        IEC5bits.USB1IE = 1;
-        U1OTGIEbits.ACTVIE = 1;
-        U1OTGIRbits.ACTVIF = 1;
-        Sleep();
-    #endif
+        USBSleepOnSuspend();
     #endif
 }
-
-
-/******************************************************************************
- * Function:        void _USB1Interrupt(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        This function is called when the USB interrupt bit is set
- *					In this example the interrupt is only used when the device
- *					goes to sleep when it receives a USB suspend command
- *
- * Note:            None
- *****************************************************************************/
-#if 0
-void __attribute__ ((interrupt)) _USB1Interrupt(void)
-{
-    #if !defined(self_powered)
-        if(U1OTGIRbits.ACTVIF)
-        {
-            IEC5bits.USB1IE = 0;
-            U1OTGIEbits.ACTVIE = 0;
-            IFS5bits.USB1IF = 0;
-        
-            //USBClearInterruptFlag(USBActivityIFReg,USBActivityIFBitNum);
-            USBClearInterruptFlag(USBIdleIFReg,USBIdleIFBitNum);
-            //USBSuspendControl = 0;
-        }
-    #endif
-}
-#endif
 
 /******************************************************************************
  * Function:        void USBCBWakeFromSuspend(void)

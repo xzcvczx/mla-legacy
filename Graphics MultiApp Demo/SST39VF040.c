@@ -40,7 +40,7 @@
  *****************************************************************************/
 #include "MainDemo.h"
 
-#if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
+#if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2) 
     #define SST39PMPWaitBusy()  while(PMMODEbits.BUSY);
 
 /////////////////////////////////////////////////////////////////////////

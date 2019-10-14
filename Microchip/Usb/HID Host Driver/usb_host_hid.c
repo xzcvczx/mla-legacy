@@ -65,12 +65,23 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
-  Rev         Description
-  ----------  ----------------------------------------------------------
-  2.6 - 2.6a  No change
-
 *******************************************************************************/
+
+/********************************************************************
+ File Description:
+
+ Change History:
+  Rev       Description
+  ----      -----------
+  2.2       Initial Release
+  2.3-2.5a  No changes
+  2.5b      Corrected heap allocation issue
+  2.6-2.6a  No changes
+  2.7       Fixed issue where deviceInfoHID[i].rptDescriptor was freed
+            twice.  The second free results in possible issues in future
+            malloc() calls in the C32 compiler.
+********************************************************************/
+
 #include <stdlib.h>
 #include <string.h>
 #include "GenericTypeDefs.h"
@@ -685,6 +696,7 @@ void USBHostHIDTasks( void )
                                 else
                                 {
                                     free(deviceInfoHID[i].rptDescriptor);
+                                    deviceInfoHID[i].rptDescriptor = NULL;
                                 }
                             }
                         }
@@ -755,6 +767,7 @@ void USBHostHIDTasks( void )
                         }
                         // free the previous allocated memory, reallocate for new interface if needed
                         free(deviceInfoHID[i].rptDescriptor);
+                        deviceInfoHID[i].rptDescriptor = NULL;
                         pCurrInterfaceDetails = pCurrInterfaceDetails->next;
                         if(pCurrInterfaceDetails != NULL)
                         {
@@ -2148,10 +2161,16 @@ void _USBHostHID_FreeRptDecriptorDataMem(BYTE deviceAddress)
     if (i < USB_MAX_HID_DEVICES)
     {
     /* free memory allocated to HID parser */
-        free(parsedDataMem); /* will be indexed once multiple  device support is added */
-        parsedDataMem = NULL;
-        free(deviceInfoHID[i].rptDescriptor);
-        deviceInfoHID[i].rptDescriptor = NULL;
+        if(parsedDataMem != NULL)
+        {
+            free(parsedDataMem); /* will be indexed once multiple  device support is added */
+            parsedDataMem = NULL;
+        }
+        if(deviceInfoHID[i].rptDescriptor != NULL)
+        {
+            free(deviceInfoHID[i].rptDescriptor);
+            deviceInfoHID[i].rptDescriptor = NULL;
+        }
 
     /* free memory allocated to report descriptor in deviceInfoHID */
        while(pInterfaceDetails != NULL)

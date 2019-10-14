@@ -31,6 +31,13 @@ SERVICES, ANY CLAIMS BY THIRD PARTIES (INCLUDING BUT NOT LIMITED TO ANY
 DEFENSE THEREOF), OR OTHER SIMILAR COSTS.                                       
                                                                                 
 ********************************************************************************
+
+ Change History:
+  Rev   Description
+  ----  -----------------------------------------
+  2.7   Updated to include PIC32 support
+
+********************************************************************************
 */
 
 #include "Compiler.h"
@@ -273,6 +280,13 @@ void LoadApplication ( void )
 ***************************************************************************/
 int main ( void )
 {
+    #if defined(__PIC32MX__)
+        // Initialize the MCU
+        SYSTEMConfigWaitStatesAndPB( GetSystemClock() );
+        CheKseg0CacheOn();
+        INTEnableSystemMultiVectoredInt();
+    #endif
+
     // Initialize the boot loader IO
     BLIO_InitializeIO();
     BLIO_ReportBootStatus(BL_RESET, "BL: ***** Reset *****\r\n");
@@ -296,7 +310,10 @@ int main ( void )
         //Device switches over automatically to PLL output after PLL is locked and ready.
         #endif
 
+        #if defined(__PIC24F__)
         INTCON2bits.ALTIVT = 1;
+        #endif
+
         mLED_3_On();
         BLIO_ReportBootStatus(BL_LOADING, "BL: Loading new application image\r\n");
         LoadApplication();
@@ -309,13 +326,21 @@ int main ( void )
 
         // Must disable all interrupts
         BLMedia_DeinitializeTransport();
-        BLIO_DeinitializeIO();
+        
+
+        #if defined(__PIC32MX__)
+
+        INTDisableInterrupts();
+
+        #else
 
         U1IE = 0;
         U1IR = 0xFF;
         IEC5 = 0;
         IFS5 = 0;
         INTCON2bits.ALTIVT = 0;
+
+        #endif
 
         ////////////////////////////
         // Launch the application //

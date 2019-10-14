@@ -342,7 +342,7 @@ void    SldSetPos(SLIDER *pSld, SHORT newPos);
 *				 thumb is on the rightmost position for a horizontal orientation
 *				 and bottom most position for the vertical orientation. Minimum
 *				 value is always at zero.
-*		 res - This is the incremental change of the slider when user action
+*		 page - This is the incremental change of the slider when user action
 *			   requests to move the slider thumb. This value is added or 
 *			   subtracted to the current position of the thumb.
 *		 pos - This defines the initial position of the thumb.
@@ -470,6 +470,7 @@ void    SldMsgDefault(WORD translatedMsg, SLIDER *pSld, GOL_MSG *pMsg);
 *							 Keyboard 	   EVENT_KEYSCAN				If event occurs and parameter1 passed matches the object’s ID and parameter 2 passed matches SCAN_UP_PRESSED or SCAN_LEFT_PRESSED.
 *		SLD_MSG_DEC			 Touch Screen  EVENT_PRESS, EVENT_MOVE		If events occurs and the x,y position falls in the area of the slider and the slider position is to the RIGHT of the x,y position for a horizontal slider or ABOVE the x,y position for a vertical slider.
 *							 Keyboard	   EVENT_KEYSCAN				If event occurs and parameter1 passed matches the object’s ID and parameter 2 passed matches SCAN_DOWN_PRESSED or SCAN_RIGHT_PRESSED.
+*		OBJ_MSG_PASSIVE		 Touch Screen  EVENT_RELEASE				If event occurs and  the x,y position falls in the area of the slider.
 *		OBJ_MSG_INVALID		 Any		   Any							If the message did not affect the object.
 *	</TABLE>
 *
@@ -483,6 +484,7 @@ void    SldMsgDefault(WORD translatedMsg, SLIDER *pSld, GOL_MSG *pMsg);
 * Output: Returns the translated message depending on the received GOL message:
 *		  - SLD_MSG_INC – Increment slider position
 *         - SLD_MSG_DEC – Decrement slider position
+*		  - OBJ_MSG_PASSIVE - no effect on slider state		 
 *     	  - OBJ_MSG_INVALID – Slider is not affected
 *
 * Example:

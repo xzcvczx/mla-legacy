@@ -76,7 +76,7 @@
     #define MINTICKDELAY    20
 
 // preset colors delay
-    #define PRESETTICKDELAY 600
+    #define PRESETTICKDELAY 2000 //600
 
 // color fading delay
     #define FADECOLORDELAY  40

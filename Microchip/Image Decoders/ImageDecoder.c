@@ -46,6 +46,9 @@ Pradeep Budagutta    03-Mar-2008    First release
 /**************************/
 /**** GLOBAL VARIABLES ****/
 /**************************/
+
+IMG_FILE *IMG_pCurrentFile;
+
 WORD IMG_wStartX;
 WORD IMG_wStartY;
 WORD IMG_wWidth;
@@ -107,6 +110,10 @@ void ImageDecoderInit(void)
      IMG_pLoopCallbackFn = NULL;
    #endif
     IMG_blAbortImageDecoding = 0;
+
+#ifdef IMG_USE_NON_BLOCKING_DECODING
+    IMG_pCurrentFile = NULL;
+#endif
 }
 
 /*******************************************************************************
@@ -155,7 +162,7 @@ BYTE ImageDecode(IMG_FILE *pImageFile, IMG_FILE_FORMAT eImgFormat,
 
      IMG_bDownScalingFactor = (wFlags & IMG_DOWN_SCALE)? 1: 0;
      IMG_bAlignCenter = (wFlags & IMG_ALIGN_CENTER)? 1: 0;
-
+     
    #ifndef IMG_USE_ONLY_565_GRAPHICS_DRIVER_FOR_OUTPUT
      IMG_pPixelOutput = pPixelOutput;
    #endif
@@ -171,7 +178,8 @@ BYTE ImageDecode(IMG_FILE *pImageFile, IMG_FILE_FORMAT eImgFormat,
                      break;
       #endif
       #ifdef IMG_SUPPORT_JPEG
-       case IMG_JPEG: bRetVal = JPEG_bDecode(pImageFile);
+       case IMG_JPEG: bRetVal = JPEG_bDecode(pImageFile, TRUE);
+                      IMG_pCurrentFile = pImageFile;
                      break;
       #endif
       #ifdef IMG_SUPPORT_GIF
@@ -183,6 +191,34 @@ BYTE ImageDecode(IMG_FILE *pImageFile, IMG_FILE_FORMAT eImgFormat,
 
      return(bRetVal);
 }
+
+
+/*******************************************************************************
+Function:       BYTE ImageDecodeTask(void)
+
+Precondition:   ImageDecode() must have been called
+
+Overview:       This function completes one small part of the image decode function
+
+Input:          None
+
+Output:         Status code - '1' means decoding is completed
+                            - '0' means decoding is not yet completed, call this function again
+*******************************************************************************/
+BYTE ImageDecodeTask(void)
+{
+	#ifdef IMG_USE_NON_BLOCKING_DECODING
+	{
+	    if(IMG_pCurrentFile != NULL) // At present, supports only JPEG
+	    {
+	        return JPEG_bDecode(IMG_pCurrentFile, FALSE);
+	    }
+	}
+	#endif
+	    
+    return 1;
+}
+
 
 /*******************************************************************************
 Function:       BYTE IMG_vSetboundaries(void)

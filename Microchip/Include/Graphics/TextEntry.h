@@ -395,6 +395,25 @@ BOOL        TeSetKeyCommand(TEXTENTRY *pTe, WORD index, WORD command);
 WORD        TeGetKeyCommand(TEXTENTRY *pTe, WORD index);
 
 /*********************************************************************
+* Function: TeSetKeyText(TEXTENTRY *pTe, WORD index, XCHAR *pText)   
+*				
+* Overview: This function will set the test assigned to a key with 
+*			the given index.
+*
+* PreCondition: none
+*
+* Input: 	pTe  - 		pointer to the object
+*			index  - 	index to the key in the link list
+*			pText - 	pointer to the new string to be used
+*			
+* Output:  	Returns TRUE if successful and FALSE if not.
+*		
+* Side Effects: none.
+*
+********************************************************************/
+BOOL TeSetKeyText(TEXTENTRY *pTe, WORD index, XCHAR *pText);
+
+/*********************************************************************
 * Function: KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe,XCHAR *pText[])   
 *				
 * Overview: This function will create the list of KEYMEMBERS that holds the 

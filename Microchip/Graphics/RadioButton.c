@@ -67,7 +67,7 @@ RADIOBUTTON *RbCreate
     RADIOBUTTON *pRb = NULL;
     RADIOBUTTON *pointer;
 
-    pRb = (RADIOBUTTON *)malloc(sizeof(RADIOBUTTON));
+    pRb = (RADIOBUTTON *)GFX_malloc(sizeof(RADIOBUTTON));
     if(pRb == NULL)
         return (pRb);
 

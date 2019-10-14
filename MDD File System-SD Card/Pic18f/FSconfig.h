@@ -8,6 +8,7 @@
  * Dependencies:    None
  * Compiler:        C18/C30/C32
  * Company:         Microchip Technology, Inc.
+ * Version:         1.2.0
  *
  * Software License Agreement
  *
@@ -31,14 +32,6 @@
  *
 *****************************************************************************/
 
-//DOM-IGNORE-BEGIN
-/********************************************************************
- Change History:
-  Rev            Description
-  ----           -----------------------
-  1.2.4 - 1.2.5  No Change
-********************************************************************/
-//DOM-IGNORE-END
 
 #ifndef _FS_DEF_
 
@@ -172,6 +165,13 @@
 		#define FS_malloc	malloc
 		#define FS_free		free
 	#endif
+#endif
+
+
+#ifdef __18CXX
+    /* Define the locations for the dataBuffer and FATbuffer; PLEASE CHECK THE LINKER FILE */
+    #define DATA_BUFFER_ADDRESS      0x700
+    #define FAT_BUFFER_ADDRESS       0x900
 #endif
 
 

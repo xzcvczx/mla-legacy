@@ -87,6 +87,10 @@ echo Removing *.elf files...
 del *.elf /f /q /s
 echo.
 
+echo Removing *.d files...
+del *.d /f /q /s
+echo.
+
 rd Objects /S /Q
 
 echo Done.

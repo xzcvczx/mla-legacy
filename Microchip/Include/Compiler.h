@@ -14,7 +14,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2008 Microchip Technology Inc.  All rights 
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights 
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and 
@@ -48,6 +48,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Howard Schlunder		10/03/2006	Original, copied from old Compiler.h
  * Howard Schlunder		11/07/2007	Reorganized and simplified
+ * Howard Schlunder		03/31/2010	Removed dependency on WORD and DWORD typedefs
  ********************************************************************/
 #ifndef __COMPILER_H
 #define __COMPILER_H
@@ -58,10 +59,10 @@
 	#if defined(HI_TECH_C) && defined(__PICC18__)	// HI TECH PICC-18 compiler
 		#define __18CXX
 		#include <htc.h>
-	#else					// Microchip C18 compiler
+	#else											// Microchip C18 compiler
 	    #include <p18cxxx.h>
 	#endif
-#elif defined(__PIC24F__)	// Microchip C30 compiler
+#elif defined(__PIC24F__) || defined(__PIC24FK__)	// Microchip C30 compiler
 	// PIC24F processor
 	#include <p24Fxxxx.h>
 #elif defined(__PIC24H__)	// Microchip C30 compiler
@@ -90,17 +91,17 @@
 
 // Base RAM and ROM pointer types for given architecture
 #if defined(__PIC32MX__)
-	#define PTR_BASE		DWORD
-	#define ROM_PTR_BASE	DWORD
+	#define PTR_BASE		unsigned long
+	#define ROM_PTR_BASE	unsigned long
 #elif defined(__C30__)
-	#define PTR_BASE		WORD
-	#define ROM_PTR_BASE	WORD
+	#define PTR_BASE		unsigned short
+	#define ROM_PTR_BASE	unsigned short
 #elif defined(__18CXX)
-	#define PTR_BASE		WORD
+	#define PTR_BASE		unsigned short
 	#define ROM_PTR_BASE	unsigned short long
 	#if defined(HI_TECH_C)
 		#undef ROM_PTR_BASE
-		#define ROM_PTR_BASE	DWORD
+		#define ROM_PTR_BASE	unsigned long
 	#endif
 #endif
 

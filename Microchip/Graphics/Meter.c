@@ -155,7 +155,7 @@ METER *MtrCreate
 {
     METER   *pMtr = NULL;
 
-    pMtr = (METER *)malloc(sizeof(METER));
+    pMtr = (METER *)GFX_malloc(sizeof(METER));
     if(pMtr == NULL)
         return (NULL);
 

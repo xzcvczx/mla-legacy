@@ -124,7 +124,7 @@ void BLIO_InitializeIO ( void )
 
 void BLIO_DeinitializeIO ( void )
 {
-    mDeInitAllLEDs();
+    //mDeInitAllLEDs();
 }
 
 

@@ -42,6 +42,8 @@
  *****************************************************************************/
 #ifdef USE_CUSTOM
 
+#include "Graphics\Graphics.h"
+
 /*********************************************************************
 * Function: CUSTOM* CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
 *                              SHORT bottom, WORD state, GOL_SCHEME *pScheme)
@@ -66,7 +68,7 @@ CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD
 {
     CUSTOM  *pCc = NULL;
 
-    pCc = malloc(sizeof(CUSTOM));
+    pCc = GFX_malloc(sizeof(CUSTOM));
     if(pCc == NULL)
         return (pCc);
 

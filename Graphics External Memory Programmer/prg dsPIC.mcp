@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=Objects - Graphics PICTail Board Memory Programmer
 dir_sin=
-dir_inc=.;..\Microchip\Include
+dir_inc=..\Board Support Package;.;..\Microchip\Include
 dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
 dir_lkr=
 [CAT_FILTERS]
@@ -18,25 +18,25 @@ filter_obj=*.o
 filter_lib=*.a
 filter_lkr=*.gld
 [CAT_SUBFOLDERS]
-subfolder_src=
-subfolder_inc=
+subfolder_src=Board Support Package
+subfolder_inc=Board Support Package
 subfolder_obj=
 subfolder_lib=
 subfolder_lkr=
 [FILE_SUBFOLDERS]
-file_000=.
+file_000=Board Support Package
 file_001=.
-file_002=.
-file_003=.
+file_002=Board Support Package
+file_003=Board Support Package
 file_004=.
 file_005=.
 file_006=.
 file_007=.
 file_008=.
-file_009=.
-file_010=.
+file_009=Board Support Package
+file_010=Board Support Package
 file_011=.
-file_012=.
+file_012=Board Support Package
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -66,17 +66,17 @@ file_010=no
 file_011=no
 file_012=no
 [FILE_INFO]
-file_000=Beep.c
+file_000=..\Board Support Package\Beep.c
 file_001=MainDemo.c
-file_002=SST25VF016.c
-file_003=SST39VF040.c
+file_002=..\Board Support Package\SST25VF016.c
+file_003=..\Board Support Package\SST39VF040.c
 file_004=UART.c
-file_005=Beep.h
+file_005=..\Board Support Package\Beep.h
 file_006=GraphicsConfig.h
 file_007=HardwareProfile.h
 file_008=MainDemo.h
-file_009=SST25VF016.h
-file_010=SST39VF040.h
+file_009=..\Board Support Package\SST25VF016.h
+file_010=..\Board Support Package\SST39VF040.h
 file_011=UART.h
 file_012=..\Microchip\Include\GenericTypeDefs.h
 [SUITE_INFO]

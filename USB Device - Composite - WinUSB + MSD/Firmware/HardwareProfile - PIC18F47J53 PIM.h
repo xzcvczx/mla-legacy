@@ -33,6 +33,7 @@
   Rev   Description
   ---   ----------------------------------------------
   2.6A  Initial release
+  2.7   No Change
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC18F47J53_PIM_H

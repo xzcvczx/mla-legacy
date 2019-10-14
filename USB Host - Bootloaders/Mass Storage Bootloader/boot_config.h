@@ -53,6 +53,17 @@ programming necessary to load the boot image into program Flash memory.
 These interface routines can be implemented via macros or functions as 
 required.
 *******************************************************************************
+
+ Change History:
+  Rev   Description
+  ----  -----------------------------------------
+  2.7   Updated to include the PIC32 device information.
+
+        Updated to include additional error codes (BL_FILE_NO_DATA, 
+        LOADER_MISSING_START, LOADER_ALIGNMENT, LOADER_ERR, and
+        LOADER_EOF_REC_MISSING)
+
+*******************************************************************************
 */
 
 /* Boot Status Codes
@@ -81,6 +92,7 @@ typedef enum
     USB_MSD_INIT_ERR,       // Unable to initialize USB MSD client driver
     OUT_OF_MEMORY_ERR,      // Attempted to malloc memory and failed
     BL_FILE_ERR,            // Unable to open the boot image file
+    BL_FILE_NO_DATA,        // Unable to read data from file but file did not report EOF
     USB_ERR,                // Unspecified USB error
 
     // Loader Errors
@@ -90,6 +102,10 @@ typedef enum
     LOADER_FLASH_ERASE_ERR, // Erase had an error
     LOADER_FLASH_WRITE_ERR, // Unable to write to Flash
     LOADER_FLASH_VERIFY_ERR,// Data written to Flash did not match buffer data
+    LOADER_MISSING_START,   // Start code was missing from the start of a line
+    LOADER_ALIGNMENT,       // There was an issue with the data alignment
+    LOADER_ERR,             // Unspecified error in the loader
+    LOADER_EOF_REC_MISSING, // Reached the end of the file stream without a hex EOF record
 
     // General errors
     BL_BOOT_FAIL,           // Application not valid or failed to launch
@@ -141,7 +157,6 @@ application image file and program it to Flash.
 
 #define BLMedia_InitializeTransport()       USBInitialize(0)
 
-//TODO: verify port to PIC24
 #if defined(__PIC32__)
 #define BLMedia_DeinitializeTransport()     (USBHostShutdown(),IFS1CLR = 0x02000000)
 #else
@@ -158,6 +173,105 @@ image file to memory.
 *******************************************************************************
 */
 
+// These macros define the maximum size of a Flash block.
+
+#if defined(__32MX460F512L__) || \
+    defined(__32MX440F512H__) || \
+    defined(__32MX775F512L__) || \
+    defined(__32MX675F512L__) || \
+    defined(__32MX695F512L__) || \
+    defined(__32MX795F512L__) || \
+    defined(__32MX575F512L__) || \
+    defined(__32MX795F512H__) || \
+    defined(__32MX775F512H__) || \
+    defined(__32MX695F512H__) || \
+    defined(__32MX675F512H__) || \
+    defined(__32MX575F512H__)
+
+    #define FLASH_BLOCK_SIZE            (1024 * 4)          // Size in bytes
+
+    //This set of options will only work with optimazation setting -Os
+    //  Address of main application's Startup code
+    #define APPLICATION_ADDRESS         0x9D00E000
+    //  Base address and length of user flash block
+    #define PROGRAM_FLASH_BASE          0x1D00E000          // Physical address
+    #define PROGRAM_FLASH_LENGTH        0x00072000          // Length in bytes
+
+//    //This set of options will only work with optimazation settings -Os, -O1, and -O2
+//    //  Address of main application's Startup code
+//    #define APPLICATION_ADDRESS         0x9D010000
+//    //  Base address and length of user flash block
+//    #define PROGRAM_FLASH_BASE          0x1D010000          // Physical address
+//    #define PROGRAM_FLASH_LENGTH        0x00070000          // Length in bytes
+//
+//    //This set of options will work with all optimazation settings
+//    //  Address of main application's Startup code
+//    #define APPLICATION_ADDRESS         0x9D017000
+//    //  Base address and length of user flash block
+//    #define PROGRAM_FLASH_BASE          0x1D017000          // Physical address
+//    #define PROGRAM_FLASH_LENGTH        0x00069000          // Length in bytes
+
+#elif defined(__32MX460F256L__) || \
+      defined(__32MX440F256H__) || \
+      defined(__32MX775F256L__) || \
+      defined(__32MX675F256L__) || \
+      defined(__32MX575F256L__) || \
+      defined(__32MX775F256H__) || \
+      defined(__32MX675F256H__) || \
+      defined(__32MX575F256H__)
+
+    #define FLASH_BLOCK_SIZE            (1024 * 4)          // Size in bytes
+
+    //This set of options will only work with optimazation setting -Os
+    //  Address of main application's Startup code
+    #define APPLICATION_ADDRESS         0x9D00E000
+    //  Base address and length of user flash block
+    #define PROGRAM_FLASH_BASE          0x1D00E000          // Physical address
+    #define PROGRAM_FLASH_LENGTH        0x00032000          // Length in bytes
+
+//    //This set of options will work with all optimazation settings
+//    //  Address of main application's Startup code
+//    #define APPLICATION_ADDRESS         0x9D017000
+//    //  Base address and length of user flash block
+//    #define PROGRAM_FLASH_BASE          0x1D017000          // Physical address
+//    #define PROGRAM_FLASH_LENGTH        0x00029000          // Length in bytes
+//
+//    //This set of options will only work with optimazation settings -Os, -O1, and -O2
+//    //  Address of main application's Startup code
+//    #define APPLICATION_ADDRESS         0x9D010000
+//    //  Base address and length of user flash block
+//    #define PROGRAM_FLASH_BASE          0x1D010000          // Physical address
+//    #define PROGRAM_FLASH_LENGTH        0x00030000          // Length in bytes
+
+#elif defined(__32MX440F128H__) || \
+      defined(__32MX440F128L__)
+
+    #define FLASH_BLOCK_SIZE            (1024 * 4)          // Size in bytes
+
+    //This set of options will only work with optimazation setting -Os
+    //  Address of main application's Startup code
+    #define APPLICATION_ADDRESS         0x9D00E000
+    //  Base address and length of user flash block
+    #define PROGRAM_FLASH_BASE          0x1D00E000          // Physical address
+    #define PROGRAM_FLASH_LENGTH        0x00012000          // Length in bytes
+
+//    //This set of options will only work with optimazation settings -Os, -O1, and -O2
+//    //  Address of main application's Startup code
+//    #define APPLICATION_ADDRESS         0x9D010000
+//    //  Base address and length of user flash block
+//    #define PROGRAM_FLASH_BASE          0x1D010000          // Physical address
+//    #define PROGRAM_FLASH_LENGTH        0x00010000          // Length in bytes
+//    
+//    //This set of options will work with all optimazation settings
+//    //  Address of main application's Startup code
+//    #define APPLICATION_ADDRESS         0x9D017000
+//    //  Base address and length of user flash block
+//    #define PROGRAM_FLASH_BASE          0x1D017000          // Physical address
+//    #define PROGRAM_FLASH_LENGTH        0x00009000          // Length in bytes
+
+
+#elif defined(__PIC24F__)
+
 #define APPLICATION_ADDRESS         0xA000
 
 // These macros define the maximum size of a Flash block.
@@ -166,6 +280,10 @@ image file to memory.
 #define PROGRAM_FLASH_LENGTH        0x00020800          // Length in bytes - this does not include the configuration words
 
 #define FLASH_BLOCK_SIZE            (1024)          // Size in bytes
+
+#else
+    #error "Device currently supported"
+#endif
 
 // Optional Record Type Support (Necessary if EXTENDED_HEXFILE_SUPPORT is defined)
 #define Loader_ValidateSerialNumber(d,l)    RECORD_NON_DATA

@@ -60,7 +60,7 @@
 #if defined(__PIC32MX__)
     #define DATETIME_REFRESH    100
 #else
-    #define DATETIME_REFRESH    1000
+    #define DATETIME_REFRESH    200
 #endif
 
 // text colors and backgrounds

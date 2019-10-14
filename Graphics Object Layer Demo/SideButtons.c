@@ -41,7 +41,7 @@
  *****************************************************************************/
 #include "MainDemo.h"
 
-#if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+#if defined (PIC24FJ256DA210_DEV_BOARD)
     #define BTN_S4 BTN_S3
     #define BTN_S5 BTN_S2
     #define BTN_S6 BTN_S1

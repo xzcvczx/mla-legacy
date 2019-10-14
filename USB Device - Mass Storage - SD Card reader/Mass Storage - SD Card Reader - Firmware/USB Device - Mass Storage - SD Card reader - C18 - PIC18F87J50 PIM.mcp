@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\USB Device - Mass Storage - SD Card Reader - PIC18F87J50 PIM
 dir_sin=
-dir_inc=..\..\Microchip\Include;..\..\USB Device - Mass Storage - SD Card reader\Mass Storage - SD Card Reader - Firmware
+dir_inc=c:\mcc18\h;..\..\Microchip\Include;..\..\USB Device - Mass Storage - SD Card reader\Mass Storage - SD Card Reader - Firmware
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]

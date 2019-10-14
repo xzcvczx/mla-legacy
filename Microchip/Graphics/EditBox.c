@@ -54,7 +54,7 @@ EDITBOX  *EbCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom,
 
 	EDITBOX *pEb = NULL;
 
-  	pEb = (EDITBOX*)malloc(sizeof(EDITBOX)+ (charMax + 1)*sizeof(XCHAR)); // ending zero is not included into charMax
+  	pEb = (EDITBOX*)GFX_malloc(sizeof(EDITBOX)+ (charMax + 1)*sizeof(XCHAR)); // ending zero is not included into charMax
 	if (pEb == NULL)
 		return pEb;
 
@@ -316,8 +316,8 @@ SHORT width = 0;
             pText = pEb->pBuffer;
             temp = 1;
 
-            while((unsigned XCHAR)*pText != (unsigned XCHAR)0){
-                if((unsigned XCHAR)*pText == (unsigned XCHAR)'\n')
+            while((XCHAR)*pText != (XCHAR)0){
+                if((XCHAR)*pText == (XCHAR)'\n')
                     temp++;
                 pText++;
             }
@@ -348,10 +348,10 @@ do{
             }else{
                 MoveRel(width, 0);
             }
-            while((unsigned XCHAR)*pText>(unsigned XCHAR)15)
+            while((XCHAR)*pText>(XCHAR)15)
                 pText++;
             
-            if((unsigned XCHAR)*pText == (unsigned XCHAR)'\n')
+            if((XCHAR)*pText == (XCHAR)'\n')
             {
                 MoveRel(0, pEb->textHeight);
             }

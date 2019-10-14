@@ -14,7 +14,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and

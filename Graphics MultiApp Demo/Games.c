@@ -217,7 +217,7 @@ void                        *balls[NUM_BALL_TYPES + 2];
 #define FIELD_PIECES            SNAKE_COLUMNS
 #define LONGEST_SNAKE           100
 
-#define SNAKE_UPDATE_INTERVAL   (500)
+#define SNAKE_UPDATE_INTERVAL   (1000)
 
 typedef struct _PIECE_INFO
 {
@@ -229,6 +229,7 @@ typedef struct _PIECE_INFO
 typedef struct _FIELD_INFO
 {
     BOOL    hasFood;
+    BOOL    notFood;
     BOOL    hasBeenEaten;
 } FIELD_INFO;
 
@@ -256,6 +257,7 @@ extern const BITMAP_FLASH   snakeFood;
 const XCHAR                 CrashedStr[] = {'Y','o','u',' ','C','r','a','s','h','e','d','!',0};
 const XCHAR                 ShuFullStr[] = {'Y','o','u',' ','a','r','e',' ','f','u','l','l','y',' ','g','r','o','w','n','!',0};
 const XCHAR                 InAKnotStr[] = {'Y','o','u',' ','a','r','e',' ','i','n',' ','a',' ','k','n','o','t','!',0};
+const XCHAR                 NotFoodStr[] = {'X',0};
 
 /************************************************************************
  Function: void DrawSnake(DWORD tick)
@@ -352,8 +354,9 @@ void DrawSnake(DWORD tick)
         else
         {
 
-            // Erase the tail.  If there is food, mark it.  Otherwise, clear it.
-            if(field[snake.pieces[oldTail].column][snake.pieces[oldTail].row].hasFood)
+            // Erase the tail.  If there is food or not food, mark it.  Otherwise, clear it.
+            if((field[snake.pieces[oldTail].column][snake.pieces[oldTail].row].hasFood) || 
+               (field[snake.pieces[oldTail].column][snake.pieces[oldTail].row].notFood))
             {
                 GridSetCell
                 (
@@ -446,10 +449,20 @@ void DrawSnake(DWORD tick)
         }
 
         // See if the snake is eating food.
-        if(field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasFood)
+        if	((field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasFood == TRUE) || 
+        	 (field[SNAKE_HEAD.column][SNAKE_HEAD.row].notFood == TRUE))
         {
-            field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasFood = FALSE;
-            field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasBeenEaten = TRUE;
+	        // if eating poison subtract score
+	        if (field[SNAKE_HEAD.column][SNAKE_HEAD.row].notFood == TRUE)
+	        {
+	            field[SNAKE_HEAD.column][SNAKE_HEAD.row].notFood = FALSE;
+	        	score -= 10;
+	        }	
+			else
+			{
+            	field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasFood = FALSE;
+            	field[SNAKE_HEAD.column][SNAKE_HEAD.row].hasBeenEaten = TRUE;
+   			}         
 
             // Put another piece of food on.  We'll let it be anywhere that doesn't
             // already have food.
@@ -459,12 +472,23 @@ void DrawSnake(DWORD tick)
                 j = Random(SNAKE_ROWS);
             } while(field[i][j].hasFood);
 
-            // Mark and draw the food.  Don't draw it if the snake is there!
-            field[i][j].hasFood = TRUE;
-            if(!GridGetCell(gamesGrid, i, j, (WORD *) &oldTail))
+            // Mark and draw the food or not food.  Don't draw it if the snake is there!
+            if ((i + j)%3 != 0)
             {
-                GridSetCell(gamesGrid, i, j, GRIDITEM_IS_BITMAP | GRIDITEM_DRAW, (void *) &snakeFood);
+            	field[i][j].hasFood = TRUE;
+            	if(!GridGetCell(gamesGrid, i, j, (WORD *) &oldTail))
+            	{
+                	GridSetCell(gamesGrid, i, j, GRIDITEM_IS_BITMAP | GRIDITEM_DRAW, (void *) &snakeFood);
+            	}
             }
+            else
+            {
+            	field[i][j].notFood = TRUE;
+            	if(!GridGetCell(gamesGrid, i, j, (WORD *) &oldTail))
+            	{
+                	GridSetCell(gamesGrid, i, j, GRIDITEM_IS_TEXT | GRIDITEM_DRAW, (void *) &NotFoodStr);
+            	}
+	        } 	
         }
 
         previousTick = tick;
@@ -637,9 +661,18 @@ void ShowScreenSnake(void)
         i = Random(SNAKE_COLUMNS - 1);
         j = Random(SNAKE_ROWS - 1);
 
-        // Mark and draw the food
-        field[i][j].hasFood = TRUE;
-        GridSetCell(gamesGrid, i, j, GRIDITEM_IS_BITMAP, (void *) &snakeFood);
+        if ((i + j)%3 != 0)
+        {
+        	// Mark and draw the food
+        	field[i][j].hasFood = TRUE;
+        	GridSetCell(gamesGrid, i, j, GRIDITEM_IS_BITMAP, (void *) &snakeFood);
+        }
+        else
+        {
+        	// Mark and draw the food
+        	field[i][j].notFood = TRUE;
+	        GridSetCell(gamesGrid, i, j, GRIDITEM_IS_TEXT, (void *) &NotFoodStr);
+        }
     }
 
     // Draw the snake on the field

@@ -98,7 +98,7 @@ static __inline__ eEthLinkStat __attribute__((always_inline)) _Phy2LinkStat(__BM
 /****************************************************************************
  * Function:        EthPhyInit
  *
- * PreCondition:    - EthOpen should have been called.
+ * PreCondition:    - EthInit should have been called.
  *
  * Input:           oFlags - the requested open flags
  *                  cFlags - PHY MII/RMII configuration flags
@@ -316,7 +316,7 @@ eEthRes __attribute__((weak)) EthPhyInit(eEthOpenFlags oFlags, eEthPhyCfgFlags c
 /****************************************************************************
  * Function:        EthPhyRestartNegotiation
  *
- * PreCondition:    - EthOpen should have been called.
+ * PreCondition:    - EthPhyInit should have been called.
  *                  - The PHY should have been initialized with proper duplex/speed mode!
  *
  * Input:           None
@@ -357,7 +357,7 @@ eEthRes  __attribute__((weak)) EthPhyRestartNegotiation(void)
 /****************************************************************************
  * Function:        EthPhyNegotiationComplete
  *
- * PreCondition:    EthOpen (and EthPhyRestartNegotiation) should have been called.
+ * PreCondition:    EthPhyInit (and EthPhyRestartNegotiation) should have been called.
  *
  * Input:           waitComplete - if wait for completion needed
  *
@@ -434,7 +434,7 @@ eEthRes  __attribute__((weak)) EthPhyNegotiationComplete(int waitComplete)
 /****************************************************************************
  * Function:        EthPhyGetNegotiationResult
  *
- * PreCondition:    EthOpen, EthPhyRestartNegotiation and EthPhyNegotiationComplete should have been called.
+ * PreCondition:    EthPhyInit, EthPhyRestartNegotiation and EthPhyNegotiationComplete should have been called.
  *
  * Input:           pFlags     - address to store the negotiation result
  *                  pPauseType - address to store the pause type supported by the LP
@@ -577,7 +577,7 @@ eEthLinkStat  __attribute__((weak)) EthPhyGetNegotiationResult(eEthOpenFlags* pF
 /****************************************************************************
  * Function:        EthPhyGetLinkStatus
  *
- * PreCondition:    EthOpen should have been called.
+ * PreCondition:    EthPhyInit should have been called.
  *
  * Input:           refresh - boolean to specify if double read is needed.
  *

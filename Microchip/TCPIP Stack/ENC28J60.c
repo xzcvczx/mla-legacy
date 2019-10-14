@@ -214,8 +214,7 @@ void MACInit(void)
     #if defined(__PIC24H__) || defined(__dsPIC33F__)
         ENC_SPICON1 = 0x0F;     // 1:1 primary prescale, 5:1 secondary prescale (8MHz  @ 40MIPS)
     //    ENC_SPICON1 = 0x1E;   // 4:1 primary prescale, 1:1 secondary prescale (10MHz @ 40MIPS, Doesn't work.  CLKRDY is incorrectly reported as being clear.  Problem caused by dsPIC33/PIC24H ES silicon bug.)
-    #elif defined(__PIC24F__)
-    //    ENC_SPICON1 = 0x1F;   // 1:1 prescale broken on PIC24F ES silicon     (16MHz @ 16MIPS)
+    #elif defined(__PIC24F__) || defined(__PIC24FK__)
         ENC_SPICON1 = 0x1B;     // 1:1 primary prescale, 2:1 secondary prescale (8MHz  @ 16MIPS)
     #else   // dsPIC30F
         ENC_SPICON1 = 0x17;     // 1:1 primary prescale, 3:1 secondary prescale (10MHz @ 30MIPS)
@@ -563,7 +562,13 @@ BOOL MACGetHeader(MAC_ADDR *remote, BYTE* type)
     PacketCount = ReadETHReg((BYTE)EPKTCNT).Val;
     BankSel(ERDPTL);
     if(PacketCount == 0u)
+    {
+	    // Ensure that MARXEN is set
+		BankSel(MACON1);
+	    WriteReg((BYTE)MACON1, MACON1_TXPAUS | MACON1_RXPAUS | MACON1_MARXEN);
+		BankSel(ERDPTL);
         return FALSE;
+    }
 
     // Make absolutely certain that any previous packet was discarded
     if(WasDiscarded == FALSE)

@@ -39,6 +39,7 @@ Pradeep Budagutta    25-Jun-2008    First release
 #include "Graphics\Graphics.h"
 #include "Image Decoders\ImageDecoder.h"
 #include "FlashImage.h"
+#include "cpld.h"
 
 // Configuration bits
 #if defined(__dsPIC33F__) || defined(__PIC24H__)
@@ -46,7 +47,7 @@ _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
@@ -98,7 +99,7 @@ int main (void)
     BYTE bTextHeight;
     WORD X, Y;
 
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #if defined(PIC24FJ256DA210_DEV_BOARD)
     
     // _ANSG8 = 0; /* S1 */
     // _ANSE9 = 0; /* S2 */
@@ -143,10 +144,17 @@ int main (void)
     #elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
     SYSTEMConfigPerformance(GetSystemClock());
+    #ifdef MULTI_MEDIA_BOARD_DM00123
+    CPLDInitialize();
+    CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+    CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
     #endif
+    #endif
+
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
     AD1PCFGL = 0xffff;
     #endif
+
     InitGraph();
     ImageDecoderInit();
     SetClipRgn(0, 0, GetMaxX(), GetMaxY());
@@ -231,6 +239,11 @@ int main (void)
         WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 1 * (bTextHeight - 1), "(Image is larger than 320x240)"));
         DelayMs(DELAY_MS);
         ImageDecode(FlashImage_fopen(MCHPLOGO_JPG), IMG_JPEG, 0, 0, 320, 240, 0, &FlashFileApi, PixelOutput);
+
+    #ifdef IMG_USE_NON_BLOCKING_DECODING
+        while(!ImageDecodeTask());
+    #endif
+
         DelayMs(DELAY_NEXT);
 
         SetColor(BLACK);
@@ -251,6 +264,11 @@ int main (void)
         WAIT_UNTIL_FINISH(OutTextXY(0, 240 - 1 * (bTextHeight + 2), "(Image is larger than 320x240)"));
         DelayMs(DELAY_MS);
         ImageDecode(FlashImage_fopen(MCHPLOGO_JPG), IMG_JPEG, 0, 0, 320, 240, IMG_DOWN_SCALE, &FlashFileApi, PixelOutput);
+
+    #ifdef IMG_USE_NON_BLOCKING_DECODING
+        while(!ImageDecodeTask());
+    #endif
+
         DelayMs(DELAY_NEXT);
 
         SetColor(BLACK);
@@ -276,6 +294,11 @@ int main (void)
                 FlashImage_fopen(MCHPLOGO_JPG), IMG_JPEG, 0, 0, 320, 240, IMG_DOWN_SCALE |
                 IMG_ALIGN_CENTER, &FlashFileApi, PixelOutput
             );
+
+    #ifdef IMG_USE_NON_BLOCKING_DECODING
+        while(!ImageDecodeTask());
+    #endif
+
         DelayMs(DELAY_NEXT);
 
         SetColor(BLACK);
@@ -301,6 +324,11 @@ int main (void)
                 FlashImage_fopen(MCHPLOGO_JPG), IMG_JPEG, 160, 120, 160, 120, IMG_DOWN_SCALE |
                 IMG_ALIGN_CENTER, &FlashFileApi, PixelOutput
             );
+
+    #ifdef IMG_USE_NON_BLOCKING_DECODING
+        while(!ImageDecodeTask());
+    #endif
+
         DelayMs(DELAY_NEXT);
     }
 

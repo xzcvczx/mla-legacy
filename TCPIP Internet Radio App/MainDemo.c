@@ -14,7 +14,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -373,7 +373,7 @@ int main(void)
         // Initialize and display the stack version on the LCD
         LCDInit();
         DelayMs(100);
-        strcpypgm2ram((char*)LCDText, "TCPStack " VERSION "  "
+        strcpypgm2ram((char*)LCDText, "TCPStack " TCPIP_STACK_VERSION "  "
             "                ");
         LCDUpdate();
     #endif
@@ -1278,7 +1278,7 @@ static void InitializeBoard(void)
 	
 		// Port I/O
 		AD1PCFGHbits.PCFG23 = 1;	// Make RA7 (BUTTON1) a digital input
-		AD1PCFGHbits.PCFG20 = 1;	// Make RA12 (INT1) a digital input for ZeroG ZG2100M PICtail Plus interrupt
+		AD1PCFGHbits.PCFG20 = 1;	// Make RA12 (INT1) a digital input for MRF24WB0M PICtail Plus interrupt
 
 		// ADC
 	    AD1CHS0 = 0;				// Input to AN0 (potentiometer)
@@ -1290,12 +1290,23 @@ static void InitializeBoard(void)
 		#endif
 		
 		// ADC
-	    AD1CHS = 0;					// Input to AN0 (potentiometer)
-		AD1PCFGbits.PCFG4 = 0;		// Disable digital input on AN4 (TC1047A temp sensor)
-		#if defined(__32MX460F512L__) || defined(__32MX795F512L__)	// PIC32MX460F512L and PIC32MX795F512L PIMs has different pinout to accomodate USB module
-			AD1PCFGbits.PCFG2 = 0;		// Disable digital input on AN2 (potentiometer)
+	    #if defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
+	    	// Disable analog on all pins
+	    	ANSA = 0x0000;
+	    	ANSB = 0x0000;
+	    	ANSC = 0x0000;
+	    	ANSD = 0x0000;
+	    	ANSE = 0x0000;
+	    	ANSF = 0x0000;
+	    	ANSG = 0x0000;
 		#else
-			AD1PCFGbits.PCFG5 = 0;		// Disable digital input on AN5 (potentiometer)
+		    AD1CHS = 0;					// Input to AN0 (potentiometer)
+			AD1PCFGbits.PCFG4 = 0;		// Disable digital input on AN4 (TC1047A temp sensor)
+			#if defined(__32MX460F512L__) || defined(__32MX795F512L__)	// PIC32MX460F512L and PIC32MX795F512L PIMs has different pinout to accomodate USB module
+				AD1PCFGbits.PCFG2 = 0;		// Disable digital input on AN2 (potentiometer)
+			#else
+				AD1PCFGbits.PCFG5 = 0;		// Disable digital input on AN5 (potentiometer)
+			#endif
 		#endif
 	#endif
 
@@ -1338,7 +1349,38 @@ static void InitializeBoard(void)
 
 #endif
 
+// Deassert all chip select lines so there isn't any problem with 
+// initialization order.  Ex: When ENC28J60 is on SPI2 with Explorer 16, 
+// MAX3232 ROUT2 pin will drive RF12/U2CTS ENC28J60 CS line asserted, 
+// preventing proper 25LC256 EEPROM operation.
+#if defined(ENC_CS_TRIS)
+	ENC_CS_IO = 1;
+	ENC_CS_TRIS = 0;
+#endif
+#if defined(ENC100_CS_TRIS)
+	ENC100_CS_IO = (ENC100_INTERFACE_MODE == 0);
+	ENC100_CS_TRIS = 0;
+#endif
+#if defined(EEPROM_CS_TRIS)
+	EEPROM_CS_IO = 1;
+	EEPROM_CS_TRIS = 0;
+#endif
+#if defined(SPIRAM_CS_TRIS)
+	SPIRAM_CS_IO = 1;
+	SPIRAM_CS_TRIS = 0;
+#endif
+#if defined(SPIFLASH_CS_TRIS)
+	SPIFLASH_CS_IO = 1;
+	SPIFLASH_CS_TRIS = 0;
+#endif
+#if defined(WF_CS_TRIS)
+	WF_CS_IO = 1;
+	WF_CS_TRIS = 0;
+#endif
+
 #if defined(PIC24FJ64GA004_PIM)
+	__builtin_write_OSCCONL(OSCCON & 0xBF);  // Unlock PPS
+
 	// Remove some LED outputs to regain other functions
 	LED1_TRIS = 1;		// Multiplexed with BUTTON0
 	LED5_TRIS = 1;		// Multiplexed with EEPROM CS
@@ -1358,14 +1400,72 @@ static void InitializeBoard(void)
 	
 	AD1PCFG = 0xFFFF;				//All digital inputs - POT and Temp are on same pin as SDO1/SDI1, which is needed for ENC28J60 commnications
 
-	// Lock the PPS
-	asm volatile (	"mov #OSCCON,w1 \n"
-					"mov #0x46, w2 \n"
-					"mov #0x57, w3 \n"
-					"mov.b w2,[w1] \n"
-					"mov.b w3,[w1] \n"
-					"bset OSCCON, #6");
+	__builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
 #endif
+
+#if defined(__PIC24FJ256DA210__)
+	__builtin_write_OSCCONL(OSCCON & 0xBF);  // Unlock PPS
+
+	// Inputs
+	RPINR19bits.U2RXR = 11;	// U2RX = RP11
+	RPINR20bits.SDI1R = 0;	// SDI1 = RP0
+	RPINR0bits.INT1R = 34;	// Assign RE9/RPI34 to INT1 (input) for MRF24WB0M Wi-Fi PICtail Plus interrupt
+	
+	// Outputs
+	RPOR8bits.RP16R = 5;	// RP16 = U2TX
+	RPOR1bits.RP2R = 8; 	// RP2 = SCK1
+	RPOR0bits.RP1R = 7;		// RP1 = SDO1
+
+	__builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
+#endif
+
+#if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
+	__builtin_write_OSCCONL(OSCCON & 0xBF);  // Unlock PPS
+	
+	// Configure SPI1 PPS pins (ENC28J60/ENCX24J600/MRF24WB0M or other PICtail Plus cards)
+	RPOR0bits.RP0R = 8;		// Assign RP0 to SCK1 (output)
+	RPOR7bits.RP15R = 7;	// Assign RP15 to SDO1 (output)
+	RPINR20bits.SDI1R = 23;	// Assign RP23 to SDI1 (input)
+
+	// Configure SPI2 PPS pins (25LC256 EEPROM on Explorer 16)
+	RPOR10bits.RP21R = 11;	// Assign RG6/RP21 to SCK2 (output)
+	RPOR9bits.RP19R = 10;	// Assign RG8/RP19 to SDO2 (output)
+	RPINR22bits.SDI2R = 26;	// Assign RG7/RP26 to SDI2 (input)
+	
+	// Configure UART2 PPS pins (MAX3232 on Explorer 16)
+	#if !defined(ENC100_INTERFACE_MODE) || (ENC100_INTERFACE_MODE == 0) || defined(ENC100_PSP_USE_INDIRECT_RAM_ADDRESSING)
+	RPINR19bits.U2RXR = 10;	// Assign RF4/RP10 to U2RX (input)
+	RPOR8bits.RP17R = 5;	// Assign RF5/RP17 to U2TX (output)
+	#endif
+	
+	// Configure INT1 PPS pin (MRF24WB0M Wi-Fi PICtail Plus interrupt signal when in SPI slot 1)
+	RPINR0bits.INT1R = 33;	// Assign RE8/RPI33 to INT1 (input)
+
+	// Configure INT3 PPS pin (MRF24WB0M Wi-Fi PICtail Plus interrupt signal when in SPI slot 2)
+	RPINR1bits.INT3R = 40;	// Assign RC3/RPI40 to INT3 (input)
+
+	__builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
+#endif
+
+#if defined(__PIC24FJ256GA110__)
+	__builtin_write_OSCCONL(OSCCON & 0xBF);  // Unlock PPS
+	
+	// Configure SPI2 PPS pins (25LC256 EEPROM on Explorer 16 and ENC28J60/ENCX24J600/MRF24WB0M or other PICtail Plus cards)
+	// Note that the ENC28J60/ENCX24J600/MRF24WB0M PICtails SPI PICtails must be inserted into the middle SPI2 socket, not the topmost SPI1 slot as normal.  This is because PIC24FJ256GA110 A3 silicon has an input-only RPI PPS pin in the ordinary SCK1 location.  Silicon rev A5 has this fixed, but for simplicity all demos will assume we are using SPI2.
+	RPOR10bits.RP21R = 11;	// Assign RG6/RP21 to SCK2 (output)
+	RPOR9bits.RP19R = 10;	// Assign RG8/RP19 to SDO2 (output)
+	RPINR22bits.SDI2R = 26;	// Assign RG7/RP26 to SDI2 (input)
+	
+	// Configure UART2 PPS pins (MAX3232 on Explorer 16)
+	RPINR19bits.U2RXR = 10;	// Assign RF4/RP10 to U2RX (input)
+	RPOR8bits.RP17R = 5;	// Assign RF5/RP17 to U2TX (output)
+	
+	// Configure INT3 PPS pin (MRF24WB0M PICtail Plus interrupt signal)
+	RPINR1bits.INT3R = 36;	// Assign RA14/RPI36 to INT3 (input)
+
+	__builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
+#endif
+
 
 #if defined(DSPICDEM11)
 	// Deselect the LCD controller (PIC18F252 onboard) to ensure there is no SPI2 contention

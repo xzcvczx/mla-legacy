@@ -38,6 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Rodger Richey		03/10/07	Original
  * Paolo Tamayo			12/20/07	Ported to PIC24 Kit
+ * PAT					3/26/10		Fixed error on PutPixel() timing (PMP timing).
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -300,7 +301,8 @@ void PutPixel(SHORT x, SHORT y)
     // lower and higher column address pointers)
     display = SingleDeviceRead();	// Read to initiate Read transaction on PMP and dummy read
     								// (requirement for data synchronization in the controller)
-    display = DeviceRead();       	// Read actual data from from display buffer
+    display = SingleDeviceRead();	// Read again as a requirement for data synchronization in the display controller
+    display = SingleDeviceRead();	// Read actual data from from display buffer
 
     if(_color > 0)                  // If non-zero for pixel on
         display |= mask;            // or in mask

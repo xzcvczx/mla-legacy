@@ -45,7 +45,7 @@ _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
@@ -98,6 +98,11 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPD
 #define BAR_WIDTH		4
 
 /////////////////////////////////////////////////////////////////////////////
+//                            LOCAL PROTOTYPES
+/////////////////////////////////////////////////////////////////////////////
+void            TickInit(void);                 // starts tick counter
+
+/////////////////////////////////////////////////////////////////////////////
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
 extern const BITMAP_FLASH redRightArrow;
@@ -115,7 +120,7 @@ int main(void)
 {
     GOL_MSG msg;                    // GOL message structure to interact with GOL
     
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+     #if defined(PIC24FJ256DA210_DEV_BOARD)
     
     _ANSG8 = 0; /* S1 */
     _ANSE9 = 0; /* S2 */
@@ -161,11 +166,16 @@ int main(void)
     #elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
     SYSTEMConfigPerformance(GetSystemClock());
+    #ifdef MULTI_MEDIA_BOARD_DM00123
+    CPLDInitialize();
+    CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+    CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+    #endif
     #endif
 
     GOLInit();                      // initialize graphics library &
 
-    #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
+    #if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
     EEPROMInit();                   // initialize Exp.16 EEPROM SPI
     BeepInit();
     #else
@@ -173,6 +183,9 @@ int main(void)
     #endif
     
     TouchInit();                    // initialize touch screen
+    
+    // create default style scheme for GOL
+    TickInit();                     // initialize tick counter (for random number generation)
     
 
     // create default style scheme for GOL
@@ -209,7 +222,7 @@ int main(void)
     #endif
 
     // If it's a new board (EEPROM_VERSION byte is not programed) calibrate touch screen
-    #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
+    #if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
     if(GRAPHICS_LIBRARY_VERSION != EEPROMReadWord(ADDRESS_VERSION))
     {
         TouchCalibration();
@@ -303,6 +316,15 @@ WORD GOLMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
 
     objectID = GetObjID(pObj);
 
+	#if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
+	    #if !defined (__PIC32MX__)
+	    if(objMsg == BTN_MSG_PRESSED)
+	    {
+	        Beep();
+	    }
+		#endif
+	#endif
+	
     if(objectID == ID_BTN1)
     {
         if(objMsg == BTN_MSG_PRESSED)
@@ -448,4 +470,59 @@ WORD GOLDrawCallback(void)
     }
 
     return (1);
+}
+/////////////////////////////////////////////////////////////////////////////
+// Function: Timer3 ISR
+// Input: none
+// Output: none
+// Overview: increments tick counter. Tick is approx. 1 ms.
+/////////////////////////////////////////////////////////////////////////////
+#ifdef __PIC32MX__
+    #define __T3_ISR    __ISR(_TIMER_3_VECTOR, ipl4)
+#else
+    #define __T3_ISR    __attribute__((interrupt, shadow, auto_psv))
+#endif
+
+/* */
+void __T3_ISR _T3Interrupt(void)
+{
+    // Clear flag
+    #ifdef __PIC32MX__
+    mT3ClearIntFlag();
+    #else
+    IFS0bits.T3IF = 0;
+    #endif
+
+	TouchProcessTouch();    
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Function: void TickInit(void)
+// Input: none
+// Output: none
+// Overview: Initilizes the tick timer.
+/////////////////////////////////////////////////////////////////////////////
+
+/*********************************************************************
+ * Section: Tick Delay
+ *********************************************************************/
+#define SAMPLE_PERIOD       500 // us
+#define TICK_PERIOD			(GetPeripheralClock() * SAMPLE_PERIOD) / 4000000
+
+/* */
+void TickInit(void)
+{
+
+    // Initialize Timer4
+    #ifdef __PIC32MX__
+    OpenTimer3(T3_ON | T3_PS_1_8, TICK_PERIOD);
+    ConfigIntTimer3(T3_INT_ON | T3_INT_PRIOR_4);
+    #else
+    TMR3 = 0;
+    PR3 = TICK_PERIOD;
+    IFS0bits.T3IF = 0;  //Clear flag
+    IEC0bits.T3IE = 1;  //Enable interrupt
+    T3CONbits.TON = 1;  //Run timer
+    #endif
+    
 }

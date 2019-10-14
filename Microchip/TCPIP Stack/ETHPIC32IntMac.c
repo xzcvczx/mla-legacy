@@ -132,7 +132,7 @@ static int			_linkNegotiation;					// if an auto-negotiation is in effect
  * Overview:        This function initializes the Eth controller, the MAC and the PHY. It should be called to be able to schedule
  *                  any Eth transmit or receive operation.
  *
- * Note:           The flags used for EthOpen() call are fixed for now. This will change in the future! 
+ * Note:            None 
  *****************************************************************************/
 void MACInit(void)
 {

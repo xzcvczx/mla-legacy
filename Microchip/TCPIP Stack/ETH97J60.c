@@ -62,7 +62,7 @@
 // Make sure that this hardware profile has a PIC18F97J60 family device in it
 #if (defined(__18F97J60) || defined(__18F96J65) || defined(__18F96J60) || defined(__18F87J60) || defined(__18F86J65) || defined(__18F86J60) || defined(__18F67J60) || defined(__18F66J65) || defined(__18F66J60) || \
 	  defined(_18F97J60) ||  defined(_18F96J65) ||  defined(_18F96J60) ||  defined(_18F87J60) ||  defined(_18F86J65) ||  defined(_18F86J60) ||  defined(_18F67J60) ||  defined(_18F66J65) ||  defined(_18F66J60)) \
-	&& !defined(ENC_CS_TRIS) && !defined(ENC100_INTERFACE_MODE) && !defined(ZG_CS_TRIS)
+	&& !defined(ENC_CS_TRIS) && !defined(ENC100_INTERFACE_MODE) && !defined(WF_CS_TRIS)
 
 #include "TCPIP Stack/TCPIP.h"
 
@@ -123,10 +123,8 @@ void MACInit(void)
 {
 	BYTE i;
 
-
-    TRISAbits.TRISA0 = 0;   // Set LED0 as output
-    TRISAbits.TRISA1 = 0;   // Set LED1 as output
-    ECON2bits.ETHEN = 1;    // Enable Ethernet!
+	TRISA &= 0xFC;			// Clear TRISA0 and TRISA1 to set LED0 and LED1 as outputs for Ethernet module status
+    ECON2bits.ETHEN = 1;	// Enable Ethernet!
 
 	// Wait for PHYRDY to become set.
     while(!ESTATbits.PHYRDY);
@@ -1198,9 +1196,9 @@ void WritePHYReg(BYTE Register, WORD Data)
 	GIESave = INTCON & 0xC0;		// Save GIEH and GIEL bits
 	INTCON &= 0x3F;					// Clear INTCONbits.GIEH and INTCONbits.GIEL
 	#if defined(HI_TECH_C)
-		asm("movff	_PRODL, _MIWRL");
+		asm("movff	_PRODL, 0xEB6");	// movff PRODL, MIWRL
 		asm("nop");
-		asm("movff	_PRODH, _MIWRH");
+		asm("movff	_PRODH, 0xEB7");	// movff PRODH, MIWRH
 	#else
 		_asm
 		movff	PRODL, MIWRL

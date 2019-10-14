@@ -32,6 +32,8 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
 *****************************************************************************/
+
+
 /*************************************************************************/
 /*  Note:  This file is included as a template of a header file for      */
 /*         a new physical layer. It is designed to go with               */
@@ -43,7 +45,7 @@
  Change History:
   Rev            Description
   ----           -----------------------
-  1.2.4 - 1.2.5  No Change
+  1.2.4 - 1.2.6  No Change
 ********************************************************************/
 //DOM-IGNORE-END
 

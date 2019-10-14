@@ -341,7 +341,8 @@ void        LbDelItemsList(LISTBOX *pLb);
 *                     if the pointer is NULL the search begins from the 
 *					  start of the items list.
 *
-* Output: none
+* Output: pointer to the selected item, NULL if there are no items selected
+*
 *
 * Side Effects: none
 *

@@ -52,41 +52,115 @@
 #if defined (__PIC24F__) || defined(__dsPIC33F__) || defined(__PIC24H__)
 
 	#if defined (__PIC24FJ256DA210__)
-		#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_TFT_G240320LTSW_118W_E.h"
-		//#include "Alternative Configurations\HardwareProfile_DA210_DEV_BOARD_16PMP_MCHP_DA210_PH480272T_005_I11Q.h"
-	#else
-		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
-		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_PH480272T_005_I11Q.h"
+		/*********************************************************************
+	     * Hardware Configuration for 
+	     * PIC24FJ256DA210 Development Board
+	     * Display TFT-G240320LTSW-118W-E
+	     ********************************************************************/
+		#include "Alternative Configurations\HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_TFT_G240320LTSW_118W_E.h"
 		
+		/*********************************************************************
+	     * Hardware Configuration for 
+	     * PIC24FJ256DA210 Development Board
+	     * Display PH480272T-005-I11Q
+	     ********************************************************************/
+		//#include "Alternative Configurations\HardwareProfile_PIC24FJ256DA210_DEV_BOARD_16PMP_MCHP_DA210_PH480272T_005_I11Q.h"
+
+	#else
+		/*********************************************************************
+	     * Hardware Configuration for 
+	     * Explorer 16
+    	 * Graphics PicTail v3
+	     * Display TFT-G240320LTSW-118W-E
+	     ********************************************************************/
+		#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
+
+		/*********************************************************************
+	     * Hardware Configuration for 
+	     * Explorer 16
+    	 * Graphics PicTail v3
+	     * Display PH480272T-005-I11Q
+	     ********************************************************************/
+		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_PH480272T_005_I11Q.h"
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_PH480272T_005_I11Q.h"
 
+		/*********************************************************************
+	     * Hardware Configuration for 
+	     * Explorer 16
+     	 * Graphics PicTail v2
+         * Display LGDP4531
+	     ********************************************************************/
 		//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531.h"
 		
 	#endif
 
+
 #elif defined (__PIC32MX__) 
 
-	#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
-	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_PH480272T_005_I11Q.h"
-
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Explorer 16
+     * Graphics PicTail v3
+     * Display TFT-G240320LTSW-118W-E
+     ********************************************************************/
+    #include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_TFT_G240320LTSW_118W_E.h"
+
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Explorer 16
+     * Graphics PicTail v3
+     * Display PH480272T-005-I11Q
+     ********************************************************************/
+	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_SSD1926_PH480272T_005_I11Q.h"
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_SSD1926_PH480272T_005_I11Q.h"
 
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Explorer 16
+     * Graphics PicTail v2
+     * Display LGDP4531
+     ********************************************************************/
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V2_8PMP_LGDP4531.h"
 
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Starter Kit
+     * Graphics PicTail v3
+     * Display TFT-G240320LTSW-118W-E
+     ********************************************************************/
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
-	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_STK_SSD1926_PH480272T_005_I11Q.h"
-	
-	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
-	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_PH480272T_005_I11Q.h"
-	
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_PIC32_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+
+	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Starter Kit
+     * Graphics PicTail v3
+     * Display PH480272T-005-I11Q
+     ********************************************************************/
+	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_STK_SSD1926_PH480272T_005_I11Q.h"
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_PIC32_STK_SSD1926_PH480272T_005_I11Q.h"
 	
-	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_8PMP_PIC32_USB_STK_SSD1926_PH480272T_005_I11Q.h"
 	//#include "Alternative Configurations\HardwareProfile_GFX_PICTAIL_V3_16PMP_PIC32_USB_STK_SSD1926_PH480272T_005_I11Q.h"
+	
+    /*********************************************************************
+     * Hardware Configuration for 
+     * Starter Kit
+     * MultiMedia Development Board
+     * Display TFT-G240320LTSW-118W-E
+     ********************************************************************/
+    //#include "Alternative Configurations\HardwareProfile_MULTI_MEDIA_BOARD_DM00123_16PMP_PIC32_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+    //#include "Alternative Configurations\HardwareProfile_MULTI_MEDIA_BOARD_DM00123_16PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+    //#include "Alternative Configurations\HardwareProfile_MULTI_MEDIA_BOARD_DM00123_16PMP_PIC32_ENET_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
 
+    //#include "Alternative Configurations\HardwareProfile_MULTI_MEDIA_BOARD_DM00123_8PMP_PIC32_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+    //#include "Alternative Configurations\HardwareProfile_MULTI_MEDIA_BOARD_DM00123_8PMP_PIC32_ENET_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
+    //#include "Alternative Configurations\HardwareProfile_MULTI_MEDIA_BOARD_DM00123_8PMP_PIC32_USB_STK_SSD1926_TFT_G240320LTSW_118W_E.h"
 
 #endif
 

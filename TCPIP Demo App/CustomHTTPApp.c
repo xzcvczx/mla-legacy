@@ -17,7 +17,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -538,7 +538,7 @@ static HTTP_IO_RESULT HTTPPostConfig(void)
 		else if(!strcmppgm2ram((char*)curHTTP.data, (ROM char*)"mac"))
 		{
 			// Read new MAC address
-			WORD_VAL w;
+			WORD w;
 			BYTE i;
 
 			ptr = curHTTP.data+6;
@@ -564,10 +564,10 @@ static HTTP_IO_RESULT HTTPPostConfig(void)
 			
 			// Read MAC Address, one byte at a time
 			for(i = 0; i < 6u; i++)
-			{				
-				w.v[1] = curHTTP.data[i*2];
-				w.v[0] = curHTTP.data[i*2+1];
-				newAppConfig.MyMACAddr.v[i] = hexatob(w);
+			{
+				((BYTE*)&w)[1] = curHTTP.data[i*2];
+				((BYTE*)&w)[0] = curHTTP.data[i*2+1];
+				newAppConfig.MyMACAddr.v[i] = hexatob(*((WORD_VAL*)&w));
 			}
 		}
 		else if(!strcmppgm2ram((char*)curHTTP.data, (ROM char*)"host"))
@@ -1386,7 +1386,7 @@ void HTTPPrint_builddate(void)
 
 void HTTPPrint_version(void)
 {
-	TCPPutROMString(sktHTTP, (ROM void*)VERSION);
+	TCPPutROMString(sktHTTP, (ROM void*)TCPIP_STACK_VERSION);
 }
 
 
@@ -1501,7 +1501,7 @@ void HTTPPrint_ledSelected(WORD num, WORD state)
 }
 
 void HTTPPrint_pot(void)
-{    
+{
 	BYTE AN0String[8];
 	WORD ADval;
 
@@ -1791,7 +1791,7 @@ void HTTPPrint_ddns_host(void)
 	#endif
 }
 
-extern ROM char *ddnsServiceHosts[];
+extern ROM char * ROM ddnsServiceHosts[];
 void HTTPPrint_ddns_service(WORD i)
 {
 	#if defined(STACK_USE_DYNAMICDNS_CLIENT)
@@ -1801,7 +1801,7 @@ void HTTPPrint_ddns_service(WORD i)
 		TCPPutROMString(sktHTTP, (ROM BYTE*)"selected");
 	#endif
 }
-		
+
 
 void HTTPPrint_ddns_status(void)
 {
@@ -1826,7 +1826,7 @@ void HTTPPrint_ddns_status_msg(void)
 		curHTTP.callbackPos = 0x01;
 		return;
 	}
-	
+
 	#if defined(STACK_USE_DYNAMICDNS_CLIENT)
 	switch(DDNSGetLastStatus())
 	{

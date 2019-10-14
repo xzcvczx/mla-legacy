@@ -60,7 +60,7 @@
 *			large area every time may slow down.
 *
 ********************************************************************/
-//    #define USE_DOUBLE_BUFFERING  // Comment this line to disable the use of double buffering
+//    #define USE_DOUBLE_BUFFERING  // If enabled, position the JP11 jumper on the PIC24FJ256DA210 development board to 2-3
 #endif
 
 /*********************************************************************
@@ -125,7 +125,7 @@
 *
 *********************************************************************/
 
-//#define USE_MULTIBYTECHAR
+#define USE_MULTIBYTECHAR
 
 /*********************************************************************
 * Overview: Font data can be placed in two locations. One is in 
@@ -137,8 +137,7 @@
 *
 *********************************************************************/
     #define USE_FONT_FLASH          // Support for fonts located in internal flash
-    
-//	#define USE_FONT_RAM			// Support for fonts located in RAM
+
 //#define USE_FONT_EXTERNAL		// Support for fonts located in external memory
 
 /*********************************************************************
@@ -154,5 +153,14 @@
     #define USE_BITMAP_FLASH        // Support for bitmaps located in internal flash
 
 //#define USE_BITMAP_EXTERNAL		// Support for bitmaps located in external memory
+
+
+/*********************************************************************
+* Overview: Define the malloc() and free() for versatility on OS 
+*           based systems. 
+*
+*********************************************************************/
+	#define GFX_malloc(size)    	malloc(size)
+	#define GFX_free(pObj)    	    free(pObj)
 
 #endif // _GRAPHICSCONFIG_H

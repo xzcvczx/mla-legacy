@@ -211,7 +211,7 @@ void ResetDevice(void)
 
     DelayMs(5);
 
-    #if ((GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2) || (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V250))
+    #if defined (GFX_PICTAIL_V2) || defined (GFX_PICTAIL_V250)
     // Power on LCD
     POWERON_LAT_BIT = 0;
     POWERON_TRIS_BIT = 0;

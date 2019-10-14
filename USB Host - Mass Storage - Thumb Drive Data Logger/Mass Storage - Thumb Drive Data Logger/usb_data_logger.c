@@ -36,7 +36,15 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-*******************************************************************************/
+********************************************************************
+ File Description:
+
+ Change History:
+  Rev   Description
+  ----  -----------------------------------------
+  2.7   Updated demo to print "<no label>:" if a drive is inserted
+        that doesn't have a volumen label.
+*******************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
@@ -2629,6 +2637,10 @@ void RedoCommandPrompt( void )
         PrintString( volume.label );
         //UART2PutChar( ':' );
         PrintString( ":\\" );
+    }
+    else
+    {
+        PrintString( "<no label>:\\" );
     }
     PrintString( "> " );
 

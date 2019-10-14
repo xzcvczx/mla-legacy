@@ -50,7 +50,13 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   Rev    Description
   -----  -----------
   v2.6a  No change
-*******************************************************************************/
+
+  2.7    Modified the code to allow connection of USB-RS232 dongles that do
+         not fully comply with CDC specifications
+
+         Modified API USBHostCDC_Api_Send_OUT_Data to allow data transfers
+         more than 256 bytes
+********************************************************************************/
 #include <stdlib.h>
 #include <string.h>
 #include "GenericTypeDefs.h"
@@ -170,7 +176,7 @@ BOOL USBHostCDC_Api_Get_IN_Data(BYTE no_of_bytes, BYTE* data)
   Remarks:
     None
 ***************************************************************************/
-BOOL USBHostCDC_Api_Send_OUT_Data(BYTE no_of_bytes, BYTE* data)
+BOOL USBHostCDC_Api_Send_OUT_Data(WORD no_of_bytes, BYTE* data)
 {
     BYTE    i;
 

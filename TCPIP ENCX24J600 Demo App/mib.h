@@ -1,5 +1,5 @@
 /*
- * This file was automatically generated on Sun Apr 12 18:49:26 2009
+ * This file was automatically generated on Wed Apr 28 19:41:06 2010
  * by mib2bib utility.
 
  * This file contains 'C' defines for dynamic OIDs and AgentID only.

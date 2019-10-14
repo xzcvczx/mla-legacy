@@ -66,7 +66,7 @@ GROUPBOX *GbCreate
 {
     GROUPBOX    *pGb = NULL;
 
-    pGb = (GROUPBOX *)malloc(sizeof(GROUPBOX));
+    pGb = (GROUPBOX *)GFX_malloc(sizeof(GROUPBOX));
     if(pGb == NULL)
         return (pGb);
 

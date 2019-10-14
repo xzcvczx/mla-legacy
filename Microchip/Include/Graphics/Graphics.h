@@ -59,33 +59,26 @@
     #define ILI9320                 14
     #define SSD1289                 15
     #define HX8347A                 16
-    #define R61580                  17
-    #define SSD2119                 18
+    #define HX8347D                 17
+    #define R61580                  18
+    #define SSD2119                 19
 	#define MCHP_DA210            	100
 	#define CUSTOM_CONTROLLER       -1
     #define NO_CONTROLLER_DEFINED   -2
 
 ////////////// GRAPHICS DISPLAYS CODES FOR DRIVER LAYER //////////////
-    #define TFT_G240320LTSW_118W_E      0
-    #define TFT2N0369_E                 0
-    #define DT032TFT_TS                 0
-    #define DT032TFT                    0
+    #define TFT_G240320LTSW_118W_E      0			// using SSD1289
+    #define TFT2N0369_E                 0			// using SSD1289
+    #define DT032TFT_TS                 0			// using SSD1289
+    #define DT032TFT                    0			// using SSD1289
     #define TFT_G320240DTSW_69W_TP_E    1
     #define _35QVW0T                    1
     #define PH480272T_005_I06Q          2
     #define PH480272T_005_I11Q          3
 
-////////////// GRAPHICS HARDWARE PLATFORM FOR DRIVER LAYER //////////////
-    #define CUSTOM_PLATFORM				0xFFFF
-    #define GFX_PICTAIL_V1      		1
-    #define GFX_PICTAIL_V2      		2
-    #define GFX_PICTAIL_V3      		3
-    #define DA210_DEV_BOARD				4
-
-
 /////////////////////// GRAPHICS_LIBRARY_VERSION /////////////////////
 // MSB is version, LSB is subversion
-    #define GRAPHICS_LIBRARY_VERSION    0x0201
+    #define GRAPHICS_LIBRARY_VERSION    0x0210
 
 ////////////////////////////// INCLUDES //////////////////////////////
     #include <stdlib.h>

@@ -66,7 +66,7 @@ STATICTEXT *StCreate
 {
     STATICTEXT  *pSt = NULL;
 
-    pSt = (STATICTEXT *)malloc(sizeof(STATICTEXT));
+    pSt = (STATICTEXT *)GFX_malloc(sizeof(STATICTEXT));
     if(pSt == NULL)
         return (pSt);
 

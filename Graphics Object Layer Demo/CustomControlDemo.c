@@ -43,17 +43,17 @@
  * Anton Alkhimenok     06/18/07    Beta release
  *****************************************************************************/
 #include "MainDemo.h"
+#define WAIT_UNTIL_FINISH(x)    while(!x)
+    #ifdef USE_CUSTOM
 
-#ifdef USE_CUSTOM
-
-/*********************************************************************
+    /*********************************************************************
 * Function: CUSTOM* CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, 
 *                              SHORT bottom, WORD state, GOL_SCHEME *pScheme)
 *
 * Overview: creates the object
 *
 ********************************************************************/
-CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, GOL_SCHEME *pScheme)
+    CUSTOM *CcCreate(WORD ID, SHORT left, SHORT top, SHORT right, SHORT bottom, WORD state, GOL_SCHEME *pScheme)
 {
     CUSTOM  *pCc = NULL;
 
@@ -159,9 +159,10 @@ WORD CcDraw(CUSTOM *pCc)
         case REMOVE:
             if(GetState(pCc, CC_HIDE))
             {
-                SetColor(pCc->pGolScheme->CommonBkColor);
-                if(!Bar(pCc->left, pCc->top, pCc->right, pCc->bottom))
+                if(IsDeviceBusy())
                     return (0);
+                SetColor(pCc->pGolScheme->CommonBkColor);
+                WAIT_UNTIL_FINISH(Bar(pCc->left, pCc->top, pCc->right, pCc->bottom));
                 return (1);
             }
 
@@ -194,17 +195,18 @@ WORD CcDraw(CUSTOM *pCc)
             state = BAR_DRAW;
 
         case BAR_DRAW:
+            if(IsDeviceBusy())
+                return (0);
+
             if(pCc->prevPos > pCc->pos)
             {
                 SetColor(pCc->pGolScheme->Color1);
-                if(!Bar(pCc->left + GOL_EMBOSS_SIZE, pCc->pos, pCc->right - GOL_EMBOSS_SIZE, pCc->prevPos))
-                    return (0);
+                WAIT_UNTIL_FINISH(Bar(pCc->left + GOL_EMBOSS_SIZE, pCc->pos, pCc->right - GOL_EMBOSS_SIZE, pCc->prevPos));
             }
             else
             {
                 SetColor(pCc->pGolScheme->Color0);
-                if(!Bar(pCc->left + GOL_EMBOSS_SIZE, pCc->prevPos, pCc->right - GOL_EMBOSS_SIZE, pCc->pos))
-                    return (0);
+                WAIT_UNTIL_FINISH(Bar(pCc->left + GOL_EMBOSS_SIZE, pCc->prevPos, pCc->right - GOL_EMBOSS_SIZE, pCc->pos));
             }
 
             SetColor(pCc->pGolScheme->TextColor0);
@@ -215,16 +217,18 @@ WORD CcDraw(CUSTOM *pCc)
         case GRID_DRAW:
             while(counter < 8)
             {
-                if
+                if(IsDeviceBusy())
+                    return (0);
+                WAIT_UNTIL_FINISH
                 (
-                    !Bar
+                    Bar
                         (
                             pCc->left + GOL_EMBOSS_SIZE,
                             pCc->top + GOL_EMBOSS_SIZE + counter * delta,
                             pCc->right - GOL_EMBOSS_SIZE,
                             pCc->top + GOL_EMBOSS_SIZE + counter * delta
                         )
-                ) return (0);
+                );
                 counter++;
             }
 

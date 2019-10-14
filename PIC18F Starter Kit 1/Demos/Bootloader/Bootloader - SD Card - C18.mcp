@@ -5,12 +5,12 @@ device=PIC18F46J50
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
-dir_bin=Objects\PIC18F Starter Kit
-dir_tmp=Objects\PIC18F Starter Kit
+dir_bin=Objects
+dir_tmp=Objects
 dir_sin=
 dir_inc=..\..\..\Microchip\Include\MDD File System;..\..\..\Microchip\Include
 dir_lib=C:\MCC18\lib
-dir_lkr=C:\Marius Voicu\_Projects\PIC18 Starter Kit\Bootloader
+dir_lkr=
 [CAT_FILTERS]
 filter_src=*.asm;*.c
 filter_inc=*.h;*.inc

@@ -142,12 +142,16 @@ image file to memory.
 */
 
 #define APPLICATION_ADDRESS         0xA000
+#define APPLICATION_HIGH_ISR        0xA008
+#define APPLICATION_LOW_ISR         0xA018
+
 
 // These macros define the maximum size of a Flash block.
 #define PROGRAM_FLASH_BASE          0x0000A000          // Physical address
 #define PROGRAM_FLASH_END           0x0000FC00          // End of flash
 
 #define FLASH_BLOCK_SIZE            (0x400)          // Size in bytes
+
 
 // Optional Record Type Support (Necessary if EXTENDED_HEXFILE_SUPPORT is defined)
 #define Loader_ValidateSerialNumber(d,l)    RECORD_NON_DATA

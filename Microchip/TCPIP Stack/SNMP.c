@@ -55,6 +55,7 @@
  *                              	required to lower code space requirements
  * Amit Shirbhate 		09/24/08	SNMPv2c Support, comments and function
  *									headers added.	
+ * Hrisikesh Sahu		04/15/10	SNMPv2 Trap Format Support.
  ********************************************************************/
 
 #define __SNMP_C
@@ -598,6 +599,471 @@ BOOL SNMPIsNotifyReady(IP_ADDR* remoteHost)
     return FALSE;
 }
 
+/****************************************************************************
+  Function:
+	BYTE *getSnmpV2GenTrapOid(BYTE generic_trap_code,BYTE *len)
+  Summary:
+	Resolves generic trap code to generic trap OID.
+	
+  Description:
+  	This function resolves given generic trap code  to generic trap OID.
+	
+  Precondition:
+	SNMPNotifyPrepare() is already called.
+
+  Parameters:
+	generic_trap_code  - GENERIC_TRAP_NOTIFICATION_TYPE
+	len 	- generic trap OID length
+      
+  Return Values:
+	BYTE *- TRAP OID
+    
+  Remarks:
+	This would fail if generic_trap_code is not coming under 
+	GENERIC_TRAP_NOTIFICATION_TYPE 
+ ***************************************************************************/
+
+BYTE *getSnmpV2GenTrapOid(BYTE generic_trap_code,BYTE *len)
+{
+    static  BYTE gen_trap_oid[] = {0x2b,6,1,6,3,1,1,5,1};
+/*	
+	static  BYTE cold_trap_oid[] = {0x2b,6,1,6,3,1,1,5,1};
+    static  BYTE warm_start_oid = {0x2b,6,1,6,3,1,1,5,2};
+    static  BYTE auth_fail_oid  = {0x2b,6,1,6,3,1,1,5,5};
+    static  BYTE linkdown_oid   = {0x2b,6,1,6,3,1,1,5,3};
+    static  BYTE linkup_oid     = {0x2b,6,1,6,3,1,1,5,4};
+*/
+	static BYTE snmptrap_oids[]  = {0x2b,6,1,6,3,1,1,4,1 }; 
+
+	*len = sizeof(gen_trap_oid);
+    switch (generic_trap_code) 
+	{
+      case COLD_START:
+	  	  gen_trap_oid[*len-1] = 1;
+        break;
+
+      case WARM_START:
+        gen_trap_oid[*len-1] = 2;
+        break;
+      case LINK_UP:
+           gen_trap_oid[*len-1] = 4;
+        break;
+      case LINK_DOWN:
+          gen_trap_oid[*len-1] = 3;
+        break;
+      case AUTH_FAILURE:
+          gen_trap_oid[*len-1] = 5;
+        break;
+	case ENTERPRISE_SPECIFIC:
+		*len = sizeof(snmptrap_oids);
+		return snmptrap_oids;
+      default:
+          return NULL;
+
+    } /* switch (generic_trap_code) */
+
+    return gen_trap_oid;
+
+} /* end getSnmpV2TrapOid() */
+
+
+
+/****************************************************************************
+  Function:
+	BOOL SNMPNotify(SNMP_ID var,SNMP_VAL val,SNMP_INDEX index)
+
+  Summary:
+  	Creates and Sends TRAP pdu.
+	
+  Description:
+	This function creates SNMP V2 Trap PDU and sends it to previously specified
+	remoteHost.
+	
+	snmpv1 trap pdu:
+       | PDU-type | enterprise | agent-addr | generic-trap | specific-trap |
+       | time-stamp | varbind-list |
+
+       The v1 enterprise is mapped directly to SNMPv2TrapOID.0
+	SNMP v2 trap pdu:
+       version (0 or 1) | community | SNMP-PDU |pdu-type | request-id | error-status 
+       |err-index |varbinds
+
+       The first two variables (in varbind-list) of snmpv2 are: sysUpTime.0 and
+        SNMPv2TrapOID.0
+
+        Generic Trap OID is used as the varbind for authentication failure.
+
+  Precondition:
+ 	SNMPIsNotifyReady() is already called and returned TRUE.
+
+  Parameters:
+	var     - SNMP var ID that is to be used in notification
+	val     - Value of var. Only value of BYTE, WORD or DWORD can be sent.
+	index   - Index of var. If this var is a single,index would be 0, or else 
+			  if this var Is a sequence, index could be any value 
+			  from 0 to 127
+	  
+  Return Values:
+	TRUE	-	if SNMP notification was successful sent.
+	   			This does not guarantee that remoteHost recieved it.
+	FALSE	-	Notification sent failed.
+  			    This would fail under following contions:
+  			    1) Given SNMP_BIB_FILE does not exist in MPFS
+  			    2) Given var does not exist.
+  			    3) Previously given agentID does not exist
+  			    4) Data type of given var is unknown - only
+  			       possible if MPFS itself was corrupted.
+
+  Remarks:
+	This would fail if there were not UDP socket to open.
+ ***************************************************************************/
+#if defined(SNMP_STACK_USE_V2_TRAP)
+
+BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
+{
+	char* pCommunity;
+    BYTE len;
+    BYTE OIDValue[OID_MAX_LEN];
+    BYTE OIDLen;
+	static DWORD varbindlen = 0;
+    BYTE agentIDLen;
+    BYTE* pOIDValue;
+    static WORD packetStructLenOffset = 0;
+    static WORD pduStructLenOffset = 0;
+    static WORD varBindStructLenOffset = 0;
+    static WORD varPairStructLenOffset = 0;
+    static WORD prevOffset = 0;
+    WORD tempOffset = 0;
+    OID_INFO rec;
+	DATA_TYPE_INFO dataTypeInfo;
+	BYTE 	snmptrap_oids[]  = {0x2b,6,1,6,3,1,1,4,1 }; /* len=10 */
+	BYTE	sysUpTime_oids[] = {0x2b,6,1,2,1,1,3}; /* len = 8 */
+
+	hMPFS = MPFSOpenROM((ROM BYTE*)SNMP_BIB_FILE_NAME);
+	if ( hMPFS == MPFS_INVALID_HANDLE )
+	{
+		UDPClose(SNMPNotifyInfo.socket);
+		return FALSE;
+	}
+	
+	if((packetStructLenOffset == 0)&&(pduStructLenOffset==0))
+	{
+		_SNMPDuplexInit(SNMPNotifyInfo.socket);
+		prevOffset = _SNMPGetTxOffset();
+	    
+		len = SNMPNotifyInfo.communityLen;
+		pCommunity = SNMPNotifyInfo.community;
+
+		_SNMPPut(STRUCTURE);            // First item is packet structure
+		packetStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+
+		// Put SNMP version info.
+		_SNMPPut(ASN_INT);              // Int type.
+		_SNMPPut(1);                    // One byte long value.
+		_SNMPPut(SNMP_V2C);           // v2
+
+		//len = strlen(community);  // Save community length for later use.
+		_SNMPPut(OCTET_STRING);         // Octet string type.
+		_SNMPPut(len);                  // community string length
+		while( len-- )                  // Copy entire string.
+			_SNMPPut(*(pCommunity++));
+
+		//TRAP Version type.  
+		_SNMPPut(SNMP_V2_TRAP);
+		pduStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+
+		//put Request ID for the trapv2 as 1 
+		_SNMPPut(ASN_INT);	// Int type.
+		_SNMPPut(4);		// To simplify logic, always use 4 byte long requestID
+		_SNMPPut(0); _SNMPPut(0); _SNMPPut(0); _SNMPPut(1); 
+
+		// Put error status.
+		_SNMPPut(ASN_INT);              // Int type
+		_SNMPPut(1);                    // One byte long.
+		_SNMPPut(0);                    // Placeholder.
+
+		// Similarly put error index.
+		_SNMPPut(ASN_INT);              // Int type
+		_SNMPPut(1);                    // One byte long
+		_SNMPPut(0);                    // Placeholder.
+
+		// Variable binding structure header
+		_SNMPPut(0x30);
+		varBindStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+
+		// Create variable name-pair structure
+		_SNMPPut(0x30);
+		varPairStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+
+		// Set 1st varbind object i,e sysUpTime.0 time stamp for the snmpv2 trap
+		// Get complete notification variable OID string.
+
+		_SNMPPut(ASN_OID);
+		OIDLen = (BYTE)sizeof(sysUpTime_oids);
+		_SNMPPut((BYTE)(OIDLen)+1);
+		pOIDValue = sysUpTime_oids;
+		while( OIDLen-- )
+			_SNMPPut(*pOIDValue++);
+
+		//1st varbind 	 and this is a scalar object so index = 0
+		_SNMPPut(0);
+
+		// Time stamp
+		_SNMPPut(SNMP_TIME_TICKS);
+		_SNMPPut(4);
+		_SNMPPut(SNMPNotifyInfo.timestamp.v[3]);
+		_SNMPPut(SNMPNotifyInfo.timestamp.v[2]);
+		_SNMPPut(SNMPNotifyInfo.timestamp.v[1]);
+		_SNMPPut(SNMPNotifyInfo.timestamp.v[0]);
+
+		tempOffset = _SNMPGetTxOffset();
+		//set the snmp time varbind trap offset 
+		_SNMPSetTxOffset(varPairStructLenOffset);
+
+		// SNMP time stamp varbind length
+		OIDLen = 2							// 1st varbind header 
+		   + (BYTE)sizeof(sysUpTime_oids)
+		   + 1						   // index byte
+		   + 6 ;						// time stamp
+		   
+		_SNMPPut(OIDLen);
+		//set the previous TX offset
+		_SNMPSetTxOffset(tempOffset);
+		varbindlen += OIDLen // varbind length
+					+ 2;  // varbind type(30) and length of individual varbind pdu
+					
+		// Set 2nd varbind object i,e snmpTrapOID.0 for the snmpv2 trap
+		// Get complete notification variable OID string.
+
+		// Create variable name-pair structure
+		_SNMPPut(0x30);
+		varPairStructLenOffset = SNMPTxOffset;
+		_SNMPPut(0);
+
+		// Copy OID string into PDU.
+		_SNMPPut(ASN_OID);
+		OIDLen = (BYTE)sizeof(snmptrap_oids);
+		_SNMPPut((BYTE)(OIDLen)+1);
+
+		pOIDValue = snmptrap_oids;
+		while( OIDLen-- )
+		_SNMPPut(*pOIDValue++);
+
+		//2nd varbind  and this is a scalar object so index = 0
+		_SNMPPut(0);
+
+		// for microchip , SNMPNotifyInfo.agentIDVar == MICROCHIP
+		if ( !GetOIDStringByID(SNMPNotifyInfo.agentIDVar, &rec, OIDValue, &OIDLen) )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+		if ( !rec.nodeInfo.Flags.bIsAgentID )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+
+		MPFSSeek(hMPFS, rec.hData, MPFS_SEEK_START);
+
+		_SNMPPut(ASN_OID);
+		MPFSGet(hMPFS, &len);
+		agentIDLen = len;
+		_SNMPPut(agentIDLen);
+		while( len-- )
+		{
+			BYTE c;
+			MPFSGet(hMPFS, &c);
+			_SNMPPut(c);
+		}
+		tempOffset = _SNMPGetTxOffset();
+		//set the snmp varbind trap offset
+		_SNMPSetTxOffset(varPairStructLenOffset);
+		// Snmp trap varbind length 
+		OIDLen = 2 					 // Agent ID header bytes
+			+ (BYTE)sizeof(snmptrap_oids)
+			+ 1 					   // index byte
+			+ 2 					 // header
+			+ agentIDLen;				 // Agent ID bytes				  
+		_SNMPPut(OIDLen);
+
+		//set the previous TX offset
+		_SNMPSetTxOffset(tempOffset);
+		varbindlen += OIDLen // varbind length
+					+ 2;     // varbind type(30) and length of individual varbind pdu
+	
+	}
+	else
+	{ // collect the last varbind offset value.
+		_SNMPSetTxOffset(varPairStructLenOffset);
+	}
+	
+	// Create variable name-pair structure
+	_SNMPPut(0x30);
+	varPairStructLenOffset = SNMPTxOffset;
+	_SNMPPut(0);
+	/* to send generic trap trap */
+	if(gGenericTrapNotification != ENTERPRISE_SPECIFIC)
+	{
+		pOIDValue = getSnmpV2GenTrapOid(gGenericTrapNotification,&OIDLen);			
+		if(pOIDValue == NULL)
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+		// Copy OID string into PDU.
+		_SNMPPut(ASN_OID);
+		_SNMPPut((BYTE)(OIDLen)+1);
+		while( OIDLen-- )
+		_SNMPPut(*pOIDValue++);
+
+		//2nd varbind  and this is a scalar object so index = 0
+		_SNMPPut(0);
+		// for microchip , SNMPNotifyInfo.agentIDVar == MICROCHIP
+		if ( !GetOIDStringByID(SNMPNotifyInfo.agentIDVar, &rec, OIDValue, &OIDLen) )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+		if ( !rec.nodeInfo.Flags.bIsAgentID )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+
+		MPFSSeek(hMPFS, rec.hData, MPFS_SEEK_START);
+
+		_SNMPPut(ASN_OID);
+		MPFSGet(hMPFS, &len);
+		agentIDLen = len;
+		_SNMPPut(agentIDLen);
+		while( len-- )
+		{
+			BYTE c;
+			MPFSGet(hMPFS, &c);
+			_SNMPPut(c);
+		}
+		tempOffset = _SNMPGetTxOffset();
+		//set the snmp varbind trap offset
+		_SNMPSetTxOffset(varPairStructLenOffset);
+		// Snmp trap varbind length 
+		OIDLen = 2 					 // Agent ID header bytes
+			+ (BYTE)sizeof(snmptrap_oids)
+			+ 1 					   // index byte
+			+ 2 					 // header
+			+ agentIDLen;				 // Agent ID bytes				  
+		_SNMPPut(OIDLen);
+		len = OIDLen;
+	}
+	else
+	{
+		// Get complete notification variable OID string.
+		if ( !GetOIDStringByID(var, &rec, OIDValue, &OIDLen) )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}		
+		pOIDValue = OIDValue;
+	
+		// Copy OID string into packet.
+		_SNMPPut(ASN_OID);
+		_SNMPPut((BYTE)(OIDLen+1));
+		len = OIDLen;
+		while( len-- )
+			_SNMPPut(*pOIDValue++);
+		_SNMPPut(index);
+
+		// Encode and Copy actual data bytes
+		if ( !GetDataTypeInfo(rec.dataType, &dataTypeInfo) )
+		{
+			MPFSClose(hMPFS);
+			UDPClose(SNMPNotifyInfo.socket);
+			return FALSE;
+		}
+		_SNMPPut(dataTypeInfo.asnType);
+	     //Modified to Send trap even for  dataTypeInfo.asnType= ASCII_STRING, 
+		//where dataTypeInfo.asnLen=0xff
+		if ( dataTypeInfo.asnLen == 0xff )
+		{
+			dataTypeInfo.asnLen=0x4;
+			val.dword=0;
+		}
+		len = dataTypeInfo.asnLen;
+
+		_SNMPPut(len);
+		while( len-- )
+			_SNMPPut(val.v[len]);
+	  
+		len	 = dataTypeInfo.asnLen	// data bytes count
+			 + 1                    // Length byte
+			 + 1                    // Data type byte
+			 + OIDLen               // OID bytes
+			 + 2                    // OID header bytes
+			 + 1;		            // index byte
+		tempOffset = _SNMPGetTxOffset();
+		_SNMPSetTxOffset(varPairStructLenOffset);
+		_SNMPPut(len);						 
+	} 
+	//set the previous TX offset
+	_SNMPSetTxOffset(tempOffset);
+	varPairStructLenOffset = tempOffset;
+	
+	varbindlen += len // length of varbind
+				+2; // varbind type(30) and length of individual varbind pdu
+	if(gSetTrapSendFlag == TRUE)
+	{
+		MPFSClose(hMPFS);
+		return TRUE;
+	}
+
+	_SNMPSetTxOffset(varBindStructLenOffset);
+	_SNMPPut(varbindlen);
+
+	len = varbindlen
+	+ 2                             //  Variable Binding structure header
+	+ 12;					// req , error and error status for SNMPv2
+
+	_SNMPSetTxOffset(pduStructLenOffset);
+	_SNMPPut(len);
+
+	len = len                           // PDU struct length
+	+ 2                             // PDU trap header
+	+ SNMPNotifyInfo.communityLen            // Community string bytes
+	+ 2                             // Community header bytes
+	+ 3;                            // SNMP version bytes
+
+
+	_SNMPSetTxOffset(packetStructLenOffset);
+	_SNMPPut(len);
+
+    _SNMPSetTxOffset(prevOffset);
+
+// after setting all the offset values, initialize all static variables to 0.
+    packetStructLenOffset = 0;
+    pduStructLenOffset = 0;
+    varBindStructLenOffset = 0;
+    varPairStructLenOffset = 0;
+    prevOffset = 0;
+    varbindlen = 0;
+	
+    MPFSClose(hMPFS);
+    UDPFlush();
+    UDPClose(SNMPNotifyInfo.socket);
+
+    return TRUE;
+}
+
+#else /* SNMP_STACK_USE_V2_TRAP */
 
 /****************************************************************************
   Function:
@@ -609,7 +1075,12 @@ BOOL SNMPIsNotifyReady(IP_ADDR* remoteHost)
   Description:
 	This function creates SNMP trap PDU and sends it to previously specified
 	remoteHost.
-	
+	snmpv1 trap pdu:
+       | PDU-type | enterprise | agent-addr | generic-trap | specific-trap |
+       | time-stamp | varbind-list |
+
+       The v1 enterprise is mapped directly to SNMPv2TrapOID.0
+       
   Precondition:
 	SNMPIsNotifyReady() is already called and returned TRUE.
 
@@ -672,8 +1143,8 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 
 	//Application has to decide which snmp version has to be 
 	//updated to the notification pdu.
-    //_SNMPPut(SNMP_V1);              // v1.
-    _SNMPPut(SNMP_V2C);           // v2
+    _SNMPPut(SNMP_V1);              // v1.
+    
 
     //len = strlen(community);  // Save community length for later use.
     _SNMPPut(OCTET_STRING);         // Octet string type.
@@ -723,12 +1194,10 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
     _SNMPPut(AppConfig.MyIPAddr.v[2]);
     _SNMPPut(AppConfig.MyIPAddr.v[3]);
 
-	// Geberic Trap code
+	// Geberic/Enterprise Trap code
 	 _SNMPPut(ASN_INT);
 	 _SNMPPut(1);
 	 _SNMPPut(gGenericTrapNotification); 
-  //_SNMPPut(6);            // Enterprise specific trap code
-//    _SNMPPut(4);            // Enterprise specific trap code
 
 	// Specific Trap code
     _SNMPPut(ASN_INT);
@@ -780,28 +1249,14 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 
     _SNMPPut(dataTypeInfo.asnType);
 
-	#if 0  //Amit 
-    // In this version, only data type of 4 bytes or less long can be
-    // notification variable.
-    if ( dataTypeInfo.asnLen == 0xff )
-    {
-        MPFSClose(hMPFS);
-        UDPClose(SNMPNotifyInfo.socket);
-        return FALSE;
-    }
-	#endif
-
-	#if 1 
 
 	//Modified to Send trap even for  dataTypeInfo.asnType= ASCII_STRING, 
 	//where dataTypeInfo.asnLen=0xff
-
 	if ( dataTypeInfo.asnLen == 0xff )
 	{
 		dataTypeInfo.asnLen=0x4;
 		val.dword=0;
 	}
-	#endif
 
     len = dataTypeInfo.asnLen;
     _SNMPPut(len);
@@ -850,6 +1305,9 @@ BOOL SNMPNotify(SNMP_ID var, SNMP_VAL val, SNMP_INDEX index)
 
     return TRUE;
 }
+
+#endif 
+
 #endif // Code removed when SNMP_TRAP_DISABLED
 
 

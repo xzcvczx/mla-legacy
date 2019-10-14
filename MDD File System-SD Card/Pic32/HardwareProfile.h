@@ -30,14 +30,7 @@
  * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
  *
 *****************************************************************************/
-//DOM-IGNORE-BEGIN
-/********************************************************************
- Change History:
-  Rev            Description
-  ----           -----------------------
-  1.2.4 - 1.2.5  No Change
-********************************************************************/
-//DOM-IGNORE-END
+
 
 #ifndef _HARDWAREPROFILE_H_
 #define _HARDWAREPROFILE_H_

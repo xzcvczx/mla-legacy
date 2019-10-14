@@ -77,7 +77,8 @@
   Rev    Description
   ----   -----------
   2.6    Minor changes in include file structure.
-  2.6a   No change
+  2.6a-  No change
+   2.7
 ********************************************************************
 //DOM-IGNORE-END
 

@@ -51,7 +51,7 @@
 #ifndef __TCPIP_HITECH_WORKAROUND_H
 #define __TCPIP_HITECH_WORKAROUND_H
 
-#define VERSION 		"v5.20"		// TCP/IP stack version
+#define TCPIP_STACK_VERSION 		"v5.25"		// TCP/IP stack version
 
 #include <string.h>
 #include <stdlib.h>
@@ -344,7 +344,7 @@
 	#include "TCPIP Stack/DHCP.h"
 #endif
 
-#if defined(STACK_USE_DNS)
+#if defined(STACK_USE_DNS) || defined(STACK_USE_DNS_SERVER)
 	#include "TCPIP Stack/DNS.h"
 #endif
 
@@ -430,7 +430,7 @@
 	#include "TCPIP Stack/SSL.h"
 #endif
 
-#if defined(ZG_CS_TRIS)
-    #include "TCPIP Stack/ZG2100.h"
+#if defined(WF_CS_TRIS)
+    #include "TCPIP Stack/WFMac.h"
 #endif
 #endif

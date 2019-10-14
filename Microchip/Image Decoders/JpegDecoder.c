@@ -990,18 +990,20 @@ static BYTE JPEG_bPaintOneBlock(JPEGDECODER *pJpegDecoder)
      return 0;
 }
 
+#ifndef IMG_USE_NON_BLOCKING_DECODING
+
 /*******************************************************************************
-Function:       BYTE JPEG_bDecode(IMG_FILE *pfile)
+Function:       BYTE JPEG_bDecode(IMG_FILE *pfile, BOOL bFirstTime)
 
 Precondition:   The global variables of Image decoder must be set
 
 Overview:       This function decodes and displays a jpeg image
 
-Input:          Image file
+Input:          Image file, ignored BOOLean
 
 Output:         Error code - '0' means no error
 *******************************************************************************/
-BYTE JPEG_bDecode(IMG_FILE *pfile)
+BYTE JPEG_bDecode(IMG_FILE *pfile, BOOL bFirstTime)
 {
      WORD whblocks, wvblocks;
      WORD wi, wj;
@@ -1060,6 +1062,119 @@ BYTE JPEG_bDecode(IMG_FILE *pfile)
      }
      return JPEG_JpegDecoder.bError;
 }
+
+#else
+
+/*******************************************************************************
+Function:       BYTE JPEG_bDecode(IMG_FILE *pfile, BOOL bFirstTime)
+
+Precondition:   The global variables of Image decoder must be set
+
+Overview:       This function decodes and displays a jpeg image
+
+Input:          Image file, BOOLean indicating if this is the first time calling 
+				the JPEG_bDecode function (needed to reset internal decoding 
+				state variables).  If bFirstTime is TRUE, pfile must be set.  
+				If bFirstTime is FALSE, pfile is ignored (uses previously 
+				provided file handle).
+
+Output:         Error code - '0' means not yet completed
+*******************************************************************************/
+BYTE JPEG_bDecode(IMG_FILE *pfile, BOOL bFirstTime)
+{
+	static WORD whblocks, wvblocks;
+	static WORD wi, wj;
+	static JPEGDECODER JPEG_JpegDecoder;
+	static enum
+	{
+		INITIAL,
+		HEADER_DECODED,
+		BLOCK_DECODE,
+		DECODE_DONE
+	} decodestate;
+
+
+	if(bFirstTime)
+		decodestate = INITIAL;
+	
+    switch(decodestate)
+    {
+    
+        case INITIAL:   JPEG_vResetDecoder(&JPEG_JpegDecoder);
+                        JPEG_JpegDecoder.pImageFile = pfile;
+                        if(JPEG_bReadHeader(&JPEG_JpegDecoder) != 0)
+                        {
+                            return 1;
+                        }
+                        decodestate = HEADER_DECODED;
+                        return 0;
+        
+        case HEADER_DECODED:
+                            IMG_wImageWidth = JPEG_JpegDecoder.wWidth;
+                            IMG_wImageHeight = JPEG_JpegDecoder.wHeight;
+                            IMG_vSetboundaries();
+
+                            JPEG_bGenerateHuffmanTables(&JPEG_JpegDecoder);
+
+                            whblocks = JPEG_JpegDecoder.wWidth >> 3;
+                            wvblocks = JPEG_JpegDecoder.wHeight >> 3;
+
+                            if(whblocks * 8 < JPEG_JpegDecoder.wWidth) /* Odd sizes */
+                            {
+                                whblocks++;
+                            }
+
+                            if(wvblocks * 8 < JPEG_JpegDecoder.wHeight) /* Odd sizes */
+                            {
+                                wvblocks++;
+                            }
+
+                            if(JPEG_JpegDecoder.bSubSampleType == JPEG_SAMPLE_1x2)
+                            {
+                                wvblocks =  (wvblocks>>1) + (wvblocks&1);
+                            }
+                            else if(JPEG_JpegDecoder.bSubSampleType == JPEG_SAMPLE_2x1)
+                            {
+                                whblocks = (whblocks>>1) + (whblocks&1);
+                            }
+                            else if(JPEG_JpegDecoder.bSubSampleType == JPEG_SAMPLE_2x2)
+                            {
+                                wvblocks =  (wvblocks>>1) + (wvblocks&1);
+                                whblocks = (whblocks>>1) + (whblocks&1);
+                            }
+
+                            JPEG_vInitDisplay(&JPEG_JpegDecoder);
+                             
+                            wi = 0;
+                            wj = 0;
+
+                            decodestate = BLOCK_DECODE;
+                            return 0;
+
+        case BLOCK_DECODE:  if(wi < whblocks)
+                            {
+                                JPEG_bDecodeOneBlock(&JPEG_JpegDecoder); /* Fills a block after correcting the zigzag, dequantizing, IDCR and color conversion to RGB */
+                                JPEG_bPaintOneBlock(&JPEG_JpegDecoder); /* Sends the block to the Graphics unit */
+                                wj++;
+                                
+                                if(wj >= wvblocks)
+                                {
+                                    wj = 0;
+                                    wi++;
+                                }
+                                return 0;
+                            }
+
+                            decodestate = DECODE_DONE;
+                            // No break needed
+
+        case DECODE_DONE:	return 1;
+
+        default:            return 1;
+    }
+}
+
+#endif /* #ifndef IMG_USE_NON_BLOCKING_DECODING */
 
 #endif /* #ifdef IMG_SUPPORT_JPEG */
 

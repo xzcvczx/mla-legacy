@@ -120,12 +120,6 @@ void StartWrite(void)
     EECON1_WR = 1;
 }//end StartWrite
 
-void ReadVersion(void) //TESTED: Passed
-{
-    dataPacket._byte[2] = MINOR_VERSION;
-    dataPacket._byte[3] = MAJOR_VERSION;
-}//end ReadVersion
-
 void ReadProgMem(void) //TESTED: Passed
 {
     for (counter = 0; counter < dataPacket.len; counter++)
@@ -243,7 +237,8 @@ void BootService(void)
         switch(dataPacket.CMD)
         {
             case READ_VERSION:
-                ReadVersion();
+                dataPacket._byte[2] = MINOR_VERSION;
+                dataPacket._byte[3] = MAJOR_VERSION;
                 counter=0x04;
                 break;
 

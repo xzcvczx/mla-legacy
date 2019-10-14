@@ -35,6 +35,7 @@ Change History:
   Rev         Description
   ----------  ----------------------------------------------------------
   2.6a        Removed extraneous definition
+  2.7         No change
 *******************************************************************************/
 
 #ifndef _USB_HOST_LOCAL_

@@ -33,7 +33,7 @@
         #define GetInstructionClock()       (GetSystemClock() / 2) ???
     #elif defined(RUN_AT_60MHZ)    
         #define GetSystemClock()            60000000UL
-        #define GetPeripheralClock()        30000000UL  // Will be divided down
+        #define GetPeripheralClock()        60000000UL  // Will be divided down
         #define GetInstructionClock()       (GetSystemClock() / 2) ???
     #else
         #error Choose a speed

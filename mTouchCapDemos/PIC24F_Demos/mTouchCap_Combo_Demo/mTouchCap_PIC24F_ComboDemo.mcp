@@ -1,0 +1,142 @@
+[HEADER]
+magic_cookie={66E99B07-E706-4689-9E80-9B2582898A13}
+file_version=1.0
+device=PIC24FJ128GB106
+[PATH_INFO]
+BuildDirPolicy=BuildDirIsProjectDir
+dir_src=
+dir_bin=
+dir_tmp=
+dir_sin=
+dir_inc=.;..;..\mTouchCap_Combo_Demo;..\..\..\Microchip\Include;..\mTouchCap_AppCommonFiles;..\..\..\Microchip\Include\mTouchCap\PIC18F & PIC24F CTMU Library
+dir_lib=C:\Program Files\Microchip\MPLAB C30\lib
+dir_lkr=
+[CAT_FILTERS]
+filter_src=*.s;*.c
+filter_inc=*.h;*.inc
+filter_obj=*.o
+filter_lib=*.a
+filter_lkr=*.gld
+[CAT_SUBFOLDERS]
+subfolder_src=Demo Source Files;USB;mTouchCapStack
+subfolder_inc=Common;Demo Header Files;USB;User Config;mTouchCapStack
+subfolder_obj=
+subfolder_lib=
+subfolder_lkr=
+[FILE_SUBFOLDERS]
+file_000=Demo Source Files
+file_001=Demo Source Files
+file_002=Demo Source Files
+file_003=Demo Source Files
+file_004=.
+file_005=.
+file_006=mTouchCapStack
+file_007=mTouchCapStack
+file_008=mTouchCapStack
+file_009=mTouchCapStack
+file_010=Demo Header Files
+file_011=Demo Header Files
+file_012=Demo Header Files
+file_013=Demo Header Files
+file_014=.
+file_015=.
+file_016=User Config
+file_017=User Config
+file_018=mTouchCapStack
+file_019=mTouchCapStack
+file_020=mTouchCapStack
+file_021=mTouchCapStack
+file_022=Common
+file_023=Common
+[GENERATED_FILES]
+file_000=no
+file_001=no
+file_002=no
+file_003=no
+file_004=no
+file_005=no
+file_006=no
+file_007=no
+file_008=no
+file_009=no
+file_010=no
+file_011=no
+file_012=no
+file_013=no
+file_014=no
+file_015=no
+file_016=no
+file_017=no
+file_018=no
+file_019=no
+file_020=no
+file_021=no
+file_022=no
+file_023=no
+[OTHER_FILES]
+file_000=no
+file_001=no
+file_002=no
+file_003=no
+file_004=no
+file_005=no
+file_006=no
+file_007=no
+file_008=no
+file_009=no
+file_010=no
+file_011=no
+file_012=no
+file_013=no
+file_014=no
+file_015=no
+file_016=no
+file_017=no
+file_018=no
+file_019=no
+file_020=no
+file_021=no
+file_022=no
+file_023=no
+[FILE_INFO]
+file_000=..\mTouchCap_AppCommonFiles\mTouchCap_2Ch_Slider.c
+file_001=..\mTouchCap_AppCommonFiles\mTouchCap_4Ch_Slider.c
+file_002=..\mTouchCap_AppCommonFiles\mTouchCap_DirectKeys.c
+file_003=..\mTouchCap_AppCommonFiles\mTouchCap_MatrixKeys.c
+file_004=..\mTouchCap_AppCommonFiles\Display.c
+file_005=mTouchCap_PIC24F_ComboDemo.c
+file_006=..\..\..\Microchip\mTouchCap\PIC18F & PIC24F CTMU Library\mTouchCap_Adc.c
+file_007=..\..\..\Microchip\mTouchCap\PIC18F & PIC24F CTMU Library\mTouchCap_CtmuAPI.c
+file_008=..\..\..\Microchip\mTouchCap\PIC18F & PIC24F CTMU Library\mTouchCap_PIC24_CTMU_Physical.c
+file_009=..\..\..\Microchip\mTouchCap\PIC18F & PIC24F CTMU Library\mTouchCap_Timers.c
+file_010=..\mTouchCap_AppCommonFiles\mTouchCap_2Ch_Slider.h
+file_011=..\mTouchCap_AppCommonFiles\mTouchCap_4Ch_Slider.h
+file_012=..\mTouchCap_AppCommonFiles\mTouchCap_DirectKeys.h
+file_013=..\mTouchCap_AppCommonFiles\mTouchCap_MatrixKeys.h
+file_014=..\mTouchCap_AppCommonFiles\Display.h
+file_015=mTouchCap_PIC24F_ComboDemo.h
+file_016=HardwareProfile.h
+file_017=Config.h
+file_018=..\..\..\Microchip\Include\mTouchCap\PIC18F & PIC24F CTMU Library\mTouchCap_Adc.h
+file_019=..\..\..\Microchip\Include\mTouchCap\PIC18F & PIC24F CTMU Library\mTouchCap_CtmuAPI.h
+file_020=..\..\..\Microchip\Include\mTouchCap\PIC18F & PIC24F CTMU Library\mTouchCap_PIC24_CTMU_Physical.h
+file_021=..\..\..\Microchip\Include\mTouchCap\PIC18F & PIC24F CTMU Library\mTouchCap_Timers.h
+file_022=..\..\..\Microchip\Include\Compiler.h
+file_023=..\..\..\Microchip\Include\GenericTypeDefs.h
+[SUITE_INFO]
+suite_guid={479DDE59-4D56-455E-855E-FFF59A3DB57E}
+suite_state=
+[TOOL_SETTINGS]
+TS{7D9C6ECE-785D-44CB-BA22-17BF2E119622}=-g
+TS{25AC22BD-2378-4FDB-BFB6-7345A15512D3}=-g -Wall
+TS{7DAC9A1D-4C45-45D6-B25A-D117C74E8F5A}=-Map="$(BINDIR_)$(TARGETBASE).map" --report-mem -o"$(BINDIR_)$(TARGETBASE).$(TARGETSUFFIX)"
+TS{509E5861-1E2A-483B-8B6B-CA8DB7F2DD78}=
+[INSTRUMENTED_TRACE]
+enable=0
+transport=0
+format=0
+[CUSTOM_BUILD]
+Pre-Build=
+Pre-BuildEnabled=1
+Post-Build=
+Post-BuildEnabled=1

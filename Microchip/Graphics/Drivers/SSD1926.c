@@ -40,6 +40,8 @@
  * Jayanth Murthy       06/25/09    dsPIC & PIC24H support 
  * Pradeep Budagutta	07/30/09	Added Palette Support
  * PAT					02/05/10	Fixed GetPixel() bug
+ * PAT					03/03/10	Fixed Circle() bug 
+ * PAT					03/26/10	Fixed Line2D() bug 
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -651,8 +653,8 @@ static WORD Line2D(SHORT x1, SHORT y1, SHORT x2, SHORT y2)
     SetReg(REG_2D_1f9, ((GetMaxX() + 1) >> 8) & 0xFF);
 
     /* Display 2d width */
-    SetReg(REG_2D_1d8, (GetMaxX() + 1) & 0xFF);
-    SetReg(REG_2D_1d9, ((GetMaxX() + 1) >> 8) & 0xFF);
+    SetReg(REG_2D_1d8, (GetMaxY() + 1) & 0xFF);
+    SetReg(REG_2D_1d9, ((GetMaxY() + 1) >> 8) & 0xFF);
 
     /* Set Color */
     SetReg(REG_2D_1fe, RED8(_color));
@@ -1079,6 +1081,7 @@ WORD Bar(SHORT left, SHORT top, SHORT right, SHORT bottom)
 }
 
 #endif
+
 #ifdef USE_DRV_CIRCLE
 
 /***************************************************************************
@@ -1104,7 +1107,7 @@ WORD Circle(SHORT x, SHORT y, SHORT radius)
         #define Rx      (WORD) radius
         #define Ry      (WORD) radius
         #define Angle1  (WORD) 0
-        #define Angle2  (WORD) 360
+        #define Angle2  (WORD) 0x0200
 
         #ifndef USE_NONBLOCKING_CONFIG
     while(IsDeviceBusy() != 0);

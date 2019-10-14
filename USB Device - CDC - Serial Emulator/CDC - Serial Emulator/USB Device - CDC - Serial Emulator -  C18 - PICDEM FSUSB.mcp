@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\CDC - Serial Emulator - FSUSB
 dir_sin=
-dir_inc=c:\mcc18\h;..\..\microchip\include;..\..\USB Device - CDC - Serial Emulator\CDC - Serial Emulator
+dir_inc=.;c:\mcc18\h;..\..\microchip\include
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]

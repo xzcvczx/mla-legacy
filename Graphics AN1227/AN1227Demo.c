@@ -45,7 +45,7 @@ _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
@@ -96,7 +96,7 @@ int main (void)
     BYTE previousKey1State;             // previous state of the button 1
     BYTE previousKey2State;             // previous state of the button 2
     
-   #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+     #if defined(PIC24FJ256DA210_DEV_BOARD)
     
     _ANSG8 = 0; /* S1 */
     _ANSE9 = 0; /* S2 */
@@ -115,6 +115,11 @@ int main (void)
     #ifdef __PIC32MX__
     INTEnableSystemMultiVectoredInt();
     SYSTEMConfigPerformance(GetSystemClock());
+    #ifdef MULTI_MEDIA_BOARD_DM00123
+    CPLDInitialize();
+    CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+    CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+    #endif
     #endif
 
     // initialize the keyboard’s keys
@@ -173,7 +178,7 @@ int main (void)
             {
 
                 // check if the button has changed its state
-                #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+                #if defined(PIC24FJ256DA210_DEV_BOARD)
                 if(BTN_S1 != previousKey1State)
                 #else
                 if(BTN_S3 != previousKey1State)
@@ -212,7 +217,7 @@ int main (void)
             }                           // end of if
 
             // check if the button has changed its state
-            #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+            #if defined(PIC24FJ256DA210_DEV_BOARD)
             if(BTN_S2 != previousKey2State)
             #else
             if(BTN_S4 != previousKey2State)

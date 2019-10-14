@@ -39,6 +39,7 @@
  * PAT			             11/12/07          Version 1.0 release
  * PAT                       06/29/09          Added multi-line support for Buttons.
  * Pradeep Budagutta         03 Dec 2009       Added Double Buffering Support
+ * PAT                       04/29/10          Fixed GOLGetFocusNext() issue.
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -135,7 +136,10 @@ OBJ_HEADER *GOLGetFocusPrev(void)
 ********************************************************************/
 OBJ_HEADER *GOLGetFocusNext(void)
 {
-    OBJ_HEADER  *pNextObj;
+    OBJ_HEADER  *pNextObj, *pObjStart;
+
+    if(_pGolObjects == NULL)
+        return (NULL);
 
     if(_pObjectFocused == NULL)
     {
@@ -146,6 +150,8 @@ OBJ_HEADER *GOLGetFocusNext(void)
         pNextObj = _pObjectFocused;
     }
 
+	pObjStart = pNextObj;
+	
     do
     {
         pNextObj = (OBJ_HEADER *)pNextObj->pNxtObj;
@@ -155,7 +161,12 @@ OBJ_HEADER *GOLGetFocusNext(void)
 
         if(GOLCanBeFocused(pNextObj))
             break;
-    } while(pNextObj != _pObjectFocused);
+    } while(pNextObj != pObjStart);
+
+	// if we reached the starting point and the starting point cannot
+	// be focused, then all objects cannot be focused. return NULL
+    if(!GOLCanBeFocused(pNextObj))
+		return NULL;
 
     return (pNextObj);
 }
@@ -247,7 +258,7 @@ WORD GOLCanBeFocused(OBJ_HEADER *object)
 GOL_SCHEME *GOLCreateScheme(void)
 {
     GOL_SCHEME  *pTemp;
-    pTemp = (GOL_SCHEME *)malloc(sizeof(GOL_SCHEME));
+    pTemp = (GOL_SCHEME *)GFX_malloc(sizeof(GOL_SCHEME));
     if(pTemp != NULL)
     {
         pTemp->EmbossDkColor = EMBOSSDKCOLORDEFAULT;
@@ -337,7 +348,7 @@ void GOLFree(void)
         if(pCurrentObj->type == OBJ_TEXTENTRY)
             TeDelKeyMembers((TEXTENTRY *)pCurrentObj);
             #endif
-        free(pCurrentObj);
+        GFX_free(pCurrentObj);
         pCurrentObj = pNextObj;
     }
 
@@ -355,7 +366,7 @@ void GOLFree(void)
 *
 * Side Effects: none
 *
-* Overview: deletes an object to the linked list objects for the current screen.
+* Overview: Deletes an object to the linked list objects for the current screen.
 *
 * Note: none
 *
@@ -400,7 +411,15 @@ BOOL GOLDeleteObject(OBJ_HEADER *object)
     if(object->type == OBJ_GRID)
         GridFreeItems((GRID *)object);
         #endif
-    free(object);
+        #ifdef USE_CHART
+    if(object->type == OBJ_CHART)
+        ChRemoveDataSeries((CHART *)object, 0);
+        #endif
+        #ifdef USE_TEXTENTRY
+    if(object->type == OBJ_TEXTENTRY)
+        TeDelKeyMembers((TEXTENTRY *)object);
+        #endif
+    GFX_free(object);
 
     return (TRUE);
 }
@@ -416,7 +435,8 @@ BOOL GOLDeleteObject(OBJ_HEADER *object)
 *
 * Side Effects: none
 *
-* Overview: deletes an object to the linked list objects for the current screen.
+* Overview: Deletes an object to the linked list objects for the current screen using
+*           the given ID to search for the object.
 *
 * Note: none
 *
@@ -993,7 +1013,6 @@ void    *_pRpnlBitmap = NULL;
 WORD GOLPanelDrawTsk(void)
 {
 
-    //#define SIN45 46341
         #ifndef USE_NONBLOCKING_CONFIG
 
     WORD    counter;
@@ -1327,5 +1346,350 @@ WORD GOLPanelDrawTsk(void)
     }       // end of while
         #endif //#ifndef USE_NONBLOCKING_CONFIG
 }
+
+
+/*********************************************************************
+* Function: WORD GOLTwoTonePanelDrawTsk(void) 
+*
+* PreCondition: parameters must be set with
+*               GOLRndPanelDraw(x,y,radius,width,height,faceClr,embossLtClr,
+*								embossDkClr,pBitmap,embossSize)
+*
+* Input: None
+*
+* Output: Output: non-zero if drawing is completed
+*
+* Overview: draws a rounded panel on screen. Must be called repeatedly. Drawing is done
+*           when it returns non-zero. 
+*
+* Note: none
+*
+********************************************************************/
+WORD GOLTwoTonePanelDrawTsk(void)
+{
+// In this panel draw task the emboss light and dark colors are used as
+// the panel face colors and the panel face color is used as an outline color
+
+        #ifndef USE_NONBLOCKING_CONFIG
+
+    WORD    counter;
+
+	SetColor(_rpnlFaceColor);
+    if(_rpnlR)
+    {
+        // draw the outline
+        Arc(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize, _rpnlR, 0xFF);  	
+    }
+    else
+    {
+        // object is rectangular panel draw the outline embossed areas
+        counter = 1;
+        while(counter < _rpnlEmbossSize)
+        {
+            Bar(_rpnlX1 + counter, _rpnlY1 + counter, _rpnlX2 - counter, _rpnlY1 + counter);    // draw top
+            Bar(_rpnlX1 + counter, _rpnlY1 + counter, _rpnlX1 + counter, _rpnlY2 - counter);    // draw left
+            Bar(_rpnlX1 + counter, _rpnlY2 - counter, _rpnlX2 - counter, _rpnlY2 - counter);    // draw bottom
+            Bar(_rpnlX2 - counter, _rpnlY1 + counter, _rpnlX2 - counter, _rpnlY2 - counter);    // draw right	
+            counter++;
+        }        
+    }
+	
+	// draw the top half of the face 
+    SetColor(_rpnlEmbossLtColor);
+    if(_rpnlR)
+    {
+    	SetBevelDrawType(DRAWTOPBEVEL);
+        FillBevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize);
+    }
+    else
+    {
+        Bar(_rpnlX1 + _rpnlEmbossSize, _rpnlY1 + _rpnlEmbossSize, 
+        	_rpnlX2 - _rpnlEmbossSize, (_rpnlY1 + ((_rpnlY2 - _rpnlY1) >> 1)));
+	}
+
+	// draw the bottom half of the face 
+    SetColor(_rpnlEmbossDkColor);
+    if(_rpnlR)
+    {
+    	SetBevelDrawType(DRAWBOTTOMBEVEL);
+        FillBevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize);
+    }
+    else
+    {
+        Bar(_rpnlX1 + _rpnlEmbossSize, (_rpnlY1 + ((_rpnlY2 - _rpnlY1) >> 1)) + 1, 
+        	_rpnlX2 - _rpnlEmbossSize, _rpnlY2 - _rpnlEmbossSize);
+	}
+	
+	SetBevelDrawType(DRAWFULLBEVEL);
+
+
+            #if (COLOR_DEPTH == 1)
+           
+    if(_rpnlFaceColor == BLACK)
+    {
+        SetColor(WHITE);
+        if(_rpnlR)
+            Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - (_rpnlEmbossSize - 1));
+        else
+            Bevel
+            (
+                _rpnlX1 + (_rpnlEmbossSize - 1),
+                _rpnlY1 + (_rpnlEmbossSize - 1),
+                _rpnlX2 - (_rpnlEmbossSize - 1),
+                _rpnlY2 - (_rpnlEmbossSize - 1),
+                0
+            );
+    }
+
+            #endif
+
+    // draw bitmap
+    if(_pRpnlBitmap != NULL)
+    {
+        PutImage
+        (
+            (((_rpnlX2 + _rpnlX1) - (GetImageWidth((void *)_pRpnlBitmap))) >> 1) + 1,
+            (((_rpnlY2 + _rpnlY1) - (GetImageHeight((void *)_pRpnlBitmap))) >> 1) + 1,
+            _pRpnlBitmap,
+            IMAGE_NORMAL
+        );
+    }
+
+    return (1);
+
+        #else
+
+    typedef enum
+    {
+        BEGIN,
+        DRAW_EMBOSS1,
+        DRAW_EMBOSS2,
+        DRAW_EMBOSS3,
+        DRAW_EMBOSS4,
+        DRAW_FACECOLOR1,
+        DRAW_FACECOLOR2,
+                #if (COLOR_DEPTH == 1)
+        DRAW_INNERFRAME,
+                #endif
+        DRAW_IMAGE,
+    } ROUND_PANEL_DRAW_STATES;
+
+    static ROUND_PANEL_DRAW_STATES state = BEGIN;
+    static WORD counter;
+
+    while(1)
+    {
+        if(IsDeviceBusy())
+            return (0);
+        switch(state)
+        {
+            case BEGIN:
+                if(_rpnlR)
+                {
+
+                    // draw the outline
+					SetColor(_rpnlFaceColor);
+        			if(!Arc(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize, _rpnlR, 0xFF))  	                    
+                        return (0);
+                    state = DRAW_FACECOLOR1;
+                }
+                else
+                {
+                    state = DRAW_EMBOSS1;
+                    counter = 1;
+                    goto rnd_panel_draw_emboss;
+                }
+
+            // now draw the upper portion of the embossed area
+            case DRAW_EMBOSS1:
+                rnd_panel_draw_emboss : SetColor(_rpnlFaceColor);
+                while(counter < _rpnlEmbossSize)
+                {
+
+                    // draw top
+                    if(!Bar(_rpnlX1 + counter, _rpnlY1 + counter, _rpnlX2 - counter, _rpnlY1 + counter))
+                    {
+                        return (0);
+                    }
+
+                    counter++;
+                }
+
+                counter = 1;
+                state = DRAW_EMBOSS2;
+                break;
+
+            case DRAW_EMBOSS2:
+                while(counter < _rpnlEmbossSize)
+                {
+
+                    // draw left   	
+                    if(!Bar(_rpnlX1 + counter, _rpnlY1 + counter, _rpnlX1 + counter, _rpnlY2 - counter))
+                    {
+                        return (0);
+                    }
+
+                    counter++;
+                }
+
+                counter = 1;
+                state = DRAW_EMBOSS3;
+                break;
+
+            // now draw the lower portion of the embossed area
+            case DRAW_EMBOSS3:
+                //SetColor(_rpnlEmbossDkColor);
+                while(counter < _rpnlEmbossSize)
+                {
+
+                    // draw bottom
+                    if(!Bar(_rpnlX1 + counter, _rpnlY2 - counter, _rpnlX2 - counter, _rpnlY2 - counter))
+                    {
+                        return (0);
+                    }
+
+                    counter++;
+                }
+
+                counter = 1;
+                state = DRAW_EMBOSS4;
+                break;
+
+            case DRAW_EMBOSS4:
+                while(counter < _rpnlEmbossSize)
+                {
+
+                    // draw right	   	
+                    if(!Bar(_rpnlX2 - counter, _rpnlY1 + counter, _rpnlX2 - counter, _rpnlY2 - counter))
+                    {
+                        return (0);
+                    }
+
+                    counter++;
+                }
+
+                state = DRAW_FACECOLOR1;
+                break;
+
+            // draw the top half of the face 
+            case DRAW_FACECOLOR1:
+                SetColor(_rpnlEmbossLtColor);
+                if(_rpnlR)
+                {
+    				SetBevelDrawType(DRAWTOPBEVEL);
+        			if(!FillBevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize))	                
+                        return (0);
+                }
+                else
+                {
+                    if
+                    (
+                        !Bar
+                            (
+        						_rpnlX1 + _rpnlEmbossSize, 
+        						_rpnlY1 + _rpnlEmbossSize, 
+        						_rpnlX2 - _rpnlEmbossSize, 
+        						(_rpnlY1 + ((_rpnlY2 - _rpnlY1) >> 1))                            
+                            )
+                    )
+                    {
+                        return (0);
+                    }
+                }
+
+                state = DRAW_FACECOLOR2;
+                break;
+
+           	// draw the bottom half of the face 
+            case DRAW_FACECOLOR2:
+                SetColor(_rpnlEmbossDkColor);
+                if(_rpnlR)
+                {
+	                SetBevelDrawType(DRAWBOTTOMBEVEL);
+                    if(!FillBevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - _rpnlEmbossSize))
+                        return (0);
+                }
+                else
+                {
+                    if
+                    (
+                        !Bar
+                            (
+      							_rpnlX1 + _rpnlEmbossSize, 
+      							(_rpnlY1 + ((_rpnlY2 - _rpnlY1) >> 1)) + 1, 
+        						_rpnlX2 - _rpnlEmbossSize, 
+        						_rpnlY2 - _rpnlEmbossSize
+                            )
+                    )
+                    {
+                        return (0);
+                    }
+                }
+				SetBevelDrawType(DRAWFULLBEVEL);
+                state = DRAW_IMAGE;
+                break;
+
+            case DRAW_IMAGE:
+                if(_pRpnlBitmap != NULL)
+                {
+                    if
+                    (
+                        !PutImage
+                            (
+                                ((_rpnlX2 + _rpnlX1 - GetImageWidth((void *)_pRpnlBitmap)) >> 1) + 1,
+                                ((_rpnlY2 + _rpnlY1 - GetImageHeight((void *)_pRpnlBitmap)) >> 1) + 1,
+                                _pRpnlBitmap,
+                                IMAGE_NORMAL
+                            )
+                    )
+                    {
+                        return (0);
+                    }
+                }
+
+                        #if (COLOR_DEPTH == 1)
+                state = DRAW_INNERFRAME;
+                break;
+                        #else
+                state = BEGIN;
+                return (1);
+                        #endif
+                break;
+
+                        #if (COLOR_DEPTH == 1)
+
+            case DRAW_INNERFRAME:
+                if(_rpnlFaceColor == BLACK)
+                {
+                    SetColor(WHITE);
+					if(_rpnlR)
+					{
+                        if(!Bevel(_rpnlX1, _rpnlY1, _rpnlX2, _rpnlY2, _rpnlR - (_rpnlEmbossSize - 1)))
+                        {
+                            return (0);
+                        }    
+					}
+					else
+    				{
+					    if(!Bevel(  _rpnlX1 + (_rpnlEmbossSize - 1),
+                                    _rpnlY1 + (_rpnlEmbossSize - 1),
+                                    _rpnlX2 - (_rpnlEmbossSize - 1),
+                                    _rpnlY2 - (_rpnlEmbossSize - 1),
+                                    0 ))
+				        {
+							return (0);
+						}
+					}
+                }
+
+                state = BEGIN;
+                return (1);
+                        #endif
+
+        }   // end of switch
+    }       // end of while
+        #endif //#ifndef USE_NONBLOCKING_CONFIG
+}
+
 
 #endif // USE_GOL

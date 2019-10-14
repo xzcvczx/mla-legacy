@@ -15,7 +15,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -693,7 +693,7 @@ void HTTPPrint_btn2(void)
 
 void HTTPPrint_version(void)
 {
-	TCPPutROMArray(sktHTTP,(ROM void*)VERSION, strlenpgm((ROM char*)VERSION));
+	TCPPutROMArray(sktHTTP,(ROM void*)TCPIP_STACK_VERSION, strlenpgm((ROM char*)TCPIP_STACK_VERSION));
 }
 
 void HTTPPrint_hiddenLED0(void)

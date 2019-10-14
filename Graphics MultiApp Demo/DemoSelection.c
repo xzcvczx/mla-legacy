@@ -38,10 +38,13 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok
  * Paolo Tamayo         03/10/08    ...
+ * Microchip			04/14/10    added macro for tick delay measurement
  *****************************************************************************/
 #include "MainDemo.h"
 
+#ifndef MULTI_MEDIA_BOARD_DM00123
 #define ENABLE_PICTURES_DEMO
+#endif
 
 // images used
 #define ICON1P  RGBLighting_mono_72x72
@@ -70,25 +73,27 @@
     #define ICON11P FolderPhoto_mono_72x72
     #define ICON11  FolderPhoto_4bpp_72x72
 #endif
-#ifndef USE_EXTERNAL_ICONS
-extern const BITMAP_FLASH   ICON1;
-extern const BITMAP_FLASH   ICON1P;
-extern const BITMAP_FLASH   ICON2;
-extern const BITMAP_FLASH   ICON2P;
-extern const BITMAP_FLASH   ICON3;
-extern const BITMAP_FLASH   ICON3P;
-extern const BITMAP_FLASH   ICON4;
-extern const BITMAP_FLASH   ICON4P;
-extern const BITMAP_FLASH   ICON5;
-extern const BITMAP_FLASH   ICON5P;
-extern const BITMAP_FLASH   ICON6;
-extern const BITMAP_FLASH   ICON6P;
-extern const BITMAP_FLASH   ICON7P;
-extern const BITMAP_FLASH   ICON7;
-extern const BITMAP_FLASH   ICON8P;
-extern const BITMAP_FLASH   ICON8;
 
-#else
+#ifdef MULTI_MEDIA_BOARD_DM00123
+extern volatile const BITMAP_FLASH      ICON1;
+extern volatile const BITMAP_FLASH      ICON1P;
+extern volatile const BITMAP_FLASH      ICON2;
+extern volatile const BITMAP_FLASH      ICON2P;
+extern volatile const BITMAP_FLASH      ICON3;
+extern volatile const BITMAP_FLASH      ICON3P;
+extern volatile const BITMAP_FLASH      ICON4;
+extern volatile const BITMAP_FLASH      ICON4P;
+extern volatile const BITMAP_FLASH      ICON5;
+extern volatile const BITMAP_FLASH      ICON5P;
+extern volatile const BITMAP_FLASH      ICON6;
+extern volatile const BITMAP_FLASH      ICON6P;
+extern volatile const BITMAP_FLASH      ICON7P;
+extern volatile const BITMAP_FLASH      ICON7;
+extern volatile const BITMAP_FLASH      ICON8P;
+extern volatile const BITMAP_FLASH      ICON8;
+extern volatile const BITMAP_FLASH      ICON9P;
+extern volatile const BITMAP_FLASH      ICON9;
+#else 
 extern BITMAP_EXTERNAL      ICON1;
 extern BITMAP_EXTERNAL      ICON1P;
 extern BITMAP_EXTERNAL      ICON2;
@@ -140,6 +145,8 @@ char            page = 0;
 // last page number
 #define DEMOSEL_LASTPAGE        1
 #define WAIT_UNTIL_FINISH(x)    while(!x)
+
+#define SELECTDELAY 	100000 // used to remove the focus on objects when not touched for a long time.
 
     /************************************************************************
  Function: CreateDemoSelection()
@@ -340,7 +347,6 @@ void CreateDemoSelectionPage1(void)
         iconScheme
     );                              // use alternate scheme
     #ifdef ENABLE_PICTURES_DEMO
-
     // External Flash Memory demo icon
     BtnCreate
     (
@@ -427,7 +433,7 @@ void CheckDemoStatus(void)
     pObj = GOLGetFocus();
     if(pObj != NULL)
     {
-        if(tick - demoTick > 5000)
+        if(tick - demoTick > SELECTDELAY)
         {
 
             // reset the focus of the currenty focused
@@ -733,10 +739,6 @@ WORD MsgDemoSelection(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
         case ID_BUTTON_C:
             if(objMsg == BTN_MSG_RELEASED)
             {
-
-                // do not process if user moved the touch away from the icon
-                if(pMsg->uiEvent == EVENT_MOVE)
-                    break;
                 page--;
                 if(page < 0)
                     page = DEMOSEL_LASTPAGE;
@@ -753,10 +755,6 @@ WORD MsgDemoSelection(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
         case ID_BUTTON_D:
             if(objMsg == BTN_MSG_RELEASED)
             {
-
-                // do not process if user moved the touch away from the icon
-                if(pMsg->uiEvent == EVENT_MOVE)
-                    break;
                 page++;
                 if(page > DEMOSEL_LASTPAGE)
                     page = 0;

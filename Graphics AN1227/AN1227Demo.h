@@ -47,4 +47,7 @@
     #endif
     #include "GenericTypeDefs.h"
     #include "Graphics\Graphics.h"
+	#ifdef MULTI_MEDIA_BOARD_DM00123
+        #include "cpld.h"
+    #endif    
 #endif

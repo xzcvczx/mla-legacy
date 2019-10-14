@@ -74,33 +74,28 @@ launched from your Windows Start menu.</p>
 <!--
 // Parses the xmlResponse from status.xml and updates the status box
 function updateStatus(xmlData) {
+	var mainstat = document.getElementById('display').style.display;
+	var loadstat = document.getElementById('loading').style.display;
+
 	// Check if a timeout occurred
 	if(!xmlData)
 	{
-		document.getElementById('display').style.display = 'none';
-		document.getElementById('loading').style.display = 'inline';
+		mainstat = 'none';
+		loadstat = 'inline';
 		return;
 	}
 
 	// Make sure we're displaying the status display
-	document.getElementById('loading').style.display = 'none';
-	document.getElementById('display').style.display = 'inline';
+	mainstat = 'inline';
+	loadstat = 'none';
 
 	// Loop over all the LEDs
-	for(i = 0; i < 8; i++) {
-		if(getXMLValue(xmlData, 'led'+i) == '1')
-			document.getElementById('led' + i).style.color = '#090';
-		else
-			document.getElementById('led' + i).style.color = '#ddd';
-	}
+	for(i = 0; i < 8; i++)
+		document.getElementById('led' + i).style.color = (getXMLValue(xmlData, 'led' + i) == '1') ? '#090' : '#ddd';
 
 	// Loop over all the buttons
-	for(i = 0; i < 4; i++) {
-		if(getXMLValue(xmlData, 'btn'+i) == 'up')
-			document.getElementById('btn' + i).innerHTML = '&Lambda;';
-		else
-			document.getElementById('btn' + i).innerHTML = 'V';
-	}
+	for(i = 0; i < 4; i++)
+		document.getElementById('btn' + i).innerHTML = (getXMLValue(xmlData, 'btn' + i) == 'up') ? '&Lambda;' : 'V';
 
 	// Update the POT value
 	document.getElementById('pot0').innerHTML = getXMLValue(xmlData, 'pot0');

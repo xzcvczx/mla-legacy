@@ -134,14 +134,26 @@ BYTE ConvertRecord2Bin (void);
 BYTE    ProcessRecord(void);
 
 // Macros to interface with memory
-#if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
+#if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
     #define FLASHInit()                     SST39Init();
     #define ChipErase()                     SST39ChipErase();
     #define WriteArray(address, pdata, len) SST39WriteArray(address, pdata, len)
-#else
+#elif defined (GFX_PICTAIL_V3) 
     #define FLASHInit()                     SST25Init();
     #define ChipErase()                     SST25ChipErase();
     #define WriteArray(address, pdata, len) SST25WriteArray(address, pdata, len)
+#elif defined (PIC24FJ256DA210_DEV_BOARD)
+	#if defined (USE_PARALLEL_FLASH)
+		// parallel flash
+	    #define FLASHInit()             		SST39LF400Init();
+	    #define ChipErase()                     SST39LF400ChipErase();
+	    #define WriteArray(address, pdata, len) SST39LF400WriteArray(address, pdata, len)
+	#else	    
+		// serial flash
+	    #define FLASHInit()                     SST25Init();
+	    #define ChipErase()                     SST25ChipErase();
+	    #define WriteArray(address, pdata, len) SST25WriteArray(address, pdata, len)
+	#endif 	    
 #endif
 
 // Acknowledgement
@@ -157,6 +169,7 @@ BYTE        buffer[1024];
 // Main state mashine
 #define START   0
 #define DATA    1
+
 BYTE        state;
 
 ///////////////////////////////////// MAIN ////////////////////////////////////
@@ -165,16 +178,21 @@ int main(void)
     BYTE    *pointer = NULL;
     BYTE    byte;
 
-
- 	#if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+ 	#if defined (PIC24FJ256DA210_DEV_BOARD)
     
-    _ANSG8 = 0; /* S1 */
-    _ANSE9 = 0; /* S2 */
-    _ANSB5 = 0; /* S3 */
+    // Make all the analog pins digital.
+	ANSA = 0x0000;
+    ANSB = 0x0000;		
+    ANSC = 0x0000;		
+    ANSD = 0x0000;
+    ANSE = 0x0000;
+    ANSF = 0x0000;
+    ANSG = 0x0000;		
     
     #else
 
 		#if defined (__PIC24FJ256GB210__)
+		    // Make all the analog pins digital.
 			ANSA = 0x0000;
 		    ANSB = 0x0000;		
 		    ANSC = 0x0000;		
@@ -196,47 +214,48 @@ int main(void)
     #ifdef __PIC32MX__
     INTEnableSystemMultiVectoredInt();
     #endif
-    #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
-    BeepInit();
-    #endif
-    FLASHInit();
+
+	#if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
+    	BeepInit();
+    #endif //#if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
+    
+   	FLASHInit();
     UARTInit();
+    
+    #if defined (EXPLORER_16)
+	    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+		    // If S3 button on Explorer 16 board is pressed erase memory
+		    TRISAbits.TRISA9 = 1;
+		    if(PORTAbits.RA9 == 0)
+		    {
+		        TRISAbits.TRISA9 = 0;
+		        ChipErase();
+				#if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
+			        Beep();
+		        #endif
 
-    #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
+		    }
+		    TRISAbits.TRISA9 = 0;
+		#else		    
+		    // If S3 button on Explorer 16 board is pressed erase memory
+		    if(PORTDbits.RD6 == 0)
+		    {
+		        ChipErase();
+	            #if defined (GFX_PICTAIL_V1) || defined (GFX_PICTAIL_V2)
+			        Beep();
+	            #endif
+		    }
+	    #endif
 
-    // If S3 button on Explorer 16 board is pressed erase memory
-    TRISAbits.TRISA9 = 1;
-    if(PORTAbits.RA9 == 0)
-    {
-        TRISAbits.TRISA9 = 0;
-        ChipErase();
-            #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
-        Beep();
-            #endif
-    }
 
-    TRISAbits.TRISA9 = 0;
-
-  	#elif defined(__PIC24FJ256DA210__)
-
-    // If S1 button on the PIC24FJ256DA210 Development board is pressed erase memory
-    if(BTN_S1 == 0)
-    {
-        ChipErase();
-    }
-
-    #else
-
-    // If S3 button on Explorer 16 board is pressed erase memory
-    if(PORTDbits.RD6 == 0)
-    {
-        ChipErase();
-            #if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
-        Beep();
-            #endif
-    }
-
+	#elif defined (PIC24FJ256DA210_DEV_BOARD)
+	    // If S1 button on the PIC24FJ256DA210 Development board is pressed erase memory
+	    if(BTN_S1 == 0)
+	    {
+	        ChipErase();
+	    }
     #endif
+
     state = START;
     address.Val = 0;
 	

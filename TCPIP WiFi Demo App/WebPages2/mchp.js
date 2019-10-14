@@ -4,7 +4,7 @@
  *
  * Software License Agreement
  *
- * Copyright © 2002-2007 Microchip Technology Inc.  All rights 
+ * Copyright © 2002-2010 Microchip Technology Inc.  All rights 
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and 
@@ -36,28 +36,20 @@
  *
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Elliott Wood			6/25/07		Original
  * Elliott Wood			12/5/07		Updated newAJAXCommand
  ********************************************************************/
 
-/**
- * Determines when a request is considered "timed out"
- */
+// Determines when a request is considered "timed out"
 var timeOutMS = 5000; //ms
  
-/**
- * Stores a queue of AJAX events to process
- */
+// Stores a queue of AJAX events to process
 var ajaxList = new Array();
 
-/**
- * Initiates a new AJAX command
- *
- * @param   the url to access
- * @param   the document ID to fill, or a function to call with response XML (optional)
- * @param	true to repeat this call indefinitely (optional)
- * @param   a URL encoded string to be submitted as POST data (optional)
- */
+// Initiates a new AJAX command
+//	url: the url to access
+//	container: the document ID to fill, or a function to call with response XML (optional)
+//	repeat: true to repeat this call indefinitely (optional)
+//	data: an URL encoded string to be submitted as POST data (optional)
 function newAJAXCommand(url, container, repeat, data)
 {
 	// Set up our object
@@ -88,12 +80,8 @@ function newAJAXCommand(url, container, repeat, data)
     ajaxList.push(newAjax);
 }
 
-/**
- * Loops over all pending AJAX events to determine
- * if any action is required
- */
-function pollAJAX() {
-	
+// Loops over all pending AJAX events to determine if any action is required
+function pollAJAX() {	
 	var curAjax = new Object();
 	var theTimer = new Date();
 	var elapsed;
@@ -150,14 +138,11 @@ function pollAJAX() {
 	// Call ourselves again in 10ms
 	setTimeout("pollAJAX()",10);
 	
-}// End pollAjax
+}
 			
-/**
- * Parses the xmlResponse returned by an XMLHTTPRequest object
- *
- * @param	the xmlData returned
- * @param	the field to search for
- */
+// Parses the xmlResponse returned by an XMLHTTPRequest object
+//	xmlData: the xmlData returned
+//  field: the field to search for
 function getXMLValue(xmlData, field) {
 	try {
 		if(xmlData.getElementsByTagName(field)[0].firstChild.nodeValue)

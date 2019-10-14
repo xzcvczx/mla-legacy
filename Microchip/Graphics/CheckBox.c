@@ -64,7 +64,7 @@ CHECKBOX *CbCreate
 {
     CHECKBOX    *pCb = NULL;
 
-    pCb = (CHECKBOX *)malloc(sizeof(CHECKBOX));
+    pCb = (CHECKBOX *)GFX_malloc(sizeof(CHECKBOX));
     if(pCb == NULL)
         return (pCb);
 

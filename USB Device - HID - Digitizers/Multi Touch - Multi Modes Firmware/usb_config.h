@@ -77,8 +77,8 @@
 //#define USB_PING_PONG_MODE USB_PING_PONG__ALL_BUT_EP0		//NOTE: This mode is not supported in PIC18F4550 family rev A3 devices
 
 
-#define USB_POLLING
-//#define USB_INTERRUPT
+//#define USB_POLLING
+#define USB_INTERRUPT
 
 /* Parameter definitions are defined in usb_device.h */
 #define USB_PULLUP_OPTION USB_PULLUP_ENABLE
@@ -123,7 +123,7 @@
 #define HID_INT_OUT_EP_SIZE     64
 #define HID_INT_IN_EP_SIZE      64
 #define HID_NUM_OF_DSC          1
-#define HID_RPT01_SIZE          286u
+#define HID_RPT01_SIZE          299u
 #define USER_GET_REPORT_HANDLER UserGetReportHandler
 #define USER_SET_REPORT_HANDLER UserSetReportHandler
 

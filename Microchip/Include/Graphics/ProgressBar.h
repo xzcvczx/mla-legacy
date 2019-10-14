@@ -47,6 +47,7 @@
 * Object States Definition: 
 *********************************************************************/
     #define PB_DISABLED 0x0002  // Bit to indicate Progress Bar is in a disabled state.
+	#define PB_VERTICAL 0x0004  // Bit for orientation  (0 - horizontal, 1 - vertical)
     #define PB_HIDE     0x8000  // Bit to indicate Progress Bar must be hidden.
     #define PB_DRAW_BAR 0x2000  // Bit to indicate Progress Bar must be redrawn.
     #define PB_DRAW     0x4000  // Bit to indicate Progress Bar must be redrawn.

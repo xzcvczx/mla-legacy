@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\USB Device - CDC - Basic Demo - PIC18 Starter Kit
 dir_sin=
-dir_inc=c:\mcc18\h;..\..\microchip\include;..\..\USB Device - CDC - Basic Demo\CDC - Basic Demo - Firmware
+dir_inc=..\..\microchip\include;.;c:\mcc18\h
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]

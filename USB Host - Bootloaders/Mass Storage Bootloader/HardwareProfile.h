@@ -56,9 +56,9 @@
 #if !defined(DEMO_BOARD)
     #if defined(__C32__)
         #if defined(__32MX460F512L__)
-            #if defined(PIC32MX460F512L_PIM)
+            #if defined(PIC32MX460F512L_PIM)    //This will be defined in the project build options
                 #include "HardwareProfile - PIC32MX460F512L PIM.h"
-            #elif defined(PIC32_USB_STARTER_KIT)
+            #elif defined(PIC32_USB_STARTER_KIT)    //This will be defined in the project build options
                 #include "HardwareProfile - PIC32 USB Starter Kit.h"
             #endif
         #endif

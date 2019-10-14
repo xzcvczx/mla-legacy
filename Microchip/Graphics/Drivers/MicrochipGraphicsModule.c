@@ -37,6 +37,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Pradeep Budagutta                20 Aug 2009                 Initial Version
  * Pradeep Budagutta                03 Dec 2009                 Added Double Buffering Support
+ * PAT				                29 Mar 2010                 Fixed EPMP base address programming
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -100,10 +101,13 @@ volatile DWORD 		_displayAreaBaseAddr;
 
 #define GFX_FLIP(a,b) { SHORT t=a; a=b; b=t; }
 
+#if defined (GFX_EPMP_CS1_BASE_ADDRESS) || defined (GFX_EPMP_CS2_BASE_ADDRESS)
+
 void EPMP_Init(void)
 {
-  #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
-  
+	/* Note: When using the EPMP to access external RAM or Flash, PMA0-PMA16 will only access a range of 
+	         256K RAM. To increase this range enable higher Address lines.
+	*/
 	ANSDbits.ANSD7 = 0;   // PMD15
 	ANSDbits.ANSD6 = 0;   // PMD14
 	ANSFbits.ANSF0 = 0;   // PMD11
@@ -118,58 +122,93 @@ void EPMP_Init(void)
 	ANSAbits.ANSA7 = 0;   // PMA17
 	ANSGbits.ANSG6 = 0;   // PMA18
 
-	PMCON1bits.ADRMUX = 0;	    // address is not multiplexed
-	PMCON1bits.MODE = 3;        // master mode
-	PMCON1bits.CSF = 0;         // PMCS1 pin used for chip select 1, PMCS2 pin used for chip select 2
-	PMCON1bits.ALP = 1;         // set address latch strobes to high active level (for sn74lvc16373)
-	PMCON1bits.ALMODE = 1;      // "smart" address strobes are not used
-	PMCON1bits.BUSKEEP = 0;     // bus keeper is not used
+	PMCON1bits.ADRMUX = 0;	    								// address is not multiplexed
+	PMCON1bits.MODE = 3;        								// master mode
+	PMCON1bits.CSF = 0;         								// PMCS1 pin used for chip select 1, PMCS2 pin used for chip select 2
+	PMCON1bits.ALP = 1;         								// set address latch strobes to high active level (for sn74lvc16373)
+	PMCON1bits.ALMODE = 1;      								// "smart" address strobes are not used
+	PMCON1bits.BUSKEEP = 0;     								// bus keeper is not used
+
+  	#if defined (GFX_EPMP_CS1_BASE_ADDRESS)
+		#ifdef USE_DOUBLE_BUFFERING
+			PMCS1BS = ((DWORD)GFX_BUFFER1>>8);					// CS1 start address
+			PMCON3 |= 0x0003;           						// PMA16 - PMA17 address lines are enabled 
+		#else
+			PMCS1BS = (GFX_EPMP_CS1_BASE_ADDRESS>>8);			// CS1 start address
+			PMCON3 |= 0x0001;           						// PMA16 address line is enabled 
+		#endif //USE_DOUBLE_BUFFERING
+
+		PMCS1CFbits.CSDIS = 0;      							// enable CS
+		PMCS1CFbits.CSP = EPMPCS1_CS_POLARITY;        			// CS1 polarity 
+		PMCS1CFbits.BEP = EPMPCS1_BE_POLARITY;       	 		// byte enable polarity
+		PMCS1CFbits.WRSP = EPMPCS1_WR_POLARITY;       			// write strobe polarity
+		PMCS1CFbits.RDSP = EPMPCS1_RD_POLARITY;       			// read strobe polarity
+		PMCS1CFbits.CSPTEN = 1;     							// enable CS port
+		PMCS1CFbits.SM = 0;         							// read and write strobes on separate lines 
+		PMCS1CFbits.PTSZ = 2;       							// data bus width is 16-bit 
 	
-#ifdef USE_DOUBLE_BUFFERING
-	PMCS1BSbits.BASE = ((DWORD)GFX_BUFFER1>>16);	// CS1 start address
-#else
-	PMCS1BSbits.BASE = (GFX_DISPLAY_BUFFER_START_ADDRESS>>16);	// CS1 start address
-#endif //USE_DOUBLE_BUFFERING
+		PMCS1MDbits.ACKM = 0;        							// PMACK is not used
 
-	PMCS2BSbits.BASE = 0xff;									// set CS1 end address and CS2 start address
-	PMCON2bits.RADDR = 0xff;									// set CS2 end address
+		// The device timing parameters. Set the proper timing
+		// according to the device used (the timing macros are defined in the hardware profile)
+		PMCS1MDbits.DWAITB = EPMPCS1_DWAITB;      				// access time 1 Tcy
+		PMCS1MDbits.DWAITM = EPMPCS1_DWAITM;
+		PMCS1MDbits.DWAITE = EPMPCS1_DWAITE;
+		PMCS1MDbits.AMWAIT = EPMPCS1_AMWAIT;					// Note: adjust this delay for slower devices 
 
-	PMCON4 = 0xFFFF;            // PMA0 - PMA15 address lines are enabled
-	PMCON3 |= 0x0003;           // PMA16 - PMA17 address line is enabled
+	#else
+			PMCS1CFbits.CSDIS = 1;       						// disable CS1 functionality  
+	#endif //#if defined (GFX_EPMP_CS1_BASE_ADDRESS)
 
-	PMCS2CFbits.CSDIS = 1;       // disable CS2 functionality  
+	#if defined (GFX_EPMP_CS2_BASE_ADDRESS)
 
-	PMCS1CFbits.CSDIS = 0;      // enable CS
-	PMCS1CFbits.CSP = 0;        // CS active low (for 61/62WV51216ALL)
-	PMCS1CFbits.CSPTEN = 1;     // enable CS port
-	PMCS1CFbits.BEP = 0;        // byte enable active low (for 61/62WV51216ALL)
-	PMCS1CFbits.WRSP = 0;       // write strobe active low (for 61/62WV51216ALL)
-	PMCS1CFbits.RDSP = 0;       // read strobe active low (for 61/62WV51216ALL)
-	PMCS1CFbits.SM = 0;         // read and write strobes on separate lines 
-	PMCS1CFbits.PTSZ = 2;       // data bus width is 16-bit 
+		PMCS2BS = (GFX_EPMP_CS2_BASE_ADDRESS>>8);				// CS2 start address
 
-	PMCS1MDbits.ACKM = 0;        // PMACK is not used
-	PMCS1MDbits.DWAITB = 0;      // access time 1 Tcy
-	PMCS1MDbits.DWAITM = 0;
-	PMCS1MDbits.DWAITE = 0;
-	PMCS1MDbits.AMWAIT = 2;
+		PMCS2CFbits.CSDIS = 0;      							// enable CS
+
+		PMCS2CFbits.CSP = EPMPCS2_CS_POLARITY;        			// CS2 polarity 
+		PMCS2CFbits.BEP = EPMPCS2_BE_POLARITY;       	 		// byte enable polarity
+		PMCS2CFbits.WRSP = EPMPCS2_WR_POLARITY;       			// write strobe polarity
+		PMCS2CFbits.RDSP = EPMPCS2_RD_POLARITY;       			// read strobe polarity
+		PMCS2CFbits.CSPTEN = 1;     							// enable CS port
+		PMCS2CFbits.SM = 0;         							// read and write strobes on separate lines 
+		PMCS2CFbits.PTSZ = 2;       							// data bus width is 16-bit 
 	
-	PMCON3bits.PTWREN = 1;      // enable write strobe port
-	PMCON3bits.PTRDEN = 1;      // enable read strobe port
-	PMCON3bits.PTBE0EN = 1;     // enable byte enable port
-	PMCON3bits.PTBE1EN = 1;     // enable byte enable port
-	PMCON3bits.AWAITM = 0;      // set address latch pulses width to 1/2 Tcy
-	PMCON3bits.AWAITE = 0;      // set address hold time to 1/4 Tcy
+		PMCS2MDbits.ACKM = 0;        							// PMACK is not used
+		
+		// The device timing parameters. Set the proper timing
+		// according to the device used (the timing macros are defined in the hardware profile)
+		PMCS2MDbits.DWAITB = EPMPCS2_DWAITB;      				// access time 1 Tcy
+		PMCS2MDbits.DWAITM = EPMPCS2_DWAITM;
+		PMCS2MDbits.DWAITE = EPMPCS2_DWAITE;
+		PMCS2MDbits.AMWAIT = EPMPCS2_AMWAIT;					// Note: adjust this delay for slower devices 
+
+
+	#else	
+		PMCS2CFbits.CSDIS = 1;       							// disable CS2 functionality  
+	#endif //#if defined (GFX_EPMP_CS2_BASE_ADDRESS)
+	
+	PMCON2bits.RADDR = 0xFF;									// set CS2 end address
+	PMCON4 = 0xFFFF;            								// PMA0 - PMA15 address lines are enabled
+	
+
+	PMCON3bits.PTWREN = 1;      								// enable write strobe port
+	PMCON3bits.PTRDEN = 1;      								// enable read strobe port
+	PMCON3bits.PTBE0EN = 1;     								// enable byte enable port
+	PMCON3bits.PTBE1EN = 1;     								// enable byte enable port
+	PMCON3bits.AWAITM = 0;      								// set address latch pulses width to 1/2 Tcy
+	PMCON3bits.AWAITE = 0;      								// set address hold time to 1/4 Tcy
 	
 	DelayMs(100);
 
-	PMCON2bits.MSTSEL = 3;
-	PMCON1bits.PMPEN = 1;
+	PMCON2bits.MSTSEL = 3;										// select EPMP bypass mode (for Graphics operation)
+	PMCON1bits.PMPEN = 1;										// enable the module
 
 	DelayMs(100);
 
-  #endif
 }
+
+#endif //#if defined (GFX_EPMP_CS1_BASE_ADDRESS) || defined (GFX_EPMP_CS2_BASE_ADDRESS)
 
 /*********************************************************************
 * Function:  void ResetDevice()
@@ -182,7 +221,8 @@ void EPMP_Init(void)
 *
 * Side Effects: none
 *
-* Overview: resets LCD, initializes PMP
+* Overview: Resets LCD, initializes PMP. FRM Section 43. Graphics 
+*			Controller Module (GFX) (Document #:DS39731) for details.
 *
 * Note: none
 *
@@ -199,20 +239,23 @@ void ResetDevice(void)
 
 #endif //USE_DOUBLE_BUFFERING
 
-/*********** Start - Project Specific Code - Relocate ***********/
 
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+#if defined (POWERON_LAT_BIT)
 
-        _RA5 = 1;       /* Switch On DISP_ON */
-        _TRISA5 = 0;
+	/* Switch On display if IO controlled; if controlled 
+	   by the Graphics Module, hook up the power-on signal of the display to
+	   GPWR pin of the Graphics Module and this code should not compile */
+	   
+    POWERON_LAT_BIT = 1;
+    POWERON_TRIS_BIT = 0;
 
-    #endif
+#endif
 
-    #ifdef GFX_USE_EXTERNAL_RAM
+#if defined (GFX_EPMP_CS1_BASE_ADDRESS) || defined (GFX_EPMP_CS2_BASE_ADDRESS)
 
-        EPMP_Init();
-
-    #endif
+    EPMP_Init();
+	
+#endif
 
 /************ End - Project Specific Code - Relocate ************/
 
@@ -230,71 +273,91 @@ void ResetDevice(void)
     G1CMDL   = 0;
     G1CMDH   = 0;
     
+    // set the  processing unit bit per pixel
     _PUBPP   = GFX_BITS_PER_PIXEL;
+    // set the  display controller bit per pixel
     _DPBPP   = GFX_BITS_PER_PIXEL;
+    // set the LCD type used (TFT, MSTN or CSTN)
     _DPMODE  = GFX_LCD_TYPE;
 
-
-
     #if (GFX_LCD_TYPE == GFX_LCD_MSTN) || (GFX_LCD_TYPE == GFX_LCD_CSTN)
-
+		// set the display width
         _DPGWDTH = STN_DISPLAY_WIDTH;
 
     #endif
 
     /* Port configurations */
     #ifdef GFX_DISPLAYENABLE_ENABLE
-    
+    	// set the display enable polarity
         _DPENPOL = GFX_DISPLAYENABLE_POLARITY;
         _DPENOE = 1;
 
     #endif
     
     #ifdef GFX_HSYNC_ENABLE
-
+		// set the HSYNC signal polarity
         _DPHSPOL = GFX_HSYNC_POLARITY;
         _DPHSOE = 1;
 
     #endif
     
     #ifdef GFX_VSYNC_ENABLE
-    
+		// set the VSYNC signal polarity
         _DPVSPOL = GFX_VSYNC_POLARITY;
         _DPVSOE = 1;
     
     #endif
     
     #ifdef GFX_DISPLAYPOWER_ENABLE
-    
+    	// set the display power (GPWR) signal polarity 
         _DPPOWER = GFX_DISPLAYPOWER_POLARITY;
         _DPPWROE = 1;
     
     #endif
     
     /* Display timing signal configurations */
+    // set the clock polarity	
     _DPCLKPOL = GFX_CLOCK_POLARITY;
     
+    // set the display buffer dimension
     G1DPW = DISP_HOR_RESOLUTION;
     G1DPH = DISP_VER_RESOLUTION;
     
+    // set the work area dimension
     G1PUW = DISP_HOR_RESOLUTION;
     G1PUH = DISP_VER_RESOLUTION;
     
+    /* Note:
+    	In some display panel the definition of porches (front and back porches) varies.
+    	Example TFT display definitions (for horizontal timing):
+    		1. Horizontal Cycle = horizontal front porch + horizontal back porch + horizontal display period
+    		2. Horizontal Cycle = horizontal front porch + horizontal back porch + horizontal display period + horizontal sync pulse width
+		In example (1) the horizontal sync pulse width must not exceed the horizontal back porch.
+		For the vertical timing, the equations are the same (replace horizontal with vertical).
+		
+		For the Microchip graphics controller: the definition follows example (2). To accomodate displays like
+		example (1), adjust the back porches and pulse widths accordingly. Refer to 
+		FRM Section 43. Graphics Controller Module (GFX) (Document #:DS39731).
+    */
     #define HT  (DISP_HOR_PULSE_WIDTH + DISP_HOR_BACK_PORCH + DISP_HOR_FRONT_PORCH + DISP_HOR_RESOLUTION)
     #define VT  (DISP_VER_PULSE_WIDTH + DISP_VER_BACK_PORCH + DISP_VER_FRONT_PORCH + DISP_VER_RESOLUTION)
 
     G1DPWT = HT;
     G1DPHT = VT;
 
+	// set the horizontal pulse width
     _HSLEN = DISP_HOR_PULSE_WIDTH;
     _HSST  = 0; 
     
+	// set the verrizontal pulse width
     _VSLEN = DISP_VER_PULSE_WIDTH;
     _VSST  = 0; 
 
+	// set the horizontal & vertical start position
     _HENST = _HSST + DISP_HOR_PULSE_WIDTH + DISP_HOR_BACK_PORCH;
     _VENST = _VSST + DISP_VER_PULSE_WIDTH + DISP_VER_BACK_PORCH;
 
+	// set the active pixel and active line start position
 	_ACTPIX  = _HENST;
 	_ACTLINE = _VENST;
 	
@@ -303,7 +366,7 @@ void ResetDevice(void)
 	_workArea2BaseAddr   = GFX_DISPLAY_BUFFER_START_ADDRESS;
 	_displayAreaBaseAddr = GFX_DISPLAY_BUFFER_START_ADDRESS;
 
-    /* Start addresses in RAM */
+    // Set the display buffer base address (SFR) (or the start addresses in RAM) 
     GFX_SetDisplayArea(_displayAreaBaseAddr);	
 
     /* Switch On the Graphics Module */
@@ -311,27 +374,32 @@ void ResetDevice(void)
     _DPPINOE = 1;
 
     #ifdef USE_PALETTE
-    
+    	// initialize the color look up table (CLUT) if enabled
         PaletteInit();
     
     #endif
         
-    TCON_Init();    // Panel TCON Programming
-
-    _G1CLKSEL = 1;  // 96MHz Enable
-    _GCLKDIV = GFX_GCLK_DIVIDER;
-    _DPSTGER = 3;
-    _GFX1IF = 0;
-    _GFX1IE = 0;
-    _G1EN = 1;
+    _G1CLKSEL = 1;  				// 96MHz Enable
+    _GCLKDIV = GFX_GCLK_DIVIDER;	// value used is dependent on the display panel specification
+    _DPSTGER = 0;					// display data stagger (set to none)
+    _GFX1IF = 0;					// clear graphics interrupt flag 
+    _GFX1IE = 0;					// graphics interrupt are not enabled
+    _G1EN = 1;						// turn on the graphics module
 
     DelayMs(100);
     
-    _DPPWROE = 1;
-    _DPPOWER = 1;
+    _DPPWROE = 1;					// enable the display power sequencer port to function as GPWR
+    _DPPOWER = 1;					// turn on the display power sequencer	
+
+	// clear the screen to all black first to remove the noise screen
+	SetColor(0);
+	Bar(0,0,GetMaxX(),GetMaxY());
+
+    TCON_Init();    				// Panel Timing Controller (TCON) Programming
 
     DelayMs(100);
-    
+
+	// disable clipping (default setting)    
     SetClip(0);
 }
 
@@ -413,8 +481,8 @@ void SetClipRgn(SHORT left, SHORT top, SHORT right, SHORT bottom)
 *					 source base address.
 *        dstOffset - offset of the new location of the moved data respect 
 *					 to the source base address.
-*        srcType - sets the source type (continuous or discontinuous)
-*        dstType - sets the source type (continuous or discontinuous) 
+*        srcType - sets the source type (1 - continuous or 0 - discontinuous)
+*        dstType - sets the source type (1 - continuous or 0 - discontinuous) 
 *        width - width of the block of data to be moved
 *        height - height of the block of data to be moved
 *
@@ -462,6 +530,70 @@ WORD MoveBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset,
 	return (1);
 	
 }	
+
+/*********************************************************************
+* Function: WORD ScrollLeft(SHORT left, SHORT top,  
+*							SHORT right, SHORT bottom, SHORT delta)
+*
+* PreCondition: none
+*
+* Input: left - left position of the scrolled rectangle
+*        top - top position of the scrolled rectangle
+*        right - right position of the scrolled rectangle
+*        bottom - bottom position of the scrolled rectangle
+*        delta - defines the scroll delta
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Scrolls the rectangular area defined by left, top, right, bottom by delta pixels.
+*
+* Note: none
+*
+********************************************************************/
+WORD ScrollLeft(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT delta)
+{
+	DWORD address;
+    SHORT width, height;
+
+	// make sure there are no pending RCC GPU commands
+    if(GFX_GetFreeCommandSpace() < 16)
+    {
+        #ifndef USE_NONBLOCKING_CONFIG
+            GFX_WaitForCommandQueue(16);
+        #else
+            return (0);
+        #endif
+    }
+
+
+   	#if (DISP_ORIENTATION == 0) || (DISP_ORIENTATION == 180)
+
+        width   =   right - left + 1;
+        height  =   bottom - top + 1;
+
+    #elif (DISP_ORIENTATION == 90) || (DISP_ORIENTATION == 270)
+
+        height  =   right - left + 1;
+        width   =   bottom - top + 1;
+	#endif
+	
+	GFX_SetWorkArea1(_workArea1BaseAddr);
+	GFX_SetWorkArea2(_workArea2BaseAddr); 
+
+	address = (top * (DWORD)_PUW) + left;
+	GFX_SetSrcAddress(address);
+
+	address = (top * (DWORD)_PUW) + left - delta;
+	GFX_SetDestAddress(address);
+
+	GFX_SetRectSize(width, height);
+	GFX_StartCopy(RCC_COPY, RCC_ROP_C, RCC_DEST_ADDR_DISCONTINUOUS,RCC_DEST_ADDR_DISCONTINUOUS);
+	
+	return (1);
+}	
+
 
 /*********************************************************************
 * Function: void PutPixel(SHORT x, SHORT y)

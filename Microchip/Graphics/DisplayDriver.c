@@ -90,8 +90,8 @@
 #elif (DISPLAY_CONTROLLER == SSD1289)
     #include "Drivers\drvTFT002.c"
 
-#elif (DISPLAY_CONTROLLER == HX8347A)
-    #include "Drivers\HX8347A.c"
+#elif (DISPLAY_CONTROLLER == HX8347A) || (DISPLAY_CONTROLLER == HX8347D)
+    #include "Drivers\HX8347.c"
 
 #elif (DISPLAY_CONTROLLER == R61580)
     #include "Drivers\drvTFT001.c"

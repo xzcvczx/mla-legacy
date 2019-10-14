@@ -79,20 +79,25 @@ Description:
   ----   -----------
   2.6-   No Change
   2.6a   
+
+  2.7    Minor changes changes to the structure of the conditional
+         compilation statement ordering.
 ********************************************************************/
 
 #ifndef _USB_HAL_H_
 #define _USB_HAL_H_
 //DOM-IGNORE-END
 
-#if defined(USB_SUPPORT_HOST) || defined(USB_SUPPORT_OTG)
-
-#if defined(__C30__)
+#if defined(__18CXX)
+    #include "USB\usb_hal_pic18.h"
+#elif defined(__C30__)
     #include "USB\usb_hal_pic24.h"
-
 #elif defined(__PIC32MX__)
     #include "USB\usb_hal_pic32.h"
+#else
+    #error "Silicon Platform not defined"
 #endif
+    
 
 /**********************
  Interface Routines
@@ -631,15 +636,6 @@ BOOL USBHALSetEpConfiguration ( BYTE ep_num, UINT16 max_pkt_size, UINT16 flags )
 
 BOOL USBHALInitialize ( unsigned long flags );
 
-#else   // defined(USB_SUPPORT_HOST) || defined(USB_SUPPORT_OTG)
-    #if defined(__18CXX)
-        #include "USB\usb_hal_pic18.h"
-    #elif defined(__C30__)
-        #include "USB\usb_hal_pic24.h"
-    #elif defined(__PIC32MX__)
-        #include "USB\usb_hal_pic32.h"
-    #endif
-#endif  // defined(USB_SUPPORT_HOST) || defined(USB_SUPPORT_OTG)
 #endif  // _USB_HAL_H_
 /*************************************************************************
  * EOF

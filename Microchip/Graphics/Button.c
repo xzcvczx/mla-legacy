@@ -74,7 +74,7 @@ BUTTON *BtnCreate
 )
 {
     BUTTON  *pB = NULL;
-    pB = (BUTTON *)malloc(sizeof(BUTTON));
+    pB = (BUTTON *)GFX_malloc(sizeof(BUTTON));
     if(pB == NULL)
         return (NULL);
 
@@ -431,10 +431,20 @@ WORD BtnDraw(BUTTON *pB)
             state = RNDBUTTON_DRAW;
 
         case RNDBUTTON_DRAW:
-            if(!GOLPanelDrawTsk())
-            {
-                return (0);
-            }
+        	if (GetState(pB, BTN_TWOTONE))
+        	{
+            	if(!GOLTwoTonePanelDrawTsk())
+            	{
+                	return (0);
+            	}
+        	}	
+        	else
+        	{
+	            if(!GOLPanelDrawTsk())
+	            {
+	                return (0);
+	            }									
+			}
 
                 #ifdef USE_BUTTON_MULTI_LINE
             state = CHECK_TEXT_DRAW;

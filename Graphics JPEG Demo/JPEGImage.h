@@ -44,12 +44,12 @@ Anton Alkhimenok     05-May-2009    Modified to support JPEG files in external m
 
 // The module uses an external memory driver to get an JPEG image from the external memory.
 // The header file for the driver must be provided HERE:
-    #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2)
+    #if defined (GFX_PICTAIL_V2)
         #include "SST39VF040.h"     // driver for SST39 parallel flash with JPEG files
-    #elif (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #elif defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD) || defined (MULTI_MEDIA_BOARD_DM00123)
         #include "SST25VF016.h"     // driver for SST25 SPI flash with JPEG files
     #else
-        #error Only Graphics PICtails 2 and 3 are supported
+        #error Hardware used does not have external memory
     #endif
 
 // One function must be implemented in the driver:
@@ -64,7 +64,7 @@ Anton Alkhimenok     05-May-2009    Modified to support JPEG files in external m
 ************************************************************************/
 
 // Definition for the function implemented in the external memory driver must be HERE:
-    #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2)
+    #if defined (GFX_PICTAIL_V2)
         #if defined(__dsPIC33F__) || defined(__PIC24H__)
             #define SST39PMPInit() \
     {                              \
@@ -116,11 +116,15 @@ Anton Alkhimenok     05-May-2009    Modified to support JPEG files in external m
     SST39PMPInit();                               \
     SST39ReadArray(address, pData, nCount);       \
     LCDPMPInit();
-    #else // GRAPHICS_HARDWARE_PLATFORM_VERSION == 3
+    #else // GFX_PICTAIL_V3 or PIC24FJ256DA210_DEV_BOARD 
         #define ReadArray(address, pData, nCount)   SST25ReadArray(address, pData, nCount);
     #endif
+    
+    
     #define USE_JPEG_FLASH          // uncomment this line if JPEG images are in internal flash
+    #ifndef MULTI_MEDIA_BOARD_DM00123
     #define USE_JPEG_EXTERNAL       // uncomment this line if JPEG images are in external memory
+    #endif
 
 // JPEG file image structure for external and interanal memories
 // See Primitive.h for BITMAP_FLASH and BITMAP_EXTERNAL info

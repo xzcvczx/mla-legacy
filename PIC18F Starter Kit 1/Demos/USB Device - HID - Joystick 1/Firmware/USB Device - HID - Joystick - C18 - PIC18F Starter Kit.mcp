@@ -5,8 +5,8 @@ device=PIC18F46J50
 [PATH_INFO]
 BuildDirPolicy=BuildDirIsProjectDir
 dir_src=
-dir_bin=
-dir_tmp=
+dir_bin=Objects
+dir_tmp=Objects
 dir_sin=
 dir_inc=..\..\..\..\Include;..\..\..\..\Microchip\Include
 dir_lib=C:\mcc18\lib

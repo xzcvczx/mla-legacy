@@ -8,7 +8,7 @@ dir_src=
 dir_bin=
 dir_tmp=.\Objects\USB Device - Composite - WinUSB + MSD - PIC18F46J50
 dir_sin=
-dir_inc=..\..\..\USB Device - Composite - WinUSB + MSD\Firmware;..\..\USB Device - Composite - WinUSB + MSD\Firmware;..\..\Microchip\Include;..\..\..\Include;..\..\Include;.
+dir_inc=..\..\Microchip\Include;.;C:\MCC18\h
 dir_lib=C:\mcc18\lib
 dir_lkr=
 [CAT_FILTERS]

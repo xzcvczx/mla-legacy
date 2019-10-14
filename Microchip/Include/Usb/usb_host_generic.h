@@ -56,7 +56,8 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 Change History:
   Rev   Description
   ----  -----------------------------------------
-  2.6a  No change
+  2.6a- No change
+   2.7
 *******************************************************************************/
 #ifndef __USBHOSTGENERIC_H__
 #define __USBHOSTGENERIC_H__

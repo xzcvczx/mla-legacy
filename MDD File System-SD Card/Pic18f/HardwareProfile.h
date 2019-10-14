@@ -31,14 +31,6 @@
  *
 *****************************************************************************/
 
-//DOM-IGNORE-BEGIN
-/********************************************************************
- Change History:
-  Rev            Description
-  ----           -----------------------
-  1.2.4 - 1.2.5  No Change
-********************************************************************/
-//DOM-IGNORE-END
 
 #ifndef _HARDWAREPROFILE_H_
 #define _HARDWAREPROFILE_H_
@@ -47,9 +39,14 @@
 
 // Sample clock speed for PIC18
 #if defined (__18CXX)
+    #if defined(__18F87J50)
+        #define DEMO_BOARD PIC18F87J50_PIM
+        #define PIC18F87J50_PIM
+    #elif defined(__18F46J50)
+        #define DEMO_BOARD PIC18F46J50_PIM
+        #define PIC18F46J50_PIM
+    #endif
 
-    #define DEMO_BOARD PIC18F87J50_PIM
-    #define PIC18F87J50_PIM
 
     #define GetSystemClock()        48000000                        // System clock frequency (Hz)
     #define GetPeripheralClock()    GetSystemClock()                // Peripheral clock freq.
@@ -128,7 +125,7 @@
    an SD-card-based physical layer                                   */
 
 #ifdef USE_SD_INTERFACE_WITH_SPI
-    #ifdef __18CXX
+    #ifdef PIC18F87J50_PIM
     
         #define USE_PIC18
         #define USE_SD_INTERFACE_WITH_SPI
@@ -175,6 +172,64 @@
     
         #define SPIENABLE           SSPCON1bits.SSPEN
 
+        // Will generate an error if the clock speed is too low to interface to the card
+        #if (GetSystemClock() < 400000)
+            #error System clock speed must exceed 400 kHz
+        #endif
+    #elif defined PIC18F46J50_PIM
+        #define USE_PIC18
+        #define USE_SD_INTERFACE_WITH_SPI
+    
+        #define INPUT_PIN           1
+        #define OUTPUT_PIN          0
+
+        #define USE_SD_INTERFACE_WITH_SPI
+    
+        #define TRIS_CARD_DETECT    TRISBbits.TRISB4    // Input
+        #define CARD_DETECT         PORTBbits.RB4
+        
+        #define TRIS_WRITE_DETECT   TRISDbits.TRISD7    // Input
+        #define WRITE_DETECT        PORTDbits.RD7
+     
+        // Chip Select Signal
+        #define SD_CS               PORTBbits.RB3
+        #define SD_CS_TRIS          TRISBbits.TRISB3
+            
+        // Card detect signal
+        #define SD_CD               PORTBbits.RB4
+        #define SD_CD_TRIS          TRISBbits.TRISB4
+            
+        // Write protect signal
+        #define SD_WE               PORTDbits.RD7
+        #define SD_WE_TRIS          TRISDbits.TRISD7
+    
+        // TRIS pins for the SCK/SDI/SDO lines
+        #define SPICLOCK            TRISBbits.TRISB1
+        #define SPIIN               TRISAbits.TRISA1
+        #define SPIOUT              TRISAbits.TRISA5
+    
+        // Latch pins for SCK/SDI/SDO lines
+        #define SPICLOCKLAT         LATBbits.LATB1
+        #define SPIINLAT            LATAbits.LATA1
+        #define SPIOUTLAT           LATAbits.LATA5
+    
+        // Port pins for SCK/SDI/SDO lines
+        #define SPICLOCKPORT        PORTBbits.RB1
+        #define SPIINPORT           PORTAbits.RA1
+        #define SPIOUTPORT          PORTAbits.RA5
+    
+        // Registers for the SPI module you want to use
+        #define SPICON1             SSP2CON1
+        #define SPISTAT             SSP2STAT
+        #define SPIBUF              SSP2BUF
+        #define SPISTAT_RBF         SSP2STATbits.BF
+        #define SPICON1bits         SSP2CON1bits
+        #define SPISTATbits         SSP2STATbits
+    
+        #define SPI_INTERRUPT_FLAG  PIR3bits.SSP2IF 
+        #define SPIENABLE           SSP2CON1bits.SSPEN
+    
+        
         // Will generate an error if the clock speed is too low to interface to the card
         #if (GetSystemClock() < 400000)
             #error System clock speed must exceed 400 kHz

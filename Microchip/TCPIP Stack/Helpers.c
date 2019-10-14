@@ -1048,21 +1048,26 @@ WORD CalcIPChecksum(BYTE* buffer, WORD count)
 {
 	WORD i;
 	WORD *val;
-	DWORD_VAL sum = {0x00000000ul};
+	union
+	{
+		WORD w[2];
+		DWORD dw;
+	} sum;
 
 	i = count >> 1;
 	val = (WORD*)buffer;
 
 	// Calculate the sum of all words
+	sum.dw = 0x00000000ul;
 	while(i--)
-		sum.Val += (DWORD)*val++;
+		sum.dw += (DWORD)*val++;
 
 	// Add in the sum of the remaining byte, if present
-	if(((WORD_VAL*)&count)->bits.b0)
-		sum.Val += (DWORD)*(BYTE*)val;
+	if(count & 0x1)
+		sum.dw += (DWORD)*(BYTE*)val;
 
 	// Do an end-around carry (one's complement arrithmatic)
-	sum.Val = (DWORD)sum.w[0] + (DWORD)sum.w[1];
+	sum.dw = sum.w[0] + sum.w[1];
 
 	// Do another end-around carry in case if the prior add 
 	// caused a carry out

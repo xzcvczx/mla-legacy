@@ -70,7 +70,7 @@ ROUNDDIAL *RdiaCreate
 {
     ROUNDDIAL   *pDia = NULL;
 
-    pDia = (ROUNDDIAL *)malloc(sizeof(ROUNDDIAL));
+    pDia = (ROUNDDIAL *)GFX_malloc(sizeof(ROUNDDIAL));
     if(pDia == NULL)
         return (NULL);
 

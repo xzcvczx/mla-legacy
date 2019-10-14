@@ -215,7 +215,8 @@ typedef enum
     TE_MSG_ADD_CHAR,                // TextEntry add character action ID
     TE_MSG_DELETE,                  // TextEntry delete character action ID
     TE_MSG_SPACE,                   // TextEntry add space character action ID
-    TE_MSG_ENTER                    // TextEntry enter action ID
+    TE_MSG_ENTER,                   // TextEntry enter action ID
+    OBJ_MSG_PASSIVE             	// Passive message response. No change in object needed.
 } TRANS_MSG;
 
 /*********************************************************************
@@ -359,7 +360,7 @@ extern const FONT_FLASH GOLFontDefault;
         #define COMMONBACKGROUNDCOLORDEFAULT    0x00
 
     #else
-        #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V1)
+        #if defined (GFX_PICTAIL_V1)
 
 /* default settings for Microtips display */
 
@@ -421,7 +422,7 @@ extern const FONT_FLASH GOLFontDefault;
 // Common background color default value.
             #define COMMONBACKGROUNDCOLORDEFAULT    RGB565CONVERT(0xD4, 0xED, 0xF7)
 
-        #endif // GRAPHICS_HARDWARE_PLATFORM
+        #endif //  #if defined (GFX_PICTAIL_V1)
     #endif // USE_MONOCHROME
 #endif
 
@@ -1631,4 +1632,31 @@ extern void     *_pRpnlBitmap;      // Bitmap used in the panel
 *
 ********************************************************************/
 WORD    GOLPanelDrawTsk(void);
+
+/*********************************************************************
+* Function: WORD GOLTwoTonePanelDrawTsk()
+*
+* Overview: This function draws a two tone panel on the screen with parameters 
+*			set by GOLPanelDraw() macro. This function must be called 
+*			repeatedly (depending on the return value) for a successful 
+*			rendering of the panel. 	
+*
+* PreCondition: Parameters of the panel must be set by GOLPanelDraw() macro.
+*
+* Input: none
+*
+* Output: Returns the status of the panel rendering
+*	<CODE> 
+*          0 – Rendering of the panel is not yet finished.
+*          1 – Rendering of the panel is finished.
+*	</CODE>	
+*
+* Example:
+*	Usage is similar to GOLPanelDraw() example.
+*
+* Side Effects: none
+*
+********************************************************************/
+WORD 	GOLTwoTonePanelDrawTsk(void);
+
 #endif // _GOL_H

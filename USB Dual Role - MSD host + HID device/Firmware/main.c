@@ -34,9 +34,17 @@
 
  Change History:
   Rev   Description
-  1.0   Initial release
+  ----  ---------------------------------------------------------
   2.1   Updated for simplicity and to use common
-                     coding style
+        coding style
+
+  2.7   Removed out of date information about PIC24F vector remapping
+        for the HID boot loader.  
+
+        Moved the PIC32 system startup function calls out of the HOST
+        case statement and added it to before the main loop.  Before
+        this change the device demo would run at a different rate if
+        it was run before the host demo than after the host demo.
 ********************************************************************/
 
 #ifndef MAIN_C
@@ -142,33 +150,6 @@ void YourHighPriorityISRCode();
 void YourLowPriorityISRCode();
 WORD_VAL ReadPOT(void);
 
-/** VECTOR REMAPPING ***********************************************/
-#if defined(__C30__)
-    #if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
-        /*
-         *	ISR JUMP TABLE
-         *
-         *	It is necessary to define jump table as a function because C30 will
-         *	not store 24-bit wide values in program memory as variables.
-         *
-         *	This function should be stored at an address where the goto instructions 
-         *	line up with the remapped vectors from the bootloader's linker script.
-         *  
-         *  For more information about how to remap the interrupt vectors,
-         *  please refer to AN1157.  An example is provided below for the T2
-         *  interrupt with a bootloader ending at address 0x1400
-         */
-//        void __attribute__ ((address(0x1404))) ISRTable(){
-//        
-//        	asm("reset"); //reset instruction to prevent runaway code
-//        	asm("goto %0"::"i"(&_T2Interrupt));  //T2Interrupt's address
-//        }
-    #endif
-#endif
-
-
-
-
 /** DECLARATIONS ***************************************************/
 #pragma code
 
@@ -216,8 +197,29 @@ int main(void)
         CLKDIVbits.PLLEN = 1;
         while(pll_startup_counter--);
     }
-
     //Device switches over automatically to PLL output after PLL is locked and ready.
+
+    #endif
+
+    #if defined(__PIC32MX__)
+        {
+            int  value;
+    
+            value = SYSTEMConfigWaitStatesAndPB( GetSystemClock() );
+    
+            // Enable the cache for the best performance
+            CheKseg0CacheOn();
+    
+            INTEnableSystemMultiVectoredInt();
+    
+            value = OSCCON;
+            while (!(value & 0x00000020))
+            {
+                value = OSCCON;    // Wait for PLL lock to stabilize
+            }
+        }
+            
+        DDPCONbits.JTAGEN = 0;
     #endif
 
     mInitAllSwitches();
@@ -227,27 +229,7 @@ int main(void)
         switch(device_mode)
         {
             case MODE_HOST:
-                //Host mode
-                #if defined(__PIC32MX__)
-                    {
-                        int  value;
-                
-                        value = SYSTEMConfigWaitStatesAndPB( GetSystemClock() );
-                
-                        // Enable the cache for the best performance
-                        CheKseg0CacheOn();
-                
-                        INTEnableSystemMultiVectoredInt();
-                
-                        value = OSCCON;
-                        while (!(value & 0x00000020))
-                        {
-                            value = OSCCON;    // Wait for PLL lock to stabilize
-                        }
-                    }
-            
-                #endif
-            
+                //Host mode          
                 deviceAttached = FALSE;
             
                 //Initialize the stack
@@ -275,7 +257,7 @@ int main(void)
                             {
                                 USBTasks();
                             }
-                            mLED_3_Off();
+                            mLED_2_Off();
                             device_mode = MODE_UNKNOWN;
                             USBMaskInterrupts();
                         }
@@ -331,13 +313,13 @@ int main(void)
                 if(sw2 == 0)
                 {
                     mInitAllLEDs();
-                    mLED_3_On();
+                    mLED_2_On();
                     device_mode = MODE_HOST;
                 }  
                 else if(sw3 == 0)
                 {
                     mInitAllLEDs();
-                    mLED_3_On();
+                    mLED_2_On();
                     device_mode = MODE_DEVICE;
                 }
                 else 

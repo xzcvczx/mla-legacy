@@ -365,28 +365,6 @@ WORD_VAL ReadPOT(void);
 		//Etc.
 	
 	}	//This return will be a "retfie", since this is in a #pragma interruptlow section 
-
-#elif defined(__C30__)
-    #if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
-        /*
-         *	ISR JUMP TABLE
-         *
-         *	It is necessary to define jump table as a function because C30 will
-         *	not store 24-bit wide values in program memory as variables.
-         *
-         *	This function should be stored at an address where the goto instructions 
-         *	line up with the remapped vectors from the bootloader's linker script.
-         *  
-         *  For more information about how to remap the interrupt vectors,
-         *  please refer to AN1157.  An example is provided below for the T2
-         *  interrupt with a bootloader ending at address 0x1400
-         */
-//        void __attribute__ ((address(0x1404))) ISRTable(){
-//        
-//        	asm("reset"); //reset instruction to prevent runaway code
-//        	asm("goto %0"::"i"(&_T2Interrupt));  //T2Interrupt's address
-//        }
-    #endif
 #endif
 
 
@@ -1008,16 +986,7 @@ void USBCBSuspend(void)
 	
 
     #if defined(__C30__)
-    #if 0
-        U1EIR = 0xFFFF;
-        U1IR = 0xFFFF;
-        U1OTGIR = 0xFFFF;
-        IFS5bits.USB1IF = 0;
-        IEC5bits.USB1IE = 1;
-        U1OTGIEbits.ACTVIE = 1;
-        U1OTGIRbits.ACTVIF = 1;
-        Sleep();
-    #endif
+        USBSleepOnSuspend();
     #endif
 }
 

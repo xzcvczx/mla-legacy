@@ -1,8 +1,8 @@
 /********************************************************************
  FileName:     	HardwareProfile - PIC24FJ256DA210 Development Board.h
  Dependencies:  See INCLUDES section
- Processor:     PIC24FJ256DA210
- Hardware:      PIC24FJ256DA210
+ Processor:     PIC24FJ256GB110
+ Hardware:      PIC24FJ256GB110 PIM
  Compiler:      Microchip C30
  Company:       Microchip Technology, Inc.
 
@@ -30,8 +30,8 @@
  File Description:
 
  Change History:
-  Rev   Description
-  2.6   Initial revision
+  Rev   Date         Description
+  ?.?   09/15/2008   Initial revision
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC24FJ256DA210_DEV_BOARD_H

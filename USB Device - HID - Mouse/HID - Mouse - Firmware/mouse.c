@@ -36,10 +36,15 @@
   Rev   Description
   ----  -----------------------------------------
   1.0   Initial release
+
   2.1   Updated for simplicity and to use common coding style
+
   2.6a  Updated to allow screen savers to come on by only sending
         one packet indicating no movement and then allowing the 
         endpoint to NAK until the next time movement is registered.
+
+  2.7   Added example to put PIC24F devices to sleep using USB
+        activity to wake the device back up.
 ********************************************************************/
 
 #ifndef USBMOUSE_C
@@ -53,7 +58,11 @@
 /** CONFIGURATION **************************************************/
 #if defined(PICDEM_FS_USB)      // Configuration bits for PICDEM FS USB Demo Board (based on PIC18F4550)
         #pragma config PLLDIV   = 5         // (20 MHz crystal on PICDEM FS USB board)
-        #pragma config CPUDIV   = OSC1_PLL2   
+        #if (USB_SPEED_OPTION == USB_FULL_SPEED)
+            #pragma config CPUDIV   = OSC1_PLL2  
+        #else
+            #pragma config CPUDIV   = OSC3_PLL4   
+        #endif
         #pragma config USBDIV   = 2         // Clock source from 96MHz PLL/2
         #pragma config FOSC     = HSPLL_HS
         #pragma config FCMEN    = OFF
@@ -232,8 +241,6 @@
     #error No hardware board defined, see "HardwareProfile.h" and __FILE__
 #endif
 
-
-
 /** VARIABLES ******************************************************/
 #pragma udata
 BYTE old_sw2,old_sw3;
@@ -360,28 +367,6 @@ void YourLowPriorityISRCode();
 		//Etc.
 	
 	}	//This return will be a "retfie", since this is in a #pragma interruptlow section 
-
-#elif defined(__C30__)
-    #if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
-        /*
-         *	ISR JUMP TABLE
-         *
-         *	It is necessary to define jump table as a function because C30 will
-         *	not store 24-bit wide values in program memory as variables.
-         *
-         *	This function should be stored at an address where the goto instructions 
-         *	line up with the remapped vectors from the bootloader's linker script.
-         *  
-         *  For more information about how to remap the interrupt vectors,
-         *  please refer to AN1157.  An example is provided below for the T2
-         *  interrupt with a bootloader ending at address 0x1400
-         */
-//        void __attribute__ ((address(0x1404))) ISRTable(){
-//        
-//        	asm("reset"); //reset instruction to prevent runaway code
-//        	asm("goto %0"::"i"(&_T2Interrupt));  //T2Interrupt's address
-//        }
-    #endif
 #endif
 
 
@@ -411,6 +396,7 @@ void main(void)
 int main(void)
 #endif
 {
+
     InitializeSystem();
 
     #if defined(USB_INTERRUPT)
@@ -984,54 +970,11 @@ void USBCBSuspend(void)
 	
 
     #if defined(__C30__)
-    #if 0
-        U1EIR = 0xFFFF;
-        U1IR = 0xFFFF;
-        U1OTGIR = 0xFFFF;
-        IFS5bits.USB1IF = 0;
-        IEC5bits.USB1IE = 1;
-        U1OTGIEbits.ACTVIE = 1;
-        U1OTGIRbits.ACTVIF = 1;
-        Sleep();
-    #endif
+        _IPL = 7;
+        USBSleepOnSuspend();
+        _IPL = 0;
     #endif
 }
-
-
-/******************************************************************************
- * Function:        void _USB1Interrupt(void)
- *
- * PreCondition:    None
- *
- * Input:           None
- *
- * Output:          None
- *
- * Side Effects:    None
- *
- * Overview:        This function is called when the USB interrupt bit is set
- *					In this example the interrupt is only used when the device
- *					goes to sleep when it receives a USB suspend command
- *
- * Note:            None
- *****************************************************************************/
-#if 0
-void __attribute__ ((interrupt)) _USB1Interrupt(void)
-{
-    #if !defined(self_powered)
-        if(U1OTGIRbits.ACTVIF)
-        {       
-            IEC5bits.USB1IE = 0;
-            U1OTGIEbits.ACTVIE = 0;
-            IFS5bits.USB1IF = 0;
-        
-            //USBClearInterruptFlag(USBActivityIFReg,USBActivityIFBitNum);
-            USBClearInterruptFlag(USBIdleIFReg,USBIdleIFBitNum);
-            //USBSuspendControl = 0;
-        }
-    #endif
-}
-#endif
 
 /******************************************************************************
  * Function:        void USBCBWakeFromSuspend(void)

@@ -68,8 +68,13 @@
 #define SLIDERYPOS      STXYPOS + STXHEIGHT + 3
 #define SLIDERWIDTH     STXWIDTH - (ARROWWIDTH << 1)    // slider width
 #define HWDATAMAX       9                               // # of "Hello World" strings
-#define HELLOWORLDDELAY 10                              // default animation delay
-#define DELTAMOVE       1
+#if defined(__PIC24FJ256DA210__)
+	#define HELLOWORLDDELAY 22                              // default animation delay
+	#define DELTAMOVE       1
+#else
+	#define HELLOWORLDDELAY 10                              // default animation delay
+	#define DELTAMOVE       1
+#endif	
 
 /////////////////////////////////////////////////////////////////////////////
 //                            LOCAL PROTOTYPES
@@ -94,7 +99,6 @@ extern XCHAR                ExitStr[];
 /////////////////////////////////////////////////////////////////////////////
 //                       GLOBAL VARIABLES FOR DEMO
 /////////////////////////////////////////////////////////////////////////////
-//extern DWORD tick;                     				// tick counter
 WORD                        update = 0;                 // variable to update customized graphics
 WORD                        helloDelay = HELLOWORLDDELAY;
 
@@ -229,7 +233,7 @@ void AnimateText(BYTE mov)
     oldY = yPos;
     newX = xPos + x;
     newY = yPos + y;
-    while((unsigned XCHAR)15 < (unsigned XCHAR)(NewChar = *pString++))
+    while((XCHAR)15 < (XCHAR)(NewChar = *pString++))
     {
 
         // remove the old position of the character

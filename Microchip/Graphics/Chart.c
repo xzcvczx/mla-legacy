@@ -92,7 +92,7 @@ CHART *ChCreate
 {
     CHART   *pCh = NULL;
 
-    pCh = (CHART *)malloc(sizeof(CHART));
+    pCh = (CHART *)GFX_malloc(sizeof(CHART));
 
     if(pCh == NULL)
         return (NULL);
@@ -2696,7 +2696,7 @@ DATASERIES *ChAddDataSeries(CHART *pCh, WORD nSamples, WORD *pData, XCHAR *pName
 {
     DATASERIES  *pVar = NULL, *pListVar;
 
-    pVar = (DATASERIES *)malloc(sizeof(DATASERIES));
+    pVar = (DATASERIES *)GFX_malloc(sizeof(DATASERIES));
 
     if(pVar == NULL)
         return (NULL);
@@ -2747,7 +2747,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number)
     // check if there is only one entry
     if(pVar->pNextData == NULL)
     {
-        free(pVar);
+        GFX_free(pVar);
         pCh->pChData = NULL;
         return;
     }
@@ -2762,7 +2762,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number)
             pVar = pVar->pNextData;
 
             // free the memory used by the item
-            free(pPrevVar);
+            GFX_free(pPrevVar);
         }
 
         return;
@@ -2780,7 +2780,7 @@ void ChRemoveDataSeries(CHART *pCh, WORD number)
     pPrevVar->pNextData = pVar->pNextData;
 
     // free the memory used by the item
-    free(pVar);
+    GFX_free(pVar);
 
     return;
 }

@@ -150,6 +150,13 @@
 #endif
 
 
+#ifdef __18CXX
+    /* Define the locations for the dataBuffer and FATbuffer; PLEASE CHECK THE LINKER FILE */
+    #define DATA_BUFFER_ADDRESS      0x800
+    #define FAT_BUFFER_ADDRESS       0xA00
+#endif
+
+
 // Function definitions
 // Associate the physical layer functions with the correct physical layer
 #ifdef USE_SD_INTERFACE_WITH_SPI       // SD-SPI.c and .h

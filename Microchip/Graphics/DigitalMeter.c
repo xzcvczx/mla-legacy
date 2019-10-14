@@ -102,7 +102,7 @@ DIGITALMETER *DmCreate
 )
 {
     DIGITALMETER    *pDm = NULL;
-    pDm = malloc(sizeof(DIGITALMETER));
+    pDm = GFX_malloc(sizeof(DIGITALMETER));
     if(pDm == NULL)
         return (pDm);
 

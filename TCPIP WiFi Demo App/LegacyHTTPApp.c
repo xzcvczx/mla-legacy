@@ -440,7 +440,7 @@ WORD HTTPGetVar(BYTE var, WORD ref, BYTE* val)
 	case VAR_STACK_VERSION:
         if(ref == HTTP_START_OF_VAR)
 		{
-			strncpypgm2ram((char*)VarString, (ROM char*)VERSION, sizeof(VarString));
+			strncpypgm2ram((char*)VarString, (ROM char*)TCPIP_STACK_VERSION, sizeof(VarString));
 		}
         *val = VarString[(BYTE)ref];
         if(VarString[(BYTE)ref] == '\0')

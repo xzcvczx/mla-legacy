@@ -82,6 +82,10 @@ WORD    _fontLastChar;  // Last character in the font table.
 // Installed font height
 SHORT   _fontHeight;
 
+// bevel drawing type (0 = full bevel, 0xF0 - top bevel only, 0x0F - bottom bevel only
+BYTE _bevelDrawType; 
+
+
 /*********************************************************************
 * Function:  void InitGraph(void)
 *
@@ -136,6 +140,9 @@ void InitGraph(void)
 
     // Set font orientation
     SetFontOrientation(ORIENT_HOR);
+    
+    // set Bevel drawing 
+    SetBevelDrawType(DRAWFULLBEVEL);
 }
 
 /*********************************************************************
@@ -1112,19 +1119,23 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 
             if(xCur != xPos)
             {
+	            if (_bevelDrawType & DRAWBOTTOMBEVEL) 
+	            { 
+	                // 6th octant to 3rd octant
+	                Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew);
+	
+	                // 5th octant to 4th octant
+	                Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur);
+				}
 
-                // 6th octant to 3rd octant
-                Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew);
-
-                // 5th octant to 4th octant
-                Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur);
-
-                // 8th octant to 1st octant
-                Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos);
-
-                // 7th octant to 2nd octant
-                Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur);
-
+	            if (_bevelDrawType & DRAWTOPBEVEL) 
+				{
+	                // 8th octant to 1st octant
+	                Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos);
+	
+	                // 7th octant to 2nd octant
+	                Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur);
+				}
                 // update current values
                 xCur = xPos;
                 yCur = yPos;
@@ -1134,7 +1145,15 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 
     // this covers both filled rounded object and filled rectangle.
     if((x2 - x1) || (y2 - y1))
-        Bar(x1 - rad, y1, x2 + rad, y2);
+    {
+		if (_bevelDrawType == DRAWFULLBEVEL) 
+	        Bar(x1 - rad, y1, x2 + rad, y2);
+	    else if (_bevelDrawType == DRAWTOPBEVEL)    
+	        Bar(x1 - rad, y1, x2 + rad, y1+((y2-y1)>>1));
+	    else    
+	        Bar(x1 - rad, y1+((y2-y1)>>1), x2 + rad, y2);
+	}     
+	        
     return (1);
     #else
 
@@ -1208,8 +1227,11 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
                 {
 
                     // 6th octant to 3rd octant
-                    if(Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew) == 0)
-                        return (0);
+	            	if (_bevelDrawType & DRAWBOTTOMBEVEL) 
+	            	{ 
+                    	if(Bar(x1 - xCur, y2 + yCur, x2 + xCur, y2 + yNew) == 0)
+                        	return (0);
+              		}          	
                     state = Q5TOQ4;
                     break;
                 }
@@ -1219,37 +1241,61 @@ WORD FillBevel(SHORT x1, SHORT y1, SHORT x2, SHORT y2, SHORT rad)
 
             case Q5TOQ4:
 
-                // 5th octant to 4th octant
-                if(Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur) == 0)
-                    return (0);
+            	if (_bevelDrawType & DRAWBOTTOMBEVEL) 
+            	{ 
+	                // 5th octant to 4th octant
+	                if(Bar(x1 - yNew, y2 + xPos, x2 + yNew, y2 + xCur) == 0)
+	                    return (0);
+				}
                 state = Q8TOQ1;
                 break;
 
             case Q8TOQ1:
 
                 // 8th octant to 1st octant
-                if(Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos) == 0)
-                    return (0);
+	            if (_bevelDrawType & DRAWTOPBEVEL) 
+				{
+					if(Bar(x1 - yNew, y1 - xCur, x2 + yNew, y1 - xPos) == 0)
+                    	return (0);
+    			}                	
                 state = Q7TOQ2;
                 break;
 
             case Q7TOQ2:
 
                 // 7th octant to 2nd octant
-                if(Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur) == 0)
-                    return (0);
-
+	            if (_bevelDrawType & DRAWTOPBEVEL) 
+				{
+	                if(Bar(x1 - xCur, y1 - yNew, x2 + xCur, y1 - yCur) == 0)
+    	                return (0);
+				}
                 // update current values
                 xCur = xPos;
                 yCur = yPos;
                 state = CHECK;
                 break;
 
+ 
+
             case FACE:
                 if((x2 - x1) || (y2 - y1))
                 {
-                    if(Bar(x1 - rad, y1, x2 + rad, y2) == 0)
-                        return (0);
+					if (_bevelDrawType == DRAWFULLBEVEL)
+					{ 
+				        if(Bar(x1 - rad, y1, x2 + rad, y2) == 0)
+	                        return (0);
+				 	}
+				    else if (_bevelDrawType == DRAWTOPBEVEL)
+				    {    
+				        if(Bar(x1 - rad, y1, x2 + rad, y1+((y2-y1)>>1)) == 0)
+	                        return (0);
+				    }
+				    else    
+				    {
+				        if(Bar(x1 - rad, y1+((y2-y1)>>1), x2 + rad, y2) == 0)
+	                        return (0);
+        			}            
+
                     state = WAITFORDONE;
                 }
                 else
@@ -1510,7 +1556,7 @@ WORD OutText(XCHAR *textString)
     #ifndef USE_NONBLOCKING_CONFIG
 
     XCHAR   ch;
-    while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
+    while((XCHAR)15 < (XCHAR)(ch = *textString++))
         while(OutChar(ch) == 0);
     return (1);
 
@@ -1519,7 +1565,7 @@ WORD OutText(XCHAR *textString)
     XCHAR       ch;
     static WORD counter = 0;
 
-    while((unsigned XCHAR)(ch = *(textString + counter)) > (unsigned XCHAR)15)
+    while((XCHAR)(ch = *(textString + counter)) > (XCHAR)15)
     {
         if(OutChar(ch) == 0)
             return (0);
@@ -1600,7 +1646,9 @@ WORD OutTextXY(SHORT x, SHORT y, XCHAR *textString)
 ********************************************************************/
 WORD OutChar(XCHAR ch)
 {
+   		#ifdef USE_FONT_FLASH	
     GLYPH_ENTRY *pChTable = NULL;
+    	#endif
     BYTE        *pChImage = NULL;
 
         #ifdef USE_FONT_EXTERNAL
@@ -1621,9 +1669,9 @@ WORD OutChar(XCHAR ch)
     if(IsDeviceBusy() != 0)
         return (0);
         #endif
-    if((unsigned XCHAR)ch < (unsigned XCHAR)_fontFirstChar)
+    if((XCHAR)ch < (XCHAR)_fontFirstChar)
         return (-1);
-    if((unsigned XCHAR)ch > (unsigned XCHAR)_fontLastChar)
+    if((XCHAR)ch > (XCHAR)_fontLastChar)
         return (-1);
 
     switch(*((SHORT *)_font))
@@ -1631,7 +1679,7 @@ WORD OutChar(XCHAR ch)
                 #ifdef USE_FONT_FLASH
 
         case FLASH:
-            pChTable = (GLYPH_ENTRY *) (((FONT_FLASH *)_font)->address + sizeof(FONT_HEADER)) + ((unsigned XCHAR)ch - (unsigned XCHAR)_fontFirstChar);
+            pChTable = (GLYPH_ENTRY *) (((FONT_FLASH *)_font)->address + sizeof(FONT_HEADER)) + ((XCHAR)ch - (XCHAR)_fontFirstChar);
 
             pChImage = (BYTE *) (((FONT_FLASH *)_font)->address + ((DWORD)(pChTable->offsetMSB) << 8) + pChTable->offsetLSB);
 
@@ -1647,7 +1695,7 @@ WORD OutChar(XCHAR ch)
             ExternalMemoryCallback
             (
                 _font,
-                sizeof(FONT_HEADER) + ((unsigned XCHAR)ch - (unsigned XCHAR)_fontFirstChar) * sizeof(GLYPH_ENTRY),
+                sizeof(FONT_HEADER) + ((XCHAR)ch - (XCHAR)_fontFirstChar) * sizeof(GLYPH_ENTRY),
                 sizeof(GLYPH_ENTRY),
                 &chTable
             );
@@ -1762,18 +1810,21 @@ WORD OutChar(XCHAR ch)
 ********************************************************************/
 SHORT GetTextWidth(XCHAR *textString, void *font)
 {
+		#if defined (USE_FONT_RAM) || defined (USE_FONT_FLASH) 
     GLYPH_ENTRY *pChTable;
     FONT_HEADER *pHeader;
+    	#endif
         #ifdef USE_FONT_EXTERNAL
     GLYPH_ENTRY chTable;
     FONT_HEADER header;
         #endif
-    SHORT       textWidth;
 
-    //SHORT        temp;
+    	#if defined (USE_FONT_RAM) || defined (USE_FONT_FLASH) || defined (USE_FONT_EXTERNAL)
+    SHORT       textWidth;
     XCHAR       ch;
     XCHAR       fontFirstChar;
     XCHAR       fontLastChar;
+    	#endif
 
     switch(*((SHORT *)font))
     {
@@ -1805,13 +1856,13 @@ SHORT GetTextWidth(XCHAR *textString, void *font)
             fontLastChar = pHeader->lastChar;
             pChTable = (GLYPH_ENTRY *) (pHeader + 1);
             textWidth = 0;
-            while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
+            while((XCHAR)15 < (XCHAR)(ch = *textString++))
             {
-                if((unsigned XCHAR)ch < (unsigned XCHAR)fontFirstChar)
+                if((XCHAR)ch < (XCHAR)fontFirstChar)
                     continue;
-                if((unsigned XCHAR)ch > (unsigned XCHAR)fontLastChar)
+                if((XCHAR)ch > (XCHAR)fontLastChar)
                     continue;
-                textWidth += (pChTable + ((unsigned XCHAR)ch - (unsigned XCHAR)fontFirstChar))->width;
+                textWidth += (pChTable + ((XCHAR)ch - (XCHAR)fontFirstChar))->width;
             }
 
             return (textWidth);
@@ -1823,16 +1874,16 @@ SHORT GetTextWidth(XCHAR *textString, void *font)
             fontFirstChar = header.firstChar;
             fontLastChar = header.lastChar;
             textWidth = 0;
-            while((unsigned XCHAR)15 < (unsigned XCHAR)(ch = *textString++))
+            while((XCHAR)15 < (XCHAR)(ch = *textString++))
             {
-                if((unsigned XCHAR)ch < (unsigned XCHAR)fontFirstChar)
+                if((XCHAR)ch < (XCHAR)fontFirstChar)
                     continue;
-                if((unsigned XCHAR)ch > (unsigned XCHAR)fontLastChar)
+                if((XCHAR)ch > (XCHAR)fontLastChar)
                     continue;
                 ExternalMemoryCallback
                 (
                     font,
-                    sizeof(FONT_HEADER) + sizeof(GLYPH_ENTRY) * ((unsigned XCHAR)ch - (unsigned XCHAR)fontFirstChar),
+                    sizeof(FONT_HEADER) + sizeof(GLYPH_ENTRY) * ((XCHAR)ch - (XCHAR)fontFirstChar),
                     sizeof(GLYPH_ENTRY),
                     &chTable
                 );

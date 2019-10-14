@@ -92,7 +92,7 @@ Description:
  Change History:
   Rev           Description
   ----------    -----------
-  2.6 - 2.6A    No chance except stack revision number
+  2.6 - 2.7     No change except stack revision number
 ********************************************************************/
 //DOM-IGNORE-END
 

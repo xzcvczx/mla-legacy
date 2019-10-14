@@ -38,6 +38,13 @@ Anton Alkhimenok    06_Jun-2009       Ported to PIC24
 
 #include "MainDemo.h"
 
+
+/**************************************************************************
+ EXTERNS
+**************************************************************************/
+extern DWORD Cluster2Sector(DISK * disk, DWORD cluster);
+extern BYTE SDSectorDMARead(DWORD sector_addr, DWORD dma_addr, UINT16 num_blk);
+
 /**************************************************************************
  LOCAL FUNCTIONS PROTOTYPES
 **************************************************************************/

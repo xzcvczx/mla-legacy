@@ -73,6 +73,7 @@ CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
   ----   -----------
   2.6    Moved many of the USB events
   2.6a   Changed the limit of USB_EVENT from UINT_MAX to INT_MAX
+  2.7    No change
 ********************************************************************/
 //DOM-IGNORE-END
 

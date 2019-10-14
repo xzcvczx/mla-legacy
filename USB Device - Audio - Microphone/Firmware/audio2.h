@@ -2,15 +2,15 @@
  FileName:      audio2.h
  Dependencies:  None
  Processor:     PIC18, PIC24, or PIC32 USB Microcontrollers
- Hardware:      The code is natively intended to be used on the
-                  following hardware platforms:
+ Hardware:      The code is natively intended to be used on the 
+                  following hardware platforms: 
                     PICDEM™ FS USB Demo Board
                     PIC18F46J50 FS USB Plug-In Module
                     PIC18F87J50 FS USB Plug-In Module
                     Explorer 16 + PIC24 or PIC32 USB PIMs
                     PIC24F Starter Kit
                     Low Pin Count USB Development Kit
- Compiler:  	Microchip C18 (for PIC18), C30 (for PIC24),
+ Compiler:  	Microchip C18 (for PIC18), C30 (for PIC24), 
                   or C32 (for PIC32)
  Company:       Microchip Technology, Inc.
 
@@ -39,8 +39,8 @@
 
  Change History:
   Rev   Date         Description
-  2.6   11/12/2009   Initial release
-
+  2.5   10/10/2009   Initial release
+  
 ********************************************************************/
 
 ROM UINT audioSamples[3228] = {

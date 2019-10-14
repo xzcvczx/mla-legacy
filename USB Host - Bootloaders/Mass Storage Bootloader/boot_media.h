@@ -54,6 +54,13 @@ medium and the ability to read the file.
 These interface routines can be implemented via macros or functions as 
 required.
 *******************************************************************************
+
+ Change History:
+  Rev   Description
+  ----  -----------------------------------------
+  2.7   Updated to include the record structure information
+
+********************************************************************************
 */
 
 //*****************************************************************************
@@ -71,6 +78,23 @@ required.
 #ifndef MAX_LOCATE_RETRYS
     #define MAX_LOCATE_RETRYS            3
 #endif
+
+// Record buffer array size
+#define MAX_RECORD_LENGTH             255   // Max Hex-Record Length (converted)
+
+// This structure holds the translated version of the hex record
+typedef struct
+{
+    unsigned char       RecordLength;   // Length record data payload (adjusted
+    unsigned int        LoadOffset;     // 16-bit offset to which the data will 
+    unsigned char       RecordType;     // Type of data in the record
+    unsigned char       data[MAX_RECORD_LENGTH] __attribute__ ((aligned (4)));      
+                        // Record data buffer - needs to be 32-bit aligned so
+                        //   that we can read 32-bit words out of it.
+    unsigned char       Checksum;       // Checksum of the record
+
+} RECORD_STRUCT; // hexadecimal format data for transfer to aggregator
+
 
 
 /* Boot Loader Media Interface Call Outs

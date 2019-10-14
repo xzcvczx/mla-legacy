@@ -40,7 +40,7 @@
  Change History:
   Rev            Description
   ----           -----------------------
-  1.2.4 - 1.2.5  No Change
+  1.2.4 - 1.2.6  No Change
 ********************************************************************/
 //DOM-IGNORE-END
 
@@ -131,6 +131,7 @@ int main (void)
    // Initialize the library
    while (!FSInit());
 
+#ifdef ALLOW_WRITES
    // Create a file
    pointer = FSfopen ("FILE1.TXT", "w");
    if (pointer == NULL)
@@ -170,6 +171,7 @@ int main (void)
    // Close the file
    if (FSfclose (pointer))
       while(1);
+#endif
 
    // Open file 1 in read mode
    pointer = FSfopen ("FILE1.TXT", "r");
@@ -197,6 +199,7 @@ int main (void)
       while(1);
    }
 
+#ifdef ALLOW_DIRS
    // Create a small directory tree
    // Beginning the path string with a '.' will create the tree in
    // the current directory.  Beginning with a '..' would create the
@@ -268,7 +271,9 @@ int main (void)
    // Change directory to the root dir
    if (FSchdir ("\\"))
       while(1);
+#endif
 
+#ifdef ALLOW_FILESEARCH
    // Set attributes
    attributes = ATTR_DIRECTORY | ATTR_ARCHIVE | ATTR_READ_ONLY | ATTR_HIDDEN;
    // Find the first TXT file with any (or none) of those attributes that
@@ -288,7 +293,7 @@ int main (void)
    // Delete file 2
    if (FSremove (rec.filename))
       while(1);
-
+#endif
 
 /*********************************************************************
    The final contents of our card should look like this:

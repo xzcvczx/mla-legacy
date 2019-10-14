@@ -139,4 +139,12 @@
     #define USE_BITMAP_FLASH        // Support for bitmaps located in internal flash
     #define USE_BITMAP_EXTERNAL     // Support for bitmaps located in external memory
 
+/*********************************************************************
+* Overview: Define the malloc() and free() for versatility on OS 
+*           based systems. 
+*
+*********************************************************************/
+	#define GFX_malloc(size)    	malloc(size)
+	#define GFX_free(pObj)    	    free(pObj)
+
 #endif // _GRAPHICSCONFIG_H

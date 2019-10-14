@@ -64,7 +64,7 @@ extern const FONT_FLASH GOLSmallFont;           // small font
     #define LIGHTYELLOW         RGB565CONVERT(238, 221, 130)
     #define GOLD                RGB565CONVERT(255, 215, 0)
     #define DARKORANGE          RGB565CONVERT(255, 140, 0)
-    #define UPDATECHARTINTERVAL (1000)
+    #define UPDATECHARTINTERVAL (2500)
     #define CHARTTITLESTRLENGTH (30)
 
 /////////////////////////////////////////////////////////////////////////////

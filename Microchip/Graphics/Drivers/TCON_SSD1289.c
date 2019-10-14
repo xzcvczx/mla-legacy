@@ -36,6 +36,7 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Anton Alkhimenok     11/17/08
+ * PAT					04/05/10	Modified initialization to reduce flicker.
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -43,6 +44,7 @@
 #define SCL 0x02
 #define SDO 0x04
 #define DC  0x08
+#define BL  0x10
 
 BYTE    value;
 
@@ -167,33 +169,66 @@ void TCON_Init(void)
 
     #else
 
-        SetReg(0xA8, DC | CS | SDO | SCL);
+        SetReg(0xA8, BL| DC | CS | SDO | SCL);
         TCON_CTRL(DC, 1);
         TCON_CTRL(CS, 1);
         TCON_CTRL(SDO, 1);
         TCON_CTRL(SCL, 1);
-        
+        TCON_CTRL(BL, 1);
+       
     #endif
     
+	GPIO_TCON(0x0028, 0x0006);
+	GPIO_TCON(0x0000, 0x0001);
+	DelayMs(15);
 
-    DelayMs(20);
+	GPIO_TCON(0x002B, 0x9532);
+	GPIO_TCON(0x0003, 0xAAAC);
+	GPIO_TCON(0x000C, 0x0002);
+	GPIO_TCON(0x000D, 0x000A);
+	GPIO_TCON(0x000E, 0x2C00);
+	GPIO_TCON(0x001E, 0x00AA);
+	GPIO_TCON(0x0025, 0x8000);
+	DelayMs(15);
 
-    GPIO_TCON(0x00, 0x0001);
-    GPIO_TCON(0x03, 0xAAAC);
-    GPIO_TCON(0x0C, 0x0002);
-    DelayMs(15);
-    GPIO_TCON(0x0D, 0x000A);
-    GPIO_TCON(0x0E, 0x2D00);
-    GPIO_TCON(0x1E, 0x00BC);
-    GPIO_TCON(0x01, 0x1A0C);
-    DelayMs(15);
-    GPIO_TCON(0x01, 0x2B3F);
-    GPIO_TCON(0x02, 0x0600);
-    GPIO_TCON(0x10, 0x0000);
-    GPIO_TCON(0x05, 0x0000);
-    GPIO_TCON(0x06, 0x0000);
+	GPIO_TCON(0x0001, 0x2B3F);
+	GPIO_TCON(0x0002, 0x0600);
+	GPIO_TCON(0x0010, 0x0000);
+	DelayMs(20);
 
-    DelayMs(20);
+	GPIO_TCON(0x0005, 0x0000);
+	GPIO_TCON(0x0006, 0x0000);
+	
+	
+	GPIO_TCON(0x0016, 0xEF1C);
+	GPIO_TCON(0x0017, 0x0003);
+	GPIO_TCON(0x0007, 0x0233);
+	GPIO_TCON(0x000B, 0x5312);
+	GPIO_TCON(0x000F, 0x0000);
+	DelayMs(20);
+
+	GPIO_TCON(0x0041, 0x0000);
+	GPIO_TCON(0x0042, 0x0000);
+	GPIO_TCON(0x0048, 0x0000);
+	GPIO_TCON(0x0049, 0x013F);
+	GPIO_TCON(0x0044, 0xEF00);
+	GPIO_TCON(0x0045, 0x0000);
+	GPIO_TCON(0x0046, 0x013F);
+	GPIO_TCON(0x004A, 0x0000);
+	GPIO_TCON(0x004B, 0x0000);
+	DelayMs(20);
+
+	GPIO_TCON(0x0030, 0x0707);
+	GPIO_TCON(0x0031, 0x0704);
+	GPIO_TCON(0x0032, 0x0204);
+	GPIO_TCON(0x0033, 0x0201);
+	GPIO_TCON(0x0034, 0x0203);
+	GPIO_TCON(0x0035, 0x0204);
+	GPIO_TCON(0x0036, 0x0204);
+	GPIO_TCON(0x0037, 0x0502);
+	GPIO_TCON(0x003A, 0x0302);
+	GPIO_TCON(0x003B, 0x0500);
+	DelayMs(20);
 
   #if (DISPLAY_CONTROLLER == MCHP_DA210)
 		CS_TRIS = CS_TRIS_temp;	

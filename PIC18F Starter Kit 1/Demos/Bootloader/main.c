@@ -78,6 +78,18 @@ _CONFIG2( 0xF7FF & IESO_OFF & FCKSM_CSDCMD & OSCIOFNC_OFF & POSCMOD_HS & FNOSC_P
 
 #endif
 
+#if defined(__18CXX)
+	#pragma code High_ISR = 0x08
+	void Remapped_High_ISR (void)
+	{
+	     _asm goto APPLICATION_HIGH_ISR _endasm
+	}
+	#pragma code Low_ISR = 0x18
+	void Remapped_Low_ISR (void)
+	{
+	     _asm goto APPLICATION_LOW_ISR _endasm
+	}
+#endif
 /*
 *******************************************************************************
 Macro used to call main application
@@ -655,7 +667,7 @@ int main(void)
 
 		oledPutROMString((ROM_STRING)"      Microchip      ", 0, 0);
 		oledPutROMString((ROM_STRING)"  PIC18F Starter Kit ", 1, 0);
-		oledPutROMString((ROM_STRING)"    Bootloader v1.1  ", 1, 0);
+		oledPutROMString((ROM_STRING)"    Bootloader v1.2  ", 1, 0);
 		oledPutROMString((ROM_STRING)"Press the menu button", 3, 0);
 		oledPutROMString((ROM_STRING)" to load a new demo. ", 4, 0);
 

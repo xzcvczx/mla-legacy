@@ -87,8 +87,8 @@
    2.1    Updated for simplicity and to use common
           coding style
    2.6    Minor changes in defintions
-   2.6a   No change
-
+   2.6a-  No change
+   2.7
 *******************************************************************/
 #ifndef HID_H
 #define HID_H

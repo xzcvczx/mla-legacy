@@ -66,7 +66,7 @@ void    SetPPSPorts(void);
 //                            MACROS
 /////////////////////////////////////////////////////////////////////////////
 // Macros to interface with memory
-#if (GRAPHICS_HARDWARE_PLATFORM != GFX_PICTAIL_V3) && (GRAPHICS_HARDWARE_PLATFORM != DA210_DEV_BOARD)
+#if !defined (GFX_PICTAIL_V3) && !defined (PIC24FJ256DA210_DEV_BOARD) && !defined (MULTI_MEDIA_BOARD_DM00123)
     #define FLASHInit()                     SST39Init();
     #define ChipErase()                     SST39ChipErase();
     #define WriteArray(address, pdata, len) SST39WriteArray(address, pdata, len)
@@ -119,19 +119,19 @@ void ProgramFlash(void)
     BYTE        byte;
     CHAR        shift = LED_SHIFT_INIT;
 
-#if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+#if defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD) || defined (MULTI_MEDIA_BOARD_DM00123)
     WORD        xCalMin, xCalMax, yCalMin, yCalMax;
 #endif
 
     BYTE        progBuffer[1024];   // progBuffer for incoming data
     DWORD_VAL   address;            // Current memory address
 
-#if (GRAPHICS_HARDWARE_PLATFORM <= GFX_PICTAIL_V3)
+#if defined (GFX_PICTAIL_V3) || defined (GFX_PICTAIL_V2)
     // USE Explorer 16 LEDs as status
     TRISA = 0xFFF3;                 // set IO pins (2:3) to output mode
     LATA = 0x0000;                  // initialize all to be off
     SetLED(LED_ON, 0x08);
-#elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)    
+#elif defined (PIC24FJ256DA210_DEV_BOARD)    
     // USE Explorer 16 LEDs as status
     TRISAbits.TRISA7 = 0;           // set IO pins (A7) to output mode
     LATA = 0;                  // initialize all to be off
@@ -146,7 +146,7 @@ void ProgramFlash(void)
     UARTInit();
     FLASHInit();
 
-#if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+#if defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD) || defined (MULTI_MEDIA_BOARD_DM00123)
 
     // get the calibration data first and save into temp variables.
     // note that the addresses used here is dependent on the definition
@@ -160,12 +160,12 @@ void ProgramFlash(void)
     // erase the whole flash
     ChipErase();
 
-#if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V250)
+#if defined (GFX_PICTAIL_V250)
 	    // Beeper exist only in Graphics PICtail 2 and its variants.
     	Beep();
 #endif	
 
-#if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+#if defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD) || defined (MULTI_MEDIA_BOARD_DM00123)
 
     // now write back the calibration data
     WriteWord(GRAPHICS_LIBRARY_VERSION, (unsigned long)0xFFFFFFFE);
@@ -189,13 +189,13 @@ void ProgramFlash(void)
         waitTick = tick;
         while(UARTDataReceived() == 0)
         {
-#if (GRAPHICS_HARDWARE_PLATFORM <= GFX_PICTAIL_V3)    
+#if defined (GFX_PICTAIL_V3) || defined (GFX_PICTAIL_V2)
             if((tick - waitTick) >= WAIT_TICK_COUNT)
             {
                 // set LED to signify waiting
                 SetLED(LED_ON, LED_SHIFT_INIT);
             }
-#elif (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD )   
+#elif defined (PIC24FJ256DA210_DEV_BOARD)   
             if((tick - waitTick) >= WAIT_TICK_COUNT)
             {
                 // set LED to signify waiting
@@ -213,7 +213,7 @@ void ProgramFlash(void)
                 shift = 0;
             else
                 shift = LED_SHIFT_INIT;
-#if (GRAPHICS_HARDWARE_PLATFORM <= GFX_PICTAIL_V3)                
+#if defined (GFX_PICTAIL_V3) || defined (GFX_PICTAIL_V2)
             SetLED(LED_OFF, 0x0C);
             SetLED(LED_ON, shift);
 #endif            

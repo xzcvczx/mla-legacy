@@ -202,6 +202,7 @@ extern volatile BOOL MemInterfaceAttached;
 	#endif
 
 	#define mMIN(a, b)	((a<b)?a:b)
+	#define smHTTP		httpStubs[curHTTPID].sm			// Access the current state machine
 
 /*****************************************************************************
   Function:
@@ -248,6 +249,10 @@ void HTTPInit(void)
 		MACPutArray((BYTE*)&curHTTP, sizeof(HTTP_CONN));
 		MACSetWritePtr(oldPtr);
     }
+
+	// Set curHTTPID to zero so that first call to HTTPLoadConn() doesn't write 
+	// dummy data outside reserved HTTP memory.
+    curHTTPID = 0;	
 }
 
 
@@ -525,7 +530,7 @@ static void HTTPProcess(void)
 
 			// Check if this is an MPFS Upload
 			#if defined(HTTP_MPFS_UPLOAD)
-			if(memcmppgm2ram(&curHTTP.data[1], HTTP_MPFS_UPLOAD, strlenpgm(HTTP_MPFS_UPLOAD)) == 0)
+			if(memcmppgm2ram(&curHTTP.data[1], HTTP_MPFS_UPLOAD, sizeof(HTTP_MPFS_UPLOAD)) == 0)
 			{// Read remainder of line, and bypass all file opening, etc.
 				#if defined(HTTP_USE_AUTHENTICATION)
 				curHTTP.isAuthorized = HTTPNeedsAuth(&curHTTP.data[1]);
@@ -544,6 +549,20 @@ static void HTTPProcess(void)
 			#ifdef STACK_USE_MDD
 			if(curHTTP.data[0]=='/' && curHTTP.data[1]=='\0' )
 			{
+
+				if(!CurWorkDirChangedToMddRootPath)
+				{
+					chdirRetVal=FSchdir(MDD_ROOT_DIR_PATH);
+					
+					if(chdirRetVal==0)
+					{	
+						CurWorkDirChangedToMddRootPath =TRUE;
+					}
+					else
+					{
+						return;
+					}
+				}
 
 				strcpypgm2ram((void*)&curHTTP.data[lenB], HTTP_DEFAULT_FILE);
 					lenB += strlenpgm(HTTP_DEFAULT_FILE);
@@ -2171,7 +2190,7 @@ HTTP_READ_STATUS HTTPReadPostName(BYTE* cData, WORD wLen)
 	status = HTTPReadTo('=', cData, wLen);
 
 	// Decode the data (if not reading to null or blank) and return
-	if(cData && !*cData)
+	if(cData && *cData)
 		HTTPURLDecode(cData);
 	return status;
 }	

@@ -36,6 +36,7 @@
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Kim Otten            02/29/08    ...
+ * PAT					04/16/10	Added Grid Item as text.
  *****************************************************************************/
 
 /*
@@ -69,14 +70,14 @@ GRID *GridCreate
 {
     GRID    *pGrid = NULL;
 
-    if((pGrid = (GRID *)malloc(sizeof(GRID))) == NULL)
+    if((pGrid = (GRID *)GFX_malloc(sizeof(GRID))) == NULL)
     {
         return (NULL);
     }
 
-    if((pGrid->gridObjects = malloc(sizeof(GRIDITEM) * numColumns * numRows)) == NULL)
+    if((pGrid->gridObjects = GFX_malloc(sizeof(GRIDITEM) * numColumns * numRows)) == NULL)
     {
-        free(pGrid);
+        GFX_free(pGrid);
         return (NULL);
     }
 
@@ -126,6 +127,8 @@ WORD GridDraw(GRID *pGrid)
 {
     SHORT   i;
     SHORT   j;
+    SHORT   xText, yText;
+
 
     if
     (
@@ -224,6 +227,38 @@ WORD GridDraw(GRID *pGrid)
                     {
 
                         // Draw the text
+                        if(pGrid->gridObjects[CELL_AT(i, j)].data)
+                        {
+	                        SetFont(pGrid->hdr.pGolScheme->pFont);
+	                        SetColor(pGrid->hdr.pGolScheme->TextColor0);
+	                        
+	                        if(GetState(pGrid, GRIDITEM_TEXTRIGHT))
+            				{
+	            				xText = CELL_LEFT+pGrid->cellWidth-GetTextWidth(pGrid->gridObjects[CELL_AT(i, j)].data,pGrid->hdr.pGolScheme->pFont);
+	            			}
+	                        else if(GetState(pGrid, GRIDITEM_TEXTLEFT))
+            				{
+	            				xText = CELL_LEFT;
+	            			}
+	            			else
+	            			{
+		            			xText = CELL_LEFT+(pGrid->cellWidth>>1)-(GetTextWidth(pGrid->gridObjects[CELL_AT(i, j)].data,pGrid->hdr.pGolScheme->pFont)>>1);
+		            		}	
+	                        if(GetState(pGrid, GRIDITEM_TEXTBOTTOM))
+            				{
+	            				yText = CELL_TOP+pGrid->cellHeight-GetTextHeight(pGrid->hdr.pGolScheme->pFont);
+	            			}
+	                        else if(GetState(pGrid, GRIDITEM_TEXTTOP))
+            				{
+	            				yText = CELL_TOP;
+	            			}
+	            			else
+	            			{
+		            			yText = CELL_TOP+(pGrid->cellHeight>>1)-(GetTextHeight(pGrid->hdr.pGolScheme->pFont)>>1);
+		            		}		
+	            				
+                            while(!OutTextXY( xText, yText, pGrid->gridObjects[CELL_AT(i, j)].data));
+                        }                        
                     }
 
                     // Draw the focus if applicable.
@@ -272,7 +307,7 @@ void GridFreeItems(GRID *pGrid)
 {
     if(pGrid && pGrid->gridObjects)
     {
-        free(pGrid->gridObjects);
+        GFX_free(pGrid->gridObjects);
         pGrid->gridObjects = NULL;  // Just in case...
     }
 }
@@ -341,9 +376,7 @@ void *GridGetCell(GRID *pGrid, SHORT column, SHORT row, WORD *cellType)
     return (pGrid->gridObjects[CELL_AT(column, row)].data);
 }
 
-//SHORT GridGetSelectedColumn(
-
-//SHORT GridGetSelectedRow()
+/* */
 void GridMsgDefault(WORD translatedMsg, GRID *pGrid, GOL_MSG *pMsg)
 {
     switch(translatedMsg)

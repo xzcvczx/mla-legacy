@@ -65,7 +65,7 @@ PICTURE *PictCreate
 {
     PICTURE *pPict = NULL;
 
-    pPict = (PICTURE *)malloc(sizeof(PICTURE));
+    pPict = (PICTURE *)GFX_malloc(sizeof(PICTURE));
     if(pPict == NULL)
         return (pPict);
 

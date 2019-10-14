@@ -192,6 +192,7 @@
 	#endif
 
 	#define mMIN(a, b)	((a<b)?a:b)
+	#define smHTTP		httpStubs[curHTTPID].sm			// Access the current state machine
 
 /*****************************************************************************
   Function:
@@ -238,6 +239,10 @@ void HTTPInit(void)
 		MACPutArray((BYTE*)&curHTTP, sizeof(HTTP_CONN));
 		MACSetWritePtr(oldPtr);
     }
+
+	// Set curHTTPID to zero so that first call to HTTPLoadConn() doesn't write 
+	// dummy data outside reserved HTTP memory.
+    curHTTPID = 0;	
 }
 
 
@@ -481,7 +486,7 @@ static void HTTPProcess(void)
 
 			// Check if this is an MPFS Upload
 			#if defined(HTTP_MPFS_UPLOAD)
-			if(memcmppgm2ram(&curHTTP.data[1], HTTP_MPFS_UPLOAD, strlenpgm(HTTP_MPFS_UPLOAD)) == 0)
+			if(memcmppgm2ram(&curHTTP.data[1], HTTP_MPFS_UPLOAD, sizeof(HTTP_MPFS_UPLOAD)) == 0)
 			{// Read remainder of line, and bypass all file opening, etc.
 				#if defined(HTTP_USE_AUTHENTICATION)
 				curHTTP.isAuthorized = HTTPNeedsAuth(&curHTTP.data[1]);
@@ -1320,7 +1325,7 @@ BYTE* HTTPURLDecode(BYTE* cData)
 	BYTE *pRead, *pWrite;
 	WORD wLen;
 	BYTE c;
-	WORD_VAL hex;
+	WORD hex;
 	 
 	// Determine length of input
 	wLen = strlen((char*)cData);
@@ -1341,11 +1346,11 @@ BYTE* HTTPURLDecode(BYTE* cData)
 				wLen = 0;
 			else
 			{
-				hex.v[1] = *pRead++;
-				hex.v[0] = *pRead++;
+				((BYTE*)&hex)[1] = *pRead++;
+				((BYTE*)&hex)[0] = *pRead++;
 				wLen--;
 				wLen--;
-				*pWrite++ = hexatob(hex);
+				*pWrite++ = hexatob(*((WORD_VAL*)&hex));
 			}
 		}
 		else

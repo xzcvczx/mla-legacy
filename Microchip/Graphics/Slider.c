@@ -36,7 +36,12 @@
  *
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Paolo A. Tamayo		11/12/07	Version 1.0 release
+ * PAT					11/12/07	Version 1.0 release
+ * PAT					04/29/10	- Added OBJ_MSG_PASSIVE message to detect
+ *									  event on the slider but with no action.
+ *									- fixed the swapped message translation
+ *									  in the SldTranslateMsg() when keyboard
+ *									  event is detected.
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -74,7 +79,7 @@ SLIDER *SldCreate
 {
     SLIDER  *pSld = NULL;
 
-    pSld = (SLIDER *)malloc(sizeof(SLIDER));
+    pSld = (SLIDER *)GFX_malloc(sizeof(SLIDER));
     if(pSld == NULL)
         return (pSld);
 
@@ -453,6 +458,10 @@ void SldMsgDefault(WORD translatedMsg, SLIDER *pSld, GOL_MSG *pMsg)
 
             #endif // USE_FOCUS
 
+	// if message was passive do not do anything
+	if (translatedMsg == OBJ_MSG_PASSIVE)
+		return;
+		
     // get the min and max positions
     SldGetMinMaxPos(pSld, &minPos, &maxPos);
 
@@ -583,7 +592,12 @@ WORD SldTranslateMsg(SLIDER *pSld, GOL_MSG *pMsg)
 				}
             }
         }   // end of if((pMsg->uiEvent == EVENT_PRESS) || (pMsg->uiEvent == EVENT_MOVE))
-
+        
+        // when the event is release emit OBJ_MSG_PASSIVE this can be used to
+        // detect that the release event happened on the slider.
+        if(pMsg->uiEvent == EVENT_RELEASE)
+        	return OBJ_MSG_PASSIVE;
+        	
         return (OBJ_MSG_INVALID);
     }       // end of if(pMsg->type == TYPE_TOUCHSCREEN
         #endif
@@ -594,12 +608,12 @@ WORD SldTranslateMsg(SLIDER *pSld, GOL_MSG *pMsg)
         {
             if(pMsg->uiEvent == EVENT_KEYSCAN)
             {
-                if((pMsg->param2 == SCAN_LEFT_PRESSED) || (pMsg->param2 == SCAN_UP_PRESSED))
+                if((pMsg->param2 == SCAN_RIGHT_PRESSED) || (pMsg->param2 == SCAN_UP_PRESSED))
                 {
                     return (SLD_MSG_INC);
                 }
 
-                if((pMsg->param2 == SCAN_RIGHT_PRESSED) || (pMsg->param2 == SCAN_DOWN_PRESSED))
+                if((pMsg->param2 == SCAN_LEFT_PRESSED) || (pMsg->param2 == SCAN_DOWN_PRESSED))
                 {
                     return (SLD_MSG_DEC);
                 }    

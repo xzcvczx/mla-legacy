@@ -251,6 +251,12 @@ sizeof(sd002),USB_DESCRIPTOR_STRING,
 //		hovering over a location on the tablet, without requiring the user to depress the 
 //		tip switch in that location.
 //Other input usages are optional.
+
+//Note: In a real application, at a minimum, certain terms in the report descriptor 
+//(ex: PHYSICAL_MAXIMUM and LOGICAL_MAXIMUM for the X and Y coordinates) will need 
+//to be modified to match the characteristics of the actual application being 
+//developed.  See the HID1_11.pdf specifications regarding these terms.
+
 ROM struct{BYTE report[HID_RPT01_SIZE];}hid_rpt01={
 	{
     0x05, 0x0d,             // USAGE_PAGE (Digitizers)          

@@ -36,8 +36,6 @@
                     coding style
   2.3   09/15/2008   Broke out each hardware platform into its own
                  "HardwareProfile - xxx.h" file
-
-  2.6   11/12/2009	 Updated for USB Audio Class Speaker demo
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC32MX460F512L_PIM_H

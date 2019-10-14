@@ -144,4 +144,12 @@
 // when USB PICtail is used with the graphics PICtail.
     #define USE_USB_PICTAIL         // Option to enable the switching of LCD controller signals
 
+/*********************************************************************
+* Overview: Define the malloc() and free() for versatility on OS 
+*           based systems. 
+*
+*********************************************************************/
+	#define GFX_malloc(size)    	malloc(size)
+	#define GFX_free(pObj)    	    free(pObj)
+
 #endif // _GRAPHICSCONFIG_H

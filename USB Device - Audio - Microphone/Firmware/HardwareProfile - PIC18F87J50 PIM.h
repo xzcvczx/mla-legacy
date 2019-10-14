@@ -36,7 +36,6 @@
                      coding style
   2.3   09/15/2008   Broke out each hardware platform into its own
                      "HardwareProfile - xxx.h" file
-  2.6   11/12/2009   no change
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC18F87J50_PIM_H
@@ -68,7 +67,7 @@
     #define self_power          1
     #endif
 
-    //#define USE_USB_BUS_SENSE_IO		//JP1 must be in R-U position to use this feature on this board
+    //#define USE_USB_BUS_SENSE_IO		//JP1 must be in R-U position to use this feature on this board	
     #define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
     #if defined(USE_USB_BUS_SENSE_IO)
     #define USB_BUS_SENSE       PORTBbits.RB5
@@ -77,10 +76,10 @@
     #endif
 
 
-
-    //Uncomment this to make the output HEX of this project
+   
+    //Uncomment this to make the output HEX of this project 
     //   to be able to be bootloaded using the HID bootloader
-	#define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER
+	#define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER		
 
     /*******************************************************************/
     /*******************************************************************/
@@ -100,15 +99,15 @@
     #define DEMO_BOARD PIC18F87J50_PIM
     #define PIC18F87J50_PIM
     #define CLOCK_FREQ 48000000
-
+  
     /** LED ************************************************************/
     #define mInitAllLEDs()      {LATE &= 0xFC; TRISE &= 0xFC; LATD &= 0xF3; TRISD &= 0xF3;}
-
+    
     #define mLED_1              LATEbits.LATE0
     #define mLED_2              LATEbits.LATE1
     #define mLED_3              LATDbits.LATD2
     #define mLED_4              LATDbits.LATD3
-
+    
     #define mGetLED_1()         mLED_1
     #define mGetLED_2()         mLED_2
     #define mGetLED_3()         mLED_3
@@ -118,17 +117,17 @@
     #define mLED_2_On()         mLED_2 = 1;
     #define mLED_3_On()         mLED_3 = 1;
     #define mLED_4_On()         mLED_4 = 1;
-
+    
     #define mLED_1_Off()        mLED_1 = 0;
     #define mLED_2_Off()        mLED_2 = 0;
     #define mLED_3_Off()        mLED_3 = 0;
     #define mLED_4_Off()        mLED_4 = 0;
-
+    
     #define mLED_1_Toggle()     mLED_1 = !mLED_1;
     #define mLED_2_Toggle()     mLED_2 = !mLED_2;
     #define mLED_3_Toggle()     mLED_3 = !mLED_3;
     #define mLED_4_Toggle()     mLED_4 = !mLED_4;
-
+    
     /** SWITCH *********************************************************/
     #define mInitAllSwitches()  TRISBbits.TRISB4=1;
     #define mInitSwitch2()      TRISBbits.TRISB4=1;
@@ -139,5 +138,5 @@
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
-
+    
 #endif  //HARDWARE_PROFILE_PIC18F87J50_PIM_H

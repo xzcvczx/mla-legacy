@@ -96,13 +96,23 @@ Description:
   ----   -----------
   2.6    Changed the inplementation of the interrupt clearing macro
          to be more efficient. 
+
   2.6a   Added DisableNonZeroEndpoints() function 
+
+  2.7    Addition of ConvertToVirtualAddress() function for
+         compatibility with PIC32.
+
+         Added prototype for USBSleepOnSuspend() function.  This
+         function shows how to put the PIC24F to sleep while the USB
+         module is in suspend and have the USB module wake up the device
+         on activity on the bus.
 ********************************************************************/
 //DOM-IGNORE-END
 
+#ifndef USB_HAL_PIC24F_H
+#define USB_HAL_PIC24F_H
 
-#if defined(USB_SUPPORT_DEVICE) | defined(USB_SUPPORT_OTG)
-
+//#if defined(USB_SUPPORT_DEVICE) | defined(USB_SUPPORT_OTG)
 #include "Compiler.h"
 
 #define USBSetBDTAddress(addr)         U1BDTP1 = (((unsigned int)addr)/256);
@@ -237,8 +247,8 @@ typedef union _POINTER
 
 #define USB_FULL_SPEED 0x00
 //USB_LOW_SPEED not currently supported in PIC24F USB products
-
-#define ConvertToPhysicalAddress(a) a
+#define ConvertToPhysicalAddress(a) ((WORD)(a))
+#define ConvertToVirtualAddress(a)  ((void *)(a))
 
 
 /****************************************************************
@@ -310,7 +320,35 @@ typedef union _POINTER
         None
  
  *******************************************************************/
-#define DisableNonZeroEndpoints(last_ep_num) memset((void*)&U1EP1,0x00,(last_ep_num * 2));
+#define DisableNonZeroEndpoints(last_ep_num) memset((void*)&U1EP1,0x00,(last_ep_num * 2));                                          
+
+
+/********************************************************************
+Function:
+    BOOL USBSleepOnSuspend(void)
+    
+Summary:
+    Places the PIC24F core into sleep and sets up the USB module
+    to wake up the device on USB activity.
+    
+PreCondition:
+    IPL (in the SR register) must be non-zero.
+    
+Parameters:
+    None
+    
+Return Values:
+    TRUE  - if entered sleep successfully
+    FALSE - if there was an error entering sleep
+    
+Remarks:
+    Please note that before calling this function that it is the
+    responsibility of the application to place all of the other
+    peripherals or board features into a lower power state if
+    required.
+
+*******************************************************************/
+BOOL USBSleepOnSuspend(void);
 
 #define USBClearUSBInterrupt() IFS5bits.USB1IF = 0;
 #if defined(USB_INTERRUPT)
@@ -334,7 +372,13 @@ typedef union _POINTER
 #endif
 
 //STALLIE, IDLEIE, TRNIE, and URSTIE are all enabled by default and are required
-#define USBEnableInterrupts() {IEC5bits.USB1IE=1;}
+#if defined(USB_INTERRUPT)
+    #define USBEnableInterrupts() {IEC5bits.USB1IE=1;}
+#else
+    #define USBEnableInterrupts()
+#endif
+
+#define USBDisableInterrupts() {IEC5bits.USB1IE=0;}
 #define ENDPOINT_MASK 0b11110000
 
     #define EP_CTRL     0x0C            // Cfg Control pipe for this ep
@@ -372,13 +416,13 @@ typedef union _POINTER
                                                 U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;\
                                             } 
 
-    #if defined(USB_SPEED_OPTION) && (USB_SPEED_OPTION != USB_FULL_SPEED)
-        #error "Low speed operation in device mode is not currently supported in the PIC24F family devices."
-    #endif
+//    #if defined(USB_SPEED_OPTION)
+//        #if (USB_SPEED_OPTION == USB_LOW_SPEED)
+//            #error "Low speed operation in device mode is not currently supported in the PIC24F family devices."
+//        #endif
+//    #endif
 
     #define USBClearInterruptRegister(reg) reg = 0xFF;
-
-#endif
 
 // Buffer Descriptor Status Register layout.
 typedef union _BD_STAT
@@ -419,7 +463,7 @@ typedef union __BDT
         {
             WORD        count:10;   //test
             BYTE        :6;
-            BYTE*       ADR; //Buffer Address
+            WORD        ADR; //Buffer Address
         };
     };
     DWORD           Val;
@@ -435,3 +479,5 @@ typedef union __BDT
         extern volatile BDT_ENTRY *pBDTEntryIn[USB_MAX_EP_NUMBER+1];
     #endif
 #endif
+
+#endif //USB_HAL_PIC24F_H

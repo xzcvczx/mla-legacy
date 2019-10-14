@@ -41,14 +41,15 @@ usb_config.h.
 #include <stdio.h>
 #include "Compiler.h"
 #include "GenericTypeDefs.h"
-#include "HardwareProfile.h"
+//#include "HardwareProfile.h"
 #include "uart2.h"
 
 // Graphics Library includes
 #include "GraphicsConfig.h"
 #include "Graphics\Graphics.h"
-#include "TouchScreen.h"
 #include "EEPROM.h"
+#include "SST25VF016.h"    
+#include "TouchScreen.h"
 
 // USB Embedded Host Stack includes
 #include "usb_config.h"
@@ -193,13 +194,13 @@ void ShowScreenSignature( void );
 #define SCREEN_TOUCHED()    (TouchGetX() != -1)
 
 // Macros to interface with memory
-#if (GRAPHICS_PICTAIL_VERSION != 3)
+#if defined (GFX_PICTAIL_V2)
 
 	#define FLASHInit() SST39Init();
 	//#define ChipErase() SST39ChipErase();
 	#define ReadArray(address, pdata, len) SST39ReadArray(address, pdata, len)
 
-#else
+#elif defined (GFX_PICTAIL_V3)
 
 	#define FLASHInit() SST25Init();
 	//#define ChipErase() SST25ChipErase();
@@ -783,6 +784,74 @@ void ShowScreenSignature( void )
               NULL );                           // use navigation scheme
 }
 
+/*********************************************************************
+* Function: Timer3 ISR
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Timer3 ISR
+*
+* Note: none
+*
+********************************************************************/
+#ifdef __PIC32MX__
+#define __T3_ISR    __ISR(_TIMER_3_VECTOR, ipl4)
+#else
+#define __T3_ISR    __attribute__((interrupt, shadow, auto_psv))
+#endif
+    
+void __T3_ISR _T3Interrupt(void)
+{
+	TouchProcessTouch();
+	// Clear flag
+	#ifdef __PIC32MX__
+    	mT3ClearIntFlag();
+	#else
+    	IFS0bits.T3IF = 0;
+	#endif
+}	
+
+/*********************************************************************
+* Function: void TimerInit(void)
+*
+* PreCondition: none
+*
+* Input: none
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: sets ADC 
+*
+* Note: none
+*
+********************************************************************/
+
+void TimerInit(void){
+
+#define SAMPLE_PERIOD	100     // us
+#define TIME_BASE 		(GetPeripheralClock()*SAMPLE_PERIOD)/4000000
+  
+#ifdef __PIC32MX__
+    OpenTimer3(T3_ON | T3_PS_1_8, TIME_BASE);
+    ConfigIntTimer3(T3_INT_ON | T3_INT_PRIOR_4);
+#else
+    // Initialize Timer3
+    TMR3 = 0;
+    PR3 = TIME_BASE;
+    T3CONbits.TCKPS = 1;         // Set prescale to 1:8
+    IFS0bits.T3IF = 0;           // Clear flag
+    IEC0bits.T3IE = 1;           // Enable interrupt
+    T3CONbits.TON = 1;           // Run timer  
+#endif
+}
 
 
 //******************************************************************************
@@ -874,7 +943,8 @@ int main (void)
 
     // Initialize the graphics library
     GOLInit();      			// Initialize graphics library and create default style scheme for GOL
-    TouchInit();
+	TimerInit();				// enable the timer that will sample the touch screen
+    TouchInit();				// enable the touch screen
 
     // If S3 button on Explorer 16 board is pressed calibrate touch screen
     if(Switch3() == 0){
@@ -883,7 +953,7 @@ int main (void)
     } else {
     
     	// If it's a new board (EEPROM_VERSION byte is not programed) calibrate touch screen
-		#if ((GRAPHICS_PICTAIL_VERSION == 2) || (GRAPHICS_PICTAIL_VERSION == 250))
+		#if defined (GFX_PICTAIL_V2)
     		if(GRAPHICS_LIBRARY_VERSION != EEPROMReadWord(ADDRESS_VERSION)){
         		TouchCalibration();
         		TouchStoreCalibration();
@@ -900,27 +970,16 @@ int main (void)
 	}
 
     altScheme = GOLCreateScheme();      
-    #if (GRAPHICS_PICTAIL_VERSION == 1)
-        /* for Microtips display */
-        altScheme->Color0               = RGB565CONVERT(0x4C, 0x7E, 0xFF);
-        altScheme->Color1               = RGB565CONVERT(0xFF, 0xCB, 0x3C);
-        altScheme->EmbossDkColor        = RGB565CONVERT(0x1E, 0x00, 0xE5);
-        altScheme->EmbossLtColor        = RGB565CONVERT(0xA9, 0xDB, 0xEF);
-        altScheme->ColorDisabled        = RGB565CONVERT(0xD4, 0xE1, 0xF7);
-        altScheme->TextColor1           = RGB565CONVERT(0x4C, 0x7E, 0xFF);
-        altScheme->TextColor0           = RGB565CONVERT(0xFF, 0xCB, 0x3C);
-        altScheme->TextColorDisabled    = RGB565CONVERT(0xB8, 0xB9, 0xBC);
-    #elif (GRAPHICS_PICTAIL_VERSION == 2)
-        /* for Truly display */
-        altScheme->Color0               = RGB565CONVERT(0x4C, 0x8E, 0xFF);
-        altScheme->Color1               = RGB565CONVERT(0xFF, 0xBB, 0x4C);
-        altScheme->EmbossDkColor        = RGB565CONVERT(0x1E, 0x00, 0xE5);
-        altScheme->EmbossLtColor        = RGB565CONVERT(0xA9, 0xDB, 0xEF);
-        altScheme->ColorDisabled        = RGB565CONVERT(0xD4, 0xE1, 0xF7);
-        altScheme->TextColor1           = BRIGHTBLUE;
-        altScheme->TextColor0           = RGB565CONVERT(0xFF, 0xBB, 0x4C);
-        altScheme->TextColorDisabled    = RGB565CONVERT(0xB8, 0xB9, 0xBC);
-    #endif // GRAPHICS_PICTAIL_VERSION
+
+    /* for Truly display */
+    altScheme->Color0               = RGB565CONVERT(0x4C, 0x8E, 0xFF);
+    altScheme->Color1               = RGB565CONVERT(0xFF, 0xBB, 0x4C);
+    altScheme->EmbossDkColor        = RGB565CONVERT(0x1E, 0x00, 0xE5);
+    altScheme->EmbossLtColor        = RGB565CONVERT(0xA9, 0xDB, 0xEF);
+    altScheme->ColorDisabled        = RGB565CONVERT(0xD4, 0xE1, 0xF7);
+    altScheme->TextColor1           = BRIGHTBLUE;
+    altScheme->TextColor0           = RGB565CONVERT(0xFF, 0xBB, 0x4C);
+    altScheme->TextColorDisabled    = RGB565CONVERT(0xB8, 0xB9, 0xBC);
 
     errorScheme = GOLCreateScheme();      
     errorScheme->Color0             = BRIGHTCYAN;

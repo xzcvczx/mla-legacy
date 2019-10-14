@@ -662,8 +662,6 @@ void UDPFlush(void)
 {
     UDP_HEADER      h;
     UDP_SOCKET_INFO *p;
-    PTR_BASE		wReadPtrSave;
-    WORD			wChecksum;
     WORD			wUDPLength;
 
     p = &UDPSocketInfo[activeUDPSocket];
@@ -705,8 +703,13 @@ void UDPFlush(void)
 	// Calculate the final UDP checksum and write it in, if enabled
 	#if defined(UDP_USE_TX_CHECKSUM)
 	{
+        PTR_BASE	wReadPtrSave;
+        WORD		wChecksum;
+
 		wReadPtrSave = MACSetReadPtr(BASE_TX_ADDR + sizeof(ETHER_HEADER) + sizeof(IP_HEADER));
 		wChecksum = CalcIPBufferChecksum(wUDPLength);
+		if(wChecksum == 0x0000u)
+			wChecksum = 0xFFFF;
 		MACSetReadPtr(wReadPtrSave);
 		MACSetWritePtr(BASE_TX_ADDR + sizeof(ETHER_HEADER) + sizeof(IP_HEADER) + 6);	// 6 is the offset to the Checksum field in UDP_HEADER
 		MACPutArray((BYTE*)&wChecksum, sizeof(wChecksum));
@@ -810,12 +813,12 @@ BOOL UDPGet(BYTE *v)
 	Reads an array of bytes from the currently active socket.
 	
   Description:
-	This function reads an array from bytes to the currently active UDP socket, 
-	while decrementing the remaining buffer length.  UDPIsGetReady should be 
+	This function reads an array of bytes from the currently active UDP socket, 
+	while decrementing the remaining bytes available. UDPIsGetReady should be 
 	used before calling this function to specify the currently active socket.
 
   Precondition:
-	UDPIsPutReady() was previously called to specify the current socket.
+	UDPIsGetReady() was previously called to specify the current socket.
 
   Parameters:
 	cData - The buffer to receive the bytes being read.
@@ -1027,6 +1030,20 @@ static UDP_SOCKET FindMatchingSocket(UDP_HEADER *h,
                 {
                     return s;
                 }
+#ifdef STACK_USE_ZEROCONF_MDNS_SD
+                /* Multicast Support in UDP Layer for mDNS.
+                 * mDNS- Multicast DNS for Zeroconf protocol.
+                 * Multicast address used by mDNS: 224.0.0.251 : 5353
+                 * second check with self MAC-address is to
+                 * suppress Loop-Back packets */
+                else if (localIP->Val == 0xFB0000E0ul)
+                {
+                    if(remoteNode->IPAddr.Val!= AppConfig.MyIPAddr.Val)
+                        return s;
+                    else
+                        return INVALID_UDP_SOCKET;                                           
+                }
+#endif
             }
 
             partialMatch = s;

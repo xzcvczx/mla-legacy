@@ -33,17 +33,24 @@
  File Description:
 
  Change History:
-  Rev   Date(M/D/Y)  Description
-  2.5   05/04/2009   Initial release.  Adapted from the mouse in a
-  					 circle demo firmware included in MCHPFSUSB v2.4a
-  2.6   09/04/2009	 Initial release.  Adapted from the Multi-Touch
-  					 digitizer demo in the MCHPFSUSB v2.5b Framework.
-  					 This version has been enhanced by supporting
-  					 multiple device modes, for improved functionality
-  					 in legacy operating systems.  See the comments near
-  					 the DEFAULT_DEVICE_MODE definition in usb_config.h
-  					 for additional details.  Also see the report
-  					 descriptor inline comments. 					 
+  Rev   Description
+  2.5   Initial release.  Adapted from the mouse in a
+        circle demo firmware included in MCHPFSUSB v2.4a
+
+  2.6   Initial release.  Adapted from the Multi-Touch
+        digitizer demo in the MCHPFSUSB v2.5b Framework.
+        This version has been enhanced by supporting
+        multiple device modes, for improved functionality
+        in legacy operating systems.  See the comments near
+        the DEFAULT_DEVICE_MODE definition in usb_config.h
+        for additional details.  Also see the report
+        descriptor inline comments.
+
+  2.7   Minor changes to usb_descriptors.c (to fix USB20CV issue),
+  	    and to interrupt vector handling (pertaining to clock
+        switching to 31kHz INTRC during USB suspend).
+        Also minor changes to code in main.c, to change the 
+        demo to match the newly updated report descriptor.					  					 
 ********************************************************************/
 
 /********************************************************************
@@ -336,6 +343,7 @@ contact data is sent to the host for each HID report.
 
 /** VARIABLES ******************************************************/
 #pragma udata
+BYTE UIESave;
 WORD led_count;
 WORD DebounceCounter;
 BOOL SwitchDebouncing;
@@ -358,8 +366,7 @@ USB_HANDLE lastTransmission;
 //Mouse emulation mode variables
 BOOL EmulateMouseMovement;
 BYTE movement_length;
-BYTE vector = 0;
-char buffer[3];
+BYTE vector;
 //The direction that the mouse will move in
 ROM signed char dir_table[]={-4,-4,-4, 0, 4, 4, 4, 0};
 
@@ -394,83 +401,34 @@ void USBHIDCBSetReportComplete(void);
 #if defined(__18CXX)
 	//On PIC18 devices, addresses 0x00, 0x08, and 0x18 are used for
 	//the reset, high priority interrupt, and low priority interrupt
-	//vectors.  However, the current Microchip USB bootloader 
-	//examples are intended to occupy addresses 0x00-0x7FF or
-	//0x00-0xFFF depending on which bootloader is used.  Therefore,
-	//the bootloader code remaps these vectors to new locations
-	//as indicated below.  This remapping is only necessary if you
-	//wish to program the hex file generated from this project with
-	//the USB bootloader.  If no bootloader is used, edit the
-	//usb_config.h file and comment out the following defines:
-	//#define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER
-	//#define PROGRAMMABLE_WITH_USB_LEGACY_CUSTOM_CLASS_BOOTLOADER
-	
+	//vectors. However, if using the HID Bootloader, the bootloader
+	//firmware will occupy the 0x00-0xFFF region.  Therefore,
+	//the bootloader code remaps these vectors to new locations:
+	//0x1000, 0x1008, 0x1018 respectively.  This remapping is only necessary 
+	//if you wish to program the hex file generated from this project with
+	//the USB bootloader. 
 	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
 		#define REMAPPED_RESET_VECTOR_ADDRESS			0x1000
-		#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x1008
-		#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x1018
-	#elif defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)	
-		#define REMAPPED_RESET_VECTOR_ADDRESS			0x800
-		#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x808
-		#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x818
-	#else	
-		#define REMAPPED_RESET_VECTOR_ADDRESS			0x00
-		#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x08
-		#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x18
+		extern void _startup (void);        // See c018i.c in your C18 compiler dir
+		#pragma code REMAPPED_RESET_VECTOR = REMAPPED_RESET_VECTOR_ADDRESS
+		void _reset (void)
+		{
+		    _asm goto _startup _endasm
+		}
+
+		//--------------------------------------------------------------------
+		//NOTE: See PIC18InterruptVectors.asm for important code and details
+		//relating to the interrupt vectors and interrupt vector remapping.
+		//Special considerations apply if clock switching to the 31kHz INTRC 
+		//during USB suspend.
+		//--------------------------------------------------------------------
 	#endif
-	
-	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)||defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)
-	extern void _startup (void);        // See c018i.c in your C18 compiler dir
-	#pragma code REMAPPED_RESET_VECTOR = REMAPPED_RESET_VECTOR_ADDRESS
-	void _reset (void)
-	{
-	    _asm goto _startup _endasm
-	}
-	#endif
-	#pragma code REMAPPED_HIGH_INTERRUPT_VECTOR = REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS
-	void Remapped_High_ISR (void)
-	{
-	     _asm goto YourHighPriorityISRCode _endasm
-	}
-	#pragma code REMAPPED_LOW_INTERRUPT_VECTOR = REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS
-	void Remapped_Low_ISR (void)
-	{
-	     _asm goto YourLowPriorityISRCode _endasm
-	}
-	
-	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)||defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)
-	//Note: If this project is built while one of the bootloaders has
-	//been defined, but then the output hex file is not programmed with
-	//the bootloader, addresses 0x08 and 0x18 would end up programmed with 0xFFFF.
-	//As a result, if an actual interrupt was enabled and occured, the PC would jump
-	//to 0x08 (or 0x18) and would begin executing "0xFFFF" (unprogrammed space).  This
-	//executes as nop instructions, but the PC would eventually reach the REMAPPED_RESET_VECTOR_ADDRESS
-	//(0x1000 or 0x800, depending upon bootloader), and would execute the "goto _startup".  This
-	//would effective reset the application.
-	
-	//To fix this situation, we should always deliberately place a 
-	//"goto REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS" at address 0x08, and a
-	//"goto REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS" at address 0x18.  When the output
-	//hex file of this project is programmed with the bootloader, these sections do not
-	//get bootloaded (as they overlap the bootloader space).  If the output hex file is not
-	//programmed using the bootloader, then the below goto instructions do get programmed,
-	//and the hex file still works like normal.  The below section is only required to fix this
-	//scenario.
-	#pragma code HIGH_INTERRUPT_VECTOR = 0x08
-	void High_ISR (void)
-	{
-	     _asm goto REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS _endasm
-	}
-	#pragma code LOW_INTERRUPT_VECTOR = 0x18
-	void Low_ISR (void)
-	{
-	     _asm goto REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS _endasm
-	}
-	#endif	//end of "#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)||defined(PROGRAMMABLE_WITH_USB_LEGACY_CUSTOM_CLASS_BOOTLOADER)"
+
+
+
+
 
 	#pragma code
-	
-	
 	//These are your actual interrupt handling routines.
 	#pragma interrupt YourHighPriorityISRCode
 	void YourHighPriorityISRCode()
@@ -748,8 +706,7 @@ void UserInit(void)
     
 	//Initialize Mouse mode variables
 	//--------------------------------------------------------
-    //Initialize all of the mouse data to 0,0,0 (no movement)
-    buffer[0]=buffer[1]=buffer[2]=0;
+    movement_length = 0xFF;
 	//State variable for deciding if the mouse data sent to the host should
 	//move the cursor or not.
     EmulateMouseMovement = TRUE;
@@ -812,6 +769,7 @@ void ProcessIO(void)
 		
 		//Prepare the mouse data and send it to the host.
 		Emulate_Mouse();
+		
 	}//if(DeviceMode == MOUSE_MODE)
 	else if((DeviceMode == MULTI_TOUCH_DIGITIZER_MODE) || (DeviceMode == SINGLE_TOUCH_DIGITIZER_MODE))
 	{	
@@ -862,8 +820,8 @@ void ProcessIO(void)
 			}	
 	
 			//Emulated thumb finger contact point originating at center of screen
-			XOrigin1 = 2047u;	//From report descriptor, valid X-coordinate values are 0-4095
-			YOrigin1 = 1535u;	//From report descriptor, valid Y-coordinate values are 0-3071
+			XOrigin1 = 2400u;	//From report descriptor, valid X-coordinate values are 0-4800
+			YOrigin1 = 1500u;	//From report descriptor, valid Y-coordinate values are 0-3000
 			
 			//Emulated index finger positioned to upper right of thumb	
 			XOrigin2 = XOrigin1 + 400u;
@@ -972,43 +930,40 @@ void Emulate_Mouse(void)
 	//coordinates since the last packet, instead of absolute X and Y 
 	//coordinates), this firmware should be replaced with code that uses the
 	//touch interface to function like a touch pad.
-		
-    if(EmulateMouseMovement == TRUE)
-    {
-        //go 14 times in the same direction before changing direction
-        if(movement_length > 14)
-        {
-            buffer[0] = 0;
-            buffer[1] = dir_table[vector & 0x07];           // X-Vector
-            buffer[2] = dir_table[(vector+2) & 0x07];       // Y-Vector
-            //go to the next direction in the table
-            vector++;
-            //reset the counter for when to change again
-            movement_length = 0;
-        }//end if(movement_length > 14)
-    }
-    else
-    {
-        //don't move the mouse
-        buffer[0] = buffer[1] = buffer[2] = 0;
-    }
 
 	//Make sure that the endpoint is not busy before modifying the hid_report_in buffer.
     if(!USBHandleBusy(lastTransmission))
     {
-        //copy over the data to the HID buffer
-		hid_report_in[0] = 0x04;		//This is the report ID byte.  Mouse report ID = 0x04 from report descriptor.
-        hid_report_in[1] = buffer[0];	//This is the byte containing the button(s) that may be pressed information
-        hid_report_in[2] = buffer[1];	//This is the X coordinate change since last report
-        hid_report_in[3] = buffer[2];	//This is the Y coordinate change since last report
+		//Prepare the HID input report containing the mouse movement data.
+		hid_report_in[0] = MOUSE_DATA_REPORT_ID;		//This is the report ID byte.  Mouse report ID = 0x04 from report descriptor.
+		
+	    if(EmulateMouseMovement == TRUE)
+	    {
+	        //go 14 times in the same direction before changing direction
+	        if(movement_length > 14u)
+	        {
+	            hid_report_in[1] = 0u;								//Button click data
+	            hid_report_in[2] = dir_table[vector & 0x07];           // X-Vector
+	            hid_report_in[3] = dir_table[(vector+2) & 0x07];       // Y-Vector
+	            //go to the next direction in the table
+	            vector++;
+	            //reset the counter for when to change again
+	            movement_length = 0;
+	        }//end if(movement_length > 14u)
+	    }
+	    else
+	    {
+	        //don't move the mouse
+	        hid_report_in[1] = hid_report_in[2] = hid_report_in[3] = 0;
+	    }
 
-     
-        //Send the 3 byte packet over USB to the host.
+        //Send the 4 byte packet over USB to the host.
         lastTransmission = HIDTxPacket(HID_EP, (BYTE*)hid_report_in, 0x04);
 
         //increment the counter of when to change the data sent
         movement_length++;
-    }
+
+	}//if(!USBHandleBusy(lastTransmission))
 }//end Emulate_Mouse
 
 
@@ -1125,7 +1080,7 @@ void Emulate_Digitizer(void)
 					//This is done by pressing only one finger down, and by moving it right quickly (X plus)
 					SOFDelta = SOFDelta * 8;	//To get faster movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 + SOFDelta;
-					if(XCoordinate1 > (XOrigin1 + 210u))
+					if(XCoordinate1 > (XOrigin1 + 246u))
 						CoordinatesChanging = FALSE;
 					hid_report_in[13] = 1;		//Only the first contact point is valid	(this is a single touch gesture)
 					break;	
@@ -1133,7 +1088,7 @@ void Emulate_Digitizer(void)
 					//This is done by pressing only one finger down, and by moving it left quickly (X minus)
 					SOFDelta = SOFDelta * 8;	//To get faster movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 210u))
+					if(XCoordinate1 < (XOrigin1 - 246u))
 						CoordinatesChanging = FALSE;
 					hid_report_in[13] = 1;		//Only the first contact point is valid	(this is a single touch gesture)
 					break;	
@@ -1141,14 +1096,14 @@ void Emulate_Digitizer(void)
 					//Sweep Contact1 (emulated thumb finger) coordinates to move lower left (X minus, Y plus)
 					SOFDelta = SOFDelta >> 1;	//To get slower movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 300u))
+					if(XCoordinate1 < (XOrigin1 - 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate1 = YCoordinate1 + SOFDelta;
 					if(YCoordinate1 > (YOrigin1 + 300u))
 						CoordinatesChanging = FALSE;	
 					//Sweep Contact2 (emulated index finger) coordinates to move upper right (X plus, Y minus)
 					XCoordinate2 = XCoordinate2 + SOFDelta;
-					if(XCoordinate2 > (XOrigin2 + 300u))
+					if(XCoordinate2 > (XOrigin2 + 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate2 = YCoordinate2 - SOFDelta;
 					if(YCoordinate2 < (YOrigin2 - 300u))
@@ -1158,14 +1113,14 @@ void Emulate_Digitizer(void)
 					//Sweep Contact1 (emulated thumb finger) coordinates to move lower left (X minus, Y plus)
 					SOFDelta = SOFDelta >> 1;	//To get slower movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 300u))
+					if(XCoordinate1 < (XOrigin1 - 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate1 = YCoordinate1 + SOFDelta;
 					if(YCoordinate1 > (YOrigin1 + 300u))
 						CoordinatesChanging = FALSE;	
 					//Sweep Contact2 (emulated index finger) coordinates to move upper right (X plus, Y minus)
 					XCoordinate2 = XCoordinate2 + SOFDelta;
-					if(XCoordinate2 > (XOrigin2 + 300u))
+					if(XCoordinate2 > (XOrigin2 + 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate2 = YCoordinate2 - SOFDelta;
 					if(YCoordinate2 < (YOrigin2 - 300u))
@@ -1175,14 +1130,14 @@ void Emulate_Digitizer(void)
 					//Sweep Contact1 (emulated thumb finger) coordinates to move lower left (X minus, Y plus)
 					SOFDelta = SOFDelta >> 1;	//To get slower movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 300u))
+					if(XCoordinate1 < (XOrigin1 - 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate1 = YCoordinate1 + SOFDelta;
 					if(YCoordinate1 > (YOrigin1 + 300u))
 						CoordinatesChanging = FALSE;	
 					//Sweep Contact2 (emulated index finger) coordinates to move upper right (X plus, Y minus)
 					XCoordinate2 = XCoordinate2 + SOFDelta;
-					if(XCoordinate2 > (XOrigin2 + 300u))
+					if(XCoordinate2 > (XOrigin2 + 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate2 = YCoordinate2 - SOFDelta;
 					if(YCoordinate2 < (YOrigin2 - 300u))
@@ -1191,19 +1146,19 @@ void Emulate_Digitizer(void)
 				case 6:	//Emulate a two-finger horizontal scroll right operation
 					//Tap both fingers down simultaneously and move them both to the left (X minus)
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 500u))
+					if(XCoordinate1 < (XOrigin1 - 586u))
 						CoordinatesChanging = FALSE;
 					XCoordinate2 = XCoordinate2 - SOFDelta;
-					if(XCoordinate2 < (XOrigin2 - 500u))
+					if(XCoordinate2 < (XOrigin2 - 586u))
 						CoordinatesChanging = FALSE;
 					break;
 				case 7:	//Emulate a two-finger horizontal scroll left operation
 					//Tap both fingers down simultaneously and move them both to the right (X plus)
 					XCoordinate1 = XCoordinate1 + SOFDelta;
-					if(XCoordinate1 > (XOrigin1 + 500u))
+					if(XCoordinate1 > (XOrigin1 + 586u))
 						CoordinatesChanging = FALSE;
 					XCoordinate2 = XCoordinate2 + SOFDelta;
-					if(XCoordinate2 > (XOrigin2 + 500u))
+					if(XCoordinate2 > (XOrigin2 + 586u))
 						CoordinatesChanging = FALSE;
 					break;
 				case 8:	//Emulate a single touch scroll down operation.  
@@ -1224,14 +1179,14 @@ void Emulate_Digitizer(void)
 					//Sweep Contact1 (emulated thumb) coordinates to move upper right (X plus, Y minus)
 					SOFDelta = SOFDelta >> 1;	//To get slower movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 + SOFDelta;
-					if(XCoordinate1 > (XOrigin1 + 300u))
+					if(XCoordinate1 > (XOrigin1 + 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate1 = YCoordinate1 - SOFDelta;
 					if(YCoordinate1 < (YOrigin1 - 300u))
 						CoordinatesChanging = FALSE;	
 					//Sweep Contact2 (emulated index finger) coordinates to move lower left (X minus, Y plus)
 					XCoordinate2 = XCoordinate2 - SOFDelta;
-					if(XCoordinate2 < (XOrigin2 - 300u))
+					if(XCoordinate2 < (XOrigin2 - 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate2 = YCoordinate2 + SOFDelta;
 					if(YCoordinate2 > (YOrigin2 + 300u))
@@ -1322,14 +1277,14 @@ void CheckForOverUnderFlow(void)
 	
 	//Check for overflow conditions.  If overflow occurred, the coordinate will 
 	//be higher than the allowed values indicated in the report descriptor.
-	if(XCoordinate1 > 4095u)
-		XCoordinate1 = 4095u;
-	if(YCoordinate1 > 3071u)
-		YCoordinate1 = 3071u;				
-	if(XCoordinate2 > 4095u)
-		XCoordinate2 = 4095u;
-	if(YCoordinate2 > 3071u)
-		YCoordinate2 = 3071u;	
+	if(XCoordinate1 > 4800u)
+		XCoordinate1 = 4800u;
+	if(YCoordinate1 > 3000u)
+		YCoordinate1 = 3000u;				
+	if(XCoordinate2 > 4800u)
+		XCoordinate2 = 4800u;
+	if(YCoordinate2 > 3000u)
+		YCoordinate2 = 3000u;	
 }	
 
 
@@ -1473,6 +1428,7 @@ void USBCBSuspend(void)
 	//application behavior.  If the microcontroller will be put to sleep, a
 	//process similar to that shown below may be used:
 	
+	
 	//ConfigureIOPinsForLowPower();
 	//SaveStateOfAllInterruptEnableBits();
 	//DisableAllInterruptEnableBits();
@@ -1483,6 +1439,12 @@ void USBCBSuspend(void)
 
 	//Alternatively, the microcontorller may use clock switching to reduce current consumption.
 	#if defined(__18CXX)
+	//Save state of enabled interrupt enable bits.
+	UIESave = UIE;
+	
+	//Disable all interrupt enable bits (except UIR, ACTVIF, and UIR, URSTIF for receiving the USB resume signalling)
+	UIE = 0x05;		//ACTVIF and URSTIF still enabled.  All others disabled.
+	
 	//Configure device for low power consumption
 	mLED_1_Off();
 	mLED_2_Off();
@@ -1499,7 +1461,8 @@ void USBCBSuspend(void)
 	//real application.
 	#endif
 
-	//IMPORTANT NOTE: Do not clear the USBActivityIF (ACTVIF) bit here.  This bit is 
+	//IMPORTANT NOTE: If the microcontroller goes to sleep in the above code, do not
+	//clear the USBActivityIF (ACTVIF) bit here (after waking up/resuming from sleep).  This bit is 
 	//cleared inside the usb_device.c file.  Clearing USBActivityIF here will cause 
 	//things to not work as intended.	
 
@@ -1601,6 +1564,9 @@ void USBCBWakeFromSuspend(void)
         unsigned int pll_startup_counter = 800;	//Long delay at 31kHz, but ~0.8ms at 48MHz
         while(pll_startup_counter--);			//Clock will switch over while executing this delay loop
     }
+    //Now restore the interrupt enable bits that we previously disabled in the USBCBSuspend() function,
+    //when we first entered USB suspend state.
+    UIE = UIESave;
 	#endif
 
 }
@@ -2030,7 +1996,7 @@ void UserSetReportHandler(void)
 		}	
 		
 		//Prepare EP0 to receive the control transfer data (the device mode to set)
-		USBEP0Receive((BYTE*)&CtrlTrfData, USB_EP0_BUFF_SIZE, USBHIDCBSetReportComplete);	//Host will send two bytes.  After the two bytes are successfully received, call the USBHIDCBSetReportComplete() callback function. 		
+		USBEP0Receive((BYTE*)&hid_report_out, SetupPkt.wLength, USBHIDCBSetReportComplete);	//Host will send two bytes.  After the two bytes are successfully received, call the USBHIDCBSetReportComplete() callback function. 		
 	}	
 }	
 
@@ -2039,20 +2005,20 @@ void UserSetReportHandler(void)
 //control transfer,  USBEP0Receive(...,...,USBHIDCBSetReportComplete) completes.
 void USBHIDCBSetReportComplete(void)
 {
-	//The CtrlTrfData[0] byte contains the Report ID that is getting set.
-	//The CtrlTrfData[1] byte contains the Device Mode
-	//The CtrlTrfData[2] byte contains the DeviceIdentifier
+	//The hid_report_out[0] byte contains the Report ID that is getting set.
+	//The hid_report_out[1] byte contains the Device Mode
+	//The hid_report_out[2] byte contains the DeviceIdentifier
 
-	if(CtrlTrfData[0] == DEVICE_MODE_FEATURE_REPORT_ID)	//configuration setting feature Report ID = 0x03 = DEVICE_MODE_FEATURE_REPORT_ID
+	if(hid_report_out[0] == DEVICE_MODE_FEATURE_REPORT_ID)	//configuration setting feature Report ID = 0x03 = DEVICE_MODE_FEATURE_REPORT_ID
 	{	
 		//Set the device variables now, so the firmware can behave according to the new
 		//settings that have been specified by the host.
 	
 		//Error checking.  Make sure the host is trying to choose a valid setting.
-		if((CtrlTrfData[1] == MOUSE_MODE) || (CtrlTrfData[1] == SINGLE_TOUCH_DIGITIZER_MODE) || (CtrlTrfData[1] == MULTI_TOUCH_DIGITIZER_MODE))	
+		if((hid_report_out[1] == MOUSE_MODE) || (hid_report_out[1] == SINGLE_TOUCH_DIGITIZER_MODE) || (hid_report_out[1] == MULTI_TOUCH_DIGITIZER_MODE))	
 		{
-			DeviceMode = CtrlTrfData[1];		//The DeviceMode variable is used else where in the application firmware to determine the behavior/type of input reports sent to the host.
-			DeviceIdentifier = CtrlTrfData[2];
+			DeviceMode = hid_report_out[1];		//The DeviceMode variable is used else where in the application firmware to determine the behavior/type of input reports sent to the host.
+			DeviceIdentifier = hid_report_out[2];
 		}	
 	}
 	

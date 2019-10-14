@@ -58,8 +58,8 @@ Change History:
 #include <stdlib.h>
 #include <string.h>
 #include "Graphics\Graphics.h"
+#include "USB\usb.h"
 #include "usb\usb_host_printer_primitives.h"
-
 
 //#define DEBUG_MODE
 #ifdef DEBUG_MODE

@@ -82,10 +82,19 @@ Description:
   2.1    Added "(" & ")" to EP definitions
          updated for simplicity and to use common
          coding style
+
   2.6    Removed many of the device specific information to the
          HAL layer files.  Moved many of the CH9 defintions to the
          CH9 file.
+
   2.6a   No Change
+
+  2.7    Fixed error where USBHandleGetAddr() didn't convert the
+         return address from a physical address to a virtual address 
+         for PIC32.
+
+         Added macro versions of USBDeviceAttach() and USBDeviceDetach()
+         so they will compile without error when using polling mode.
 
 ********************************************************************/
 
@@ -577,39 +586,90 @@ void USBSoftDetach(void);
     USB_HANDLE USBTransferOnePacket(BYTE ep, BYTE dir, BYTE* data, BYTE len)
     
   Summary:
-    Transfers a single packed on the USB bus.
+    Transfers a single packet (one transaction) of data on the USB bus.
 
   Description:
-    Transfers a single packed on the USB bus.
+    The USBTransferOnePacket() function prepares a USB endpoint
+    so that it may send data to the host (an IN transaction), or 
+    receive data from the host (an OUT transaction).  The 
+    USBTransferOnePacket() function can be used both to receive	and 
+    send data to the host.  This function is the primary API function 
+    provided by the USB stack firmware for sending or receiving application 
+    data over the USB port.  
+
+    The USBTransferOnePacket() is intended for use with all application 
+    endpoints.  It is not used for sending or receiving applicaiton data 
+    through endpoint 0 by using control transfers.  Separate API 
+    functions, such as USBEP0Receive(), USBEP0SendRAMPtr(), and
+    USBEP0SendROMPtr() are provided for this purpose.
+
+    The	USBTransferOnePacket() writes to the Buffer Descriptor Table (BDT)
+    entry associated with an endpoint buffer, and sets the UOWN bit, which 
+    prepares the USB hardware to allow the transaction to complete.  The 
+    application firmware can use the USBHandleBusy() macro to check the 
+    status of the transaction, to see if the data has been successfully 
+    transmitted yet.
+
 
     Typical Usage
     <code>
-    //make sure that the last transfer isn't busy by checking the handle
-    if(!USBHandleBusy(USBInHandle))
+    //make sure that the we are in the configured state
+    if(USBGetDeviceState() == CONFIGURED_STATE)
     {
-        //Send the data contained in the INPacket[] array out on
-        //  endpoint EP_NUM
-        USBInHandle = USBTransferOnePacket(EP_NUM,IN_TO_HOST,(BYTE*)&INPacket[0],sizeof(INPacket));
+        //make sure that the last transaction isn't busy by checking the handle
+        if(!USBHandleBusy(USBInHandle))
+        {
+	        //Write the new data that we wish to send to the host to the INPacket[] array
+	        INPacket[0] = USEFUL_APPLICATION_VALUE1;
+	        INPacket[1] = USEFUL_APPLICATION_VALUE2;
+	        //INPacket[2] = ... (fill in the rest of the packet data)
+	      
+            //Send the data contained in the INPacket[] array through endpoint "EP_NUM"
+            USBInHandle = USBTransferOnePacket(EP_NUM,IN_TO_HOST,(BYTE*)&INPacket[0],sizeof(INPacket));
+        }
     }
     </code>
 
   Conditions:
-    The user must insure that there isn't currently a transfer pending on the 
-    requested endpoint.  This is done by checking the previous request using the
-    USBHandleBusy() function (see the typical usage example).
-
+    Before calling USBTransferOnePacket(), the following should be true.
+    1.  The USB stack has already been initialized (USBDeviceInit() was called).
+    2.  A transaction is not already pending on the specified endpoint.  This
+        is done by checking the previous request using the USBHandleBusy() 
+        macro (see the typical usage example).
+    3.  The host has already sent a set configuration request and the 
+        enumeration process is complete.
+        This can be checked by verifying that the USBGetDeviceState() 
+        macro returns "CONFIGURED_STATE", prior to calling 
+        USBTransferOnePacket().
+ 					
   Input:
-    BYTE ep - the endpoint the data will be transmitted on
-    BYTE dir - the direction of the transfer
-                This value is either OUT_FROM_HOST or IN_TO_HOST
-    BYTE* data - pointer to the data to be sent
-    BYTE len - length of the data needing to be sent
+    BYTE ep - The endpoint number that the data will be transmitted or 
+	          received on
+    BYTE dir - The direction of the transfer
+               This value is either OUT_FROM_HOST or IN_TO_HOST
+    BYTE* data - For IN transactions: pointer to the RAM buffer containing 
+                 the data to be sent to the host.  For OUT transactions: pointer
+                 to the RAM buffer that the received data should get written to.
+   BYTE len - Length of the data needing to be sent (for IN transactions).
+              For OUT transactions, the len parameter should normally be set
+              to the endpoint size specified in the endpoint descriptor.    
 
   Return Values:
-    USB_HANDLE - handle to the transfer.
+    USB_HANDLE - handle to the transfer.  The handle is a pointer to 
+                 the BDT entry associated with this transaction.  The
+                 status of the transaction (ex: if it is complete or still
+                 pending) can be checked using the USBHandleBusy() macro
+                 and supplying the USB_HANDLE provided by
+                 USBTransferOnePacket().
 
   Remarks:
-    None                                                                  
+    If calling the USBTransferOnePacket() function from within the USBCBInitEP()
+    callback function, the set configuration is still being processed and the
+    USBDeviceState may not be == CONFIGURED_STATE yet.  In this	special case, 
+    the USBTransferOnePacket() may still be called, but make sure that the 
+    endpoint has been enabled and initialized by the USBEnableEndpoint() 
+    function first.  
+    
   *************************************************************************/
 USB_HANDLE USBTransferOnePacket(BYTE ep,BYTE dir,BYTE* data,BYTE len);
 
@@ -713,7 +773,7 @@ WORD USBHandleGetLength(USB_HANDLE handle);
  *******************************************************************/
 WORD USBHandleGetAddr(USB_HANDLE);
 /*DOM-IGNORE-BEGIN*/
-#define USBHandleGetAddr(handle) (((volatile BDT_ENTRY*)handle)->ADR)
+#define USBHandleGetAddr(handle) ConvertToVirtualAddress((((volatile BDT_ENTRY*)handle)->ADR))
 /*DOM-IGNORE-END*/
 
 /********************************************************************
@@ -943,6 +1003,12 @@ void USBStallEndpoint(BYTE ep, BYTE dir);
   **************************************************************************/
 void USBDeviceDetach(void);
 
+/*DOM-IGNORE-BEGIN*/
+#if !defined(USB_INTERRUPT)
+    #define USBDeviceDetach() 
+#endif
+/*DOM-IGNORE-END*/
+
 /**************************************************************************
     Function:
         void USBDeviceAttach(void)
@@ -974,6 +1040,12 @@ void USBDeviceDetach(void);
         None                                                        
 ****************************************************************************/
 void USBDeviceAttach(void);
+
+/*DOM-IGNORE-BEGIN*/
+#if !defined(USB_INTERRUPT)
+    #define USBDeviceAttach() 
+#endif
+/*DOM-IGNORE-END*/
 
 /*******************************************************************************
   Function:

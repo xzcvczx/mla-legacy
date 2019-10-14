@@ -521,7 +521,7 @@ void AutoIPConflict (BYTE vInterface)
         case SM_AUTOIP_GRATUITOUS_ARP2:
         case SM_AUTOIP_GRATUITOUS_ARP3:
         case SM_AUTOIP_DELAY:
-            if (AutoIPClient.conflicts >= 10)
+            if (AutoIPClient.conflicts >= 10u)
                 AutoIPClient.smAUTOIPState = SM_AUTOIP_RATE_LIMIT_SET;
             else
                 AutoIPClient.smAUTOIPState = SM_AUTOIP_CHECK_ADDRESS;
@@ -536,7 +536,7 @@ void AutoIPConflict (BYTE vInterface)
         // 10 seconds, claim a new address.
         case SM_AUTOIP_CONFIGURED:
         case SM_AUTOIP_DEFEND:
-            if (AutoIPClient.gAutoIPConflictTimer != 0)
+            if (AutoIPClient.gAutoIPConflictTimer != 0u)
             {
                 if (TickGet() - AutoIPClient.gAutoIPConflictTimer < TICK_SECOND * 10)
                 {

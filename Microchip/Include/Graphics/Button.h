@@ -54,6 +54,7 @@
     #define BTN_TEXTLEFT    0x0020  // Bit to indicate text is left aligned.
     #define BTN_TEXTBOTTOM  0x0040  // Bit to indicate text is top aligned.
     #define BTN_TEXTTOP     0x0080  // Bit to indicate text is bottom aligned.
+    #define BTN_TWOTONE     0x0100  // Bit to indicate the button is a two tone type.
 
 // Note that if bits[7:4] are all zero text is centered.
     #define BTN_DRAW_FOCUS  0x2000  // Bit to indicate focus must be redrawn.

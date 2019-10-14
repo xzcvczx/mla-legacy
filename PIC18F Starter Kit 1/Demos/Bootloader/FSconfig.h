@@ -126,6 +126,12 @@
     #endif
 #endif
 
+#ifdef __18CXX
+    /* Define the locations for the dataBuffer and FATbuffer; PLEASE CHECK THE LINKER FILE */
+    #define DATA_BUFFER_ADDRESS      0x600
+    #define FAT_BUFFER_ADDRESS       0x800
+#endif
+
 
 // Function definitions
 

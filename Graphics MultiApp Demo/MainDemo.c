@@ -53,9 +53,9 @@
 
 // Configuration bits
 #ifdef __PIC32MX__
-    #if defined(__32MX460F512L__)
+    #if defined(__32MX460F512L__) || defined (PIC32_ENET_SK_DM320004) || defined (PIC32_USB_SK_DM320003_1) || defined (PIC32_USB_SK_DM320003_2)
         #pragma config UPLLEN = ON          // USB PLL Enabled
-        #pragma config FPLLMUL = MUL_18     // PLL Multiplier
+        #pragma config FPLLMUL = MUL_20     // PLL Multiplier
         #pragma config UPLLIDIV = DIV_2     // USB PLL Input Divider
         #pragma config FPLLIDIV = DIV_2     // PLL Input Divider
         #pragma config FPLLODIV = DIV_1     // PLL Output Divider
@@ -75,7 +75,7 @@
         #pragma config DEBUG = ON           // Background Debugger Enable
     #endif
     #if defined(__32MX360F512L__)
-        #pragma config FPLLODIV = DIV_2, FPLLMUL = MUL_18, FPLLIDIV = DIV_1, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+        #pragma config FPLLODIV = DIV_2, FPLLMUL = MUL_20, FPLLIDIV = DIV_1, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
         #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
         #pragma config CP = OFF, BWP = OFF, PWP = OFF
     #endif
@@ -111,12 +111,12 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_EC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPDIS
 #define WAIT_UNTIL_FINISH(x)    while(!x)
 
     // Macros to interface with memory
-#if (GRAPHICS_HARDWARE_PLATFORM != GFX_PICTAIL_V3) && (GRAPHICS_HARDWARE_PLATFORM != DA210_DEV_BOARD)
-        #define FLASHInit() 				SST39Init();
-    #define ReadArray(address, pdata, len)  SST39ReadArray(address, pdata, len)
-#else
+#if defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD) ||  defined (MULTI_MEDIA_BOARD_DM00123) 
     #define FLASHInit()                     SST25Init();
     #define ReadArray(address, pdata, len)  SST25ReadArray(address, pdata, len)
+#else
+    #define FLASHInit() 					SST39Init();
+    #define ReadArray(address, pdata, len)  SST39ReadArray(address, pdata, len)
 #endif
 
 /************************************************************************
@@ -201,10 +201,15 @@ void                    TickInit(void);
 /////////////////////////////////////////////////////////////////////////////
 //                            IMAGES USED
 /////////////////////////////////////////////////////////////////////////////
+#ifdef MULTI_MEDIA_BOARD_DM00123
+extern volatile const BITMAP_FLASH  intro;      // the following images are taken from
+extern volatile const BITMAP_FLASH  mchpLogo;   // the external flash memory
+extern volatile const BITMAP_FLASH  mchpIcon0;
+#else
 extern BITMAP_EXTERNAL  intro;      // the following images are taken from
 extern BITMAP_EXTERNAL  mchpLogo;   // the external flash memory
 extern BITMAP_EXTERNAL  mchpIcon0;
-
+#endif
 /////////////////////////////////////////////////////////////////////////////
 //                       GLOBAL VARIABLES FOR DEMO
 /////////////////////////////////////////////////////////////////////////////
@@ -245,7 +250,7 @@ int main(void)
 {
     GOL_MSG msg;                        // GOL message structure to interact with GOL
    
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #if defined (PIC24FJ256DA210_DEV_BOARD)
 	     //All pins to digital except those that are used as analog signals
 		ANSA = 0x0000;
 	    ANSB = 0x0020;		// RB5 as potentiometer input
@@ -254,7 +259,15 @@ int main(void)
 	    ANSE = 0x0000;
 	    ANSF = 0x0000;
 	    ANSG = 0x0080;		// RG7 as touch screen Y+
-	     
+	#elif defined (EXPLORER_16)
+	
+	    /////////////////////////////////////////////////////////////////////////////
+	    // ADC Explorer 16 Development Board Errata (work around 2)
+	    // RB15 should be output
+	    /////////////////////////////////////////////////////////////////////////////
+	    LATBbits.LATB15 = 0;
+	    TRISBbits.TRISB15 = 0;
+		     
     #else
 		#if defined (__PIC24FJ256GB210__)
 			ANSA = 0x0000;
@@ -266,13 +279,6 @@ int main(void)
 		    ANSG = 0x0000;		
 		#endif
 
-    /////////////////////////////////////////////////////////////////////////////
-    // ADC Explorer 16 Development Board Errata (work around 2)
-    // RB15 should be output
-    /////////////////////////////////////////////////////////////////////////////
-    //LATBbits.LATB15 = 0;
-    //TRISBbits.TRISB15 = 0;
-
     #endif
 	
 
@@ -280,14 +286,13 @@ int main(void)
     Init_CPUClocks();
 
 	// when using these board initialize the display first 
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #if defined (PIC24FJ256DA210_DEV_BOARD)
 	    GOLInit();                      // Initialize graphics library and create default style scheme for GOL
 	#endif    
     
     FLASHInit();                        // initialize EEPROM SPI on GFX3 or flash Memory on GFX2
-    TickInit();                         // Start tick counter
 
-    #if (GRAPHICS_HARDWARE_PLATFORM != DA210_DEV_BOARD)
+    #if !defined (PIC24FJ256DA210_DEV_BOARD)
 	    GOLInit();                      // Initialize graphics library and create default style scheme for GOL
 	#endif    
 
@@ -296,7 +301,7 @@ int main(void)
 
     // do not use beeper if using 32MX460F512L
     #else
-    	#if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2)
+    	#if defined (GFX_PICTAIL_V2)
     		BeepInit();                         // Initialize beeper
     	#endif	
     #endif
@@ -304,11 +309,11 @@ int main(void)
 
     // Programming the flash is not possible when using the PIC32 STK since the hardware 
     // does not support it (no serial port) so we skip this check if using the STKs
-	#if !defined (PIC32_USB_STK) && !defined (PIC32_STK)
+	#if !defined (PIC32_USB_SK_DM320003_1) && !defined (PIC32_GP_SK_DM320001)
 	    // If S6 button on Explorer 16 board is pressed erase memory
 	    // display uses the same signals as the external flash memory so we cannot
 	    // use the display while programming the flash.
-	    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+	    #if defined (PIC24FJ256DA210_DEV_BOARD)
 	    if(BTN_S2 == 0)
 	    #else
 	    if(BTN_S6 == 0)
@@ -318,7 +323,7 @@ int main(void)
 	    }
 	#endif	//	#if !defined (PIC32_USB_STK) && !defined (PIC32_STK)
 
-    #if ((GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2) || (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V250))
+    #if defined (GFX_PICTAIL_V2) || defined (GFX_PICTAIL_V250)
         #if defined(ENABLE_SD_MSD_DEMO)
 
     /************************************************************************
@@ -333,6 +338,7 @@ int main(void)
     #endif
 
     TouchInit();                        // Initialize touch screen
+    TickInit();                         // Start tick counter    
     RTCCInit();                         // Setup the RTCC
     RTCCProcessEvents();
 
@@ -340,7 +346,7 @@ int main(void)
     UARTInit();
     #endif
 
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #if defined (PIC24FJ256DA210_DEV_BOARD)
     if(BTN_S1 == 0)
     #else
     // If S3 button on Explorer 16 board is pressed calibrate touch screen
@@ -353,7 +359,7 @@ int main(void)
     else
     {
         // If it's a new board (EEPROM_VERSION byte is not programed) calibrate touch screen
-        #if ((GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2) || (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V250))
+        #if defined (GFX_PICTAIL_V2) || defined (GFX_PICTAIL_V250)
         if(GRAPHICS_LIBRARY_VERSION != EEPROMReadWord(ADDRESS_VERSION))
         #else
         if(GRAPHICS_LIBRARY_VERSION != SST25ReadWord(ADDRESS_VERSION))
@@ -388,7 +394,7 @@ int main(void)
     #ifdef ENABLE_SD_MSD_DEMO
 
     int temp;
-        #if defined(__32MX360F512L__) || defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
+        #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GA110__) || defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
     Configure_SDSPI_PPS();
         #endif
     MDD_SDSPI_InitIO();
@@ -457,7 +463,7 @@ int main(void)
             #endif
 
             // FOR DEBUG ONLY (holding down S6 of explorer 16 will pause the screen)
-            while(PORTDbits.RD7 == 0);
+            //while(PORTDbits.RD7 == 0);
         }
     }
 }
@@ -1079,9 +1085,6 @@ void Init_CPUClocks(void)
         value = SYSTEMConfigPerformance(GetSystemClock());
         mOSCSetPBDIV(OSC_PB_DIV_2);
 
-        //value = SYSTEMConfigWaitStatesAndPB( GetSystemClock() );
-                    //// Enable the cache for the best performance
-        //CheKseg0CacheOn();
         INTEnableSystemMultiVectoredInt();
 
         value = OSCCON;
@@ -1089,6 +1092,11 @@ void Init_CPUClocks(void)
         {
             value = OSCCON; // Wait for PLL lock to stabilize
         }
+        #ifdef MULTI_MEDIA_BOARD_DM00123
+        CPLDInitialize();
+        CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+        CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+        #endif
     }
 
     AD1PCFG = 0xFFFF;       // Set analog pins to digital.
@@ -1099,7 +1107,7 @@ void Init_CPUClocks(void)
 }
 
 /*********************************************************************
-* Function: Timer4 ISR
+* Function: Timer3 ISR
 *
 * PreCondition: none
 *
@@ -1115,22 +1123,35 @@ void Init_CPUClocks(void)
 *
 ********************************************************************/
 #ifdef __PIC32MX__
-    #define __T4_ISR    __ISR(_TIMER_4_VECTOR, ipl1)
+    #define __T3_ISR    __ISR(_TIMER_3_VECTOR, ipl4)
 #else
-    #define __T4_ISR    __attribute__((interrupt, shadow, auto_psv))
+    #define __T3_ISR    __attribute__((interrupt, shadow, auto_psv))
 #endif
 
 /* */
-void __T4_ISR _T4Interrupt(void)
-{
-    tick++;
+#define TICK_PRESCALER	16
+int tickscaler;
 
+void __T3_ISR _T3Interrupt(void)
+{
+	if (tickscaler > TICK_PRESCALER)
+	{
+    	tickscaler = 0;
+    	tick++;
+ 	} 
+ 	else
+    	tickscaler++;
+ 	  	
+
+    TouchProcessTouch();
+    
     // Clear flag
     #ifdef __PIC32MX__
-    mT4ClearIntFlag();
+    mT3ClearIntFlag();
     #else
-    IFS1bits.T4IF = 0;
+    IFS0bits.T3IF = 0;
     #endif
+    
 }
 
 /*********************************************************************
@@ -1153,14 +1174,13 @@ void __T4_ISR _T4Interrupt(void)
 /*********************************************************************
  * Section: Tick Delay
  *********************************************************************/
-
-// for a system clock of 72 MHz
 #ifdef __PIC32MX__
-    #define TICK_PERIOD (72000 / 8)
+// for a system clock of 80 MHz
+    #define TICK_PERIOD 		(GetSystemClock()/300000) 
 #else
-
 // for a system clock of 32 MHz
-    #define TICK_PERIOD 16000
+	#define SAMPLE_PERIOD       200 
+	#define TICK_PERIOD			(GetPeripheralClock() * SAMPLE_PERIOD) / 4000000
 #endif
 
 /* */
@@ -1169,16 +1189,21 @@ void TickInit(void)
 
     // Initialize Timer4
     #ifdef __PIC32MX__
-    OpenTimer4(T4_ON | T4_PS_1_8, TICK_PERIOD);
-    ConfigIntTimer4(T4_INT_ON | T4_INT_PRIOR_1);
+    OpenTimer3(T3_ON | T3_PS_1_8, TICK_PERIOD);  // enable timer to run for approximately 100 us
+    ConfigIntTimer3(T3_INT_ON | T3_INT_PRIOR_1); // Enable interrupt
     #else
-    TMR4 = 0;
-    PR4 = TICK_PERIOD;
-    IFS1bits.T4IF = 0;  //Clear flag
-    IEC1bits.T4IE = 1;  //Enable interrupt
-    T4CONbits.TON = 1;  //Run timer
+    TMR3 = 0;
+    PR3 = TICK_PERIOD;							//(for approximately 100 us)
+    IFS0bits.T3IF = 0;  						//Clear flag
+    IEC0bits.T3IE = 1;  						//Enable interrupt
+    T3CONbits.TON = 1;  						//Run timer
     #endif
+    
+    tickscaler = 0;
+
 }
+
+
 
 /*********************************************************************
 * Function: WORD ExternalMemoryCallback(EXTDATA* memory, LONG offset, WORD nCount, void* buffer)
@@ -1215,7 +1240,7 @@ WORD ExternalMemoryCallback(EXTDATA *memory, LONG offset, WORD nCount, void *buf
     {
 
         // Read data requested into buffer provided
-        #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+        #if defined (GFX_PICTAIL_V3) || defined (PIC24FJ256DA210_DEV_BOARD) || defined (MULTI_MEDIA_BOARD_DM00123)
         SST25ReadArray(memory->address + offset, // address to read from
         (BYTE *)buffer, nCount);
         #else

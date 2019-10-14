@@ -15,12 +15,6 @@ Remarks:
 //DOM-IGNORE-BEGIN
 /******************************************************************************
 
-* File Name:       lcd_demo.c
-* Dependencies:    None
-* Processor:       PIC24FJ256GB110
-* Compiler:        C30 v2.01
-* Company:         Microchip Technology, Inc.
-
 Software License Agreement
 
 The software supplied herewith by Microchip Technology Incorporated

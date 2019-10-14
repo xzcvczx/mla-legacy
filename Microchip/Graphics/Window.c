@@ -65,7 +65,7 @@ WINDOW *WndCreate
 {
     WINDOW  *pW;
 
-    pW = (WINDOW *)malloc(sizeof(WINDOW));
+    pW = (WINDOW *)GFX_malloc(sizeof(WINDOW));
     if(pW == NULL)
         return (pW);
 

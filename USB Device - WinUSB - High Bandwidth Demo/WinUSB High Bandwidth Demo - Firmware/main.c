@@ -34,11 +34,17 @@
 
  Change History:
   Rev   Description
+  ----  ----------------------------------------------------------
   2.5   Initial release of this demo.  Source code
   		was derived from the MCHPFSUSB v2.4
   		"USB Device - WinUSB - Generic Driver Demo"
   		firmware project.
-  2.6   Added Support for PIC32MX795F512L & PIC24FJ256DA210
+
+  2.6   Added support for PIC32MX795F512L & PIC24FJ256DA210
+
+  2.6a  Added support for PIC24FJ256GB210
+
+  2.7   No change
 ********************************************************************/
 
 /** INCLUDES *******************************************************/

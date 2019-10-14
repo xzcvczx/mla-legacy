@@ -14,7 +14,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -47,7 +47,7 @@
  * Author               Date		Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Howard Schlunder		10/03/06	Original, copied from Compiler.h
- * Ken Hesky            07/01/08    Added ZG2100-specific features
+ * Ken Hesky            01/xx/10    Added MRF24WB0M-specific features
  ********************************************************************/
 #ifndef __HARDWARE_PROFILE_H
 #define __HARDWARE_PROFILE_H
@@ -63,14 +63,17 @@
 //#define PIC24FJ64GA004_PIM		// Explorer 16, but with the PIC24FJ64GA004 PIM module, which has significantly differnt pin mappings
 //#define EXPLORER_16				// PIC24FJ128GA010, PIC24HJ256GP610, dsPIC33FJ256GP710, PIC32MX360F512L, PIC32MX460F512L, PIC32MX795F512L, etc. PIMs
 //#define DSPICDEM11
-#define PIC32_STARTER_KIT		// PIC32MX360F512L Starter Kit, PIC32MX460F512L USB Starter Board, or PIC32MX795F512L USB Starter Kit II
-//#define PIC32_ETH_STARTER_KIT	// PIC32MX795F512L Ethernet Starter Kit board with embedded Ethernet controller
+#define PIC32_GP_SK_DM320001			// PIC32MX360F512L General Purpose Starter Kit (for purposes of TCP/IP, defining this macro is the same as defining PIC32_USB_DM320003_1 or PIC32_USB_SK_DM320003_2)
+#define PIC32_USB_DM320003_1			// PIC32MX460F512L USB Starter Board (for purposes of TCP/IP, defining this macro is the same as defining PIC32_GP_SK_DM320001 or PIC32_USB_SK_DM320003_2)
+#define PIC32_USB_SK_DM320003_2			// PIC32MX795F512L USB Starter Kit II (for purposes of TCP/IP, defining this macro is the same as defining PIC32_GP_SK_DM320001 or PIC32_USB_DM320003_1)
+//#define PIC32_ENET_SK_DM320004		// PIC32MX795F512L Ethernet Starter Kit board with embedded Ethernet controller
+//#define PIC24FJ256DA210_DEV_BOARD	// PIC24FJ256DA210 Development Board (Graphics)
 //#define YOUR_BOARD
 
 // If no hardware profiles are defined, assume that we are using 
 // a Microchip demo board and try to auto-select the correct profile
 // based on processor selected in MPLAB
-#if !defined(PICDEMNET2) && !defined(PIC18_EXPLORER) && !defined(HPC_EXPLORER) && !defined(EXPLORER_16) && !defined(PIC24FJ64GA004_PIM) && !defined(DSPICDEM11) && !defined(PICDEMNET2) && !defined(INTERNET_RADIO) && !defined(YOUR_BOARD) && !defined(__PIC24FJ128GA006__) && !defined(PIC32_STARTER_KIT) && !defined(PIC32_ETH_STARTER_KIT)
+#if !defined(PICDEMNET2) && !defined(PIC18_EXPLORER) && !defined(HPC_EXPLORER) && !defined(EXPLORER_16) && !defined(PIC24FJ64GA004_PIM) && !defined(DSPICDEM11) && !defined(PICDEMNET2) && !defined(INTERNET_RADIO) && !defined(YOUR_BOARD) && !defined(__PIC24FJ128GA006__) && !defined(PIC32_GP_SK_DM320001) && !defined(PIC32_USB_DM320003_1) && !defined(PIC32_USB_SK_DM320003_2) && !defined(PIC32_ENET_SK_DM320004) && !defined(PIC24FJ256DA210_DEV_BOARD)
 	#if defined(__18F97J60) || defined(_18F97J60)
 		#define PICDEMNET2
 	#elif defined(__18F67J60) || defined(_18F67J60)
@@ -80,6 +83,8 @@
 		//#define HPC_EXPLORER
 	#elif defined(__PIC24FJ64GA004__)
 		#define PIC24FJ64GA004_PIM
+	#elif defined(__PIC24FJ256DA210__)
+		#define PIC24FJ256DA210_DEV_BOARD
 	#elif defined(__PIC24F__) || defined(__PIC24H__) || defined(__dsPIC33F__) || defined(__PIC32MX__)
 		#define EXPLORER_16
 	#elif defined(__dsPIC30F__)
@@ -95,7 +100,7 @@
 		#elif !defined(HI_TECH_C)
 			#pragma config XINST=OFF
 		#endif
-	
+		
 		#if defined(__18F8722) && !defined(HI_TECH_C)
 			// PICDEM HPC Explorer or PIC18 Explorer board
 			#pragma config OSC=HSPLL, FCMEN=OFF, IESO=OFF, PWRT=OFF, WDT=OFF, LVP=OFF
@@ -117,7 +122,7 @@
 		#elif (defined(__18F97J60) || defined(__18F96J65) || defined(__18F96J60) || defined(__18F87J60) || defined(__18F86J65) || defined(__18F86J60) || defined(__18F67J60) || defined(__18F66J65) || defined(__18F66J60)) && !defined(HI_TECH_C)
 			// PICDEM.net 2 or any other PIC18F97J60 family device
 			#pragma config WDT=OFF, FOSC2=ON, FOSC=HSPLL, ETHLED=ON
-		#elif defined(_18F97J60) || defined(_18F96J65) || defined(_18F96J60) || defined(_18F87J60) || defined(_18F86J65) || defined(_18F86J60) || defined(_18F67J60) || defined(_18F66J65) || defined(_18F66J60) 
+		#elif defined(_18F97J60) || defined(_18F96J65) || defined(_18F96J60) || defined(_18F87J60) || defined(_18F86J65) || defined(_18F86J60) || defined(_18F67J60) || defined(_18F66J65) || defined(_18F66J60)
 			// PICDEM.net 2 board with HI-TECH PICC-18 compiler
 			__CONFIG(1, WDTDIS & XINSTDIS);
 			__CONFIG(2, HSPLL);
@@ -125,6 +130,19 @@
 		#elif defined(__18F4620) && !defined(HI_TECH_C)
 			#pragma config OSC=HSPLL, WDT=OFF, MCLRE=ON, PBADEN=OFF, LVP=OFF
 		#endif
+	#elif defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
+		// PIC24FJ256DA210 Development Board (Graphics) or PIC24FJ256GB210 PIM on Explorer 16
+		_CONFIG3(ALTPMP_ALPMPDIS & SOSCSEL_EC); 										// PMP in default location, disable Timer1 oscillator so that RC13 can be used as a GPIO
+		_CONFIG2(FNOSC_PRIPLL & POSCMOD_XT & IOL1WAY_OFF & PLL96MHZ_ON & PLLDIV_DIV2);	// Primary XT OSC with 96MHz PLL (8MHz crystal input), IOLOCK can be set and cleared
+		_CONFIG1(FWDTEN_OFF & ICS_PGx2 & JTAGEN_OFF & ALTVREF_ALTVREDIS);				// Watchdog timer off, ICD debugging on PGEC2/PGED2 pins, JTAG off, AVREF and CVREF in default locations
+	#elif defined(__PIC24FJ256GB110__)
+		// PIC24FJ256GB110 PIM on Explorer 16
+		_CONFIG2(PLLDIV_DIV2 & PLL_96MHZ_ON & FNOSC_PRIPLL & IOL1WAY_OFF & POSCMOD_XT); // Primary XT OSC with 96MHz PLL (8MHz crystal input), IOLOCK can be set and cleared
+		_CONFIG1(JTAGEN_OFF & ICS_PGx2 & FWDTEN_OFF);									// Watchdog timer off, ICD debugging on PGEC2/PGED2 pins, JTAG off
+	#elif defined(__PIC24FJ256GA110__)
+		// PIC24FJ256GA110 PIM on Explorer 16
+		_CONFIG2(FNOSC_PRIPLL & IOL1WAY_OFF & POSCMOD_XT);	// Primary XT OSC with PLL, IOLOCK can be set and cleared
+		_CONFIG1(JTAGEN_OFF & ICS_PGx2 & FWDTEN_OFF);		// Watchdog timer off, ICD debugging on PGEC2/PGED2 pins, JTAG off
 	#elif defined(__PIC24F__)
 		// Explorer 16 board
 		_CONFIG2(FNOSC_PRIPLL & POSCMOD_XT)		// Primary XT OSC with 4x PLL
@@ -142,7 +160,7 @@
 		_FBORPOR(MCLR_EN & PBOR_OFF & PWRT_OFF)
 	#elif defined(__PIC32MX__)
 		#pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FPBDIV = DIV_1, POSCMOD = XT, FNOSC = PRIPLL, CP = OFF
-		#if defined(PIC32_ETH_STARTER_KIT)
+		#if defined(PIC32_ENET_SK_DM320004)
 			#pragma config FMIIEN = OFF, FETHIO = OFF	// external PHY in RMII/alternate configuration
 		#endif
 	#endif
@@ -165,17 +183,17 @@
 		#define GetInstructionClock()	(GetSystemClock()/4)
 		#define GetPeripheralClock()	GetInstructionClock()
 	#endif
-#elif defined(__PIC24F__)	
+#elif defined(__PIC24F__) || defined(__PIC24FK__)
 	// PIC24F processor
 	#define GetSystemClock()		(32000000ul)      // Hz
 	#define GetInstructionClock()	(GetSystemClock()/2)
 	#define GetPeripheralClock()	GetInstructionClock()
-#elif defined(__PIC24H__)	
+#elif defined(__PIC24H__)
 	// PIC24H processor
 	#define GetSystemClock()		(80000000ul)      // Hz
 	#define GetInstructionClock()	(GetSystemClock()/2)
 	#define GetPeripheralClock()	GetInstructionClock()
-#elif defined(__dsPIC33F__)	
+#elif defined(__dsPIC33F__)
 	// dsPIC33F processor
 	#define GetSystemClock()		(80000000ul)      // Hz
 	#define GetInstructionClock()	(GetSystemClock()/2)
@@ -278,6 +296,33 @@
 //	#define ENC_SPICON1			(SSP1CON1)
 //	#define ENC_SPICON1bits		(SSP1CON1bits)
 //	#define ENC_SPICON2			(SSP1CON2)
+
+//    //----------------
+//    // MRF24WB0M I/O pins
+//    //----------------
+//	#define WF_CS_TRIS			(TRISCbits.TRISC2)	// Uncomment this line if you wish to use the MRF24WB0M on the PICDEM.net 2 board instead of the internal PIC18F97J60 Ethernet module
+//	#define WF_SDI_TRIS			(TRISCbits.TRISC4)
+//	#define WF_SCK_TRIS			(TRISCbits.TRISC3)
+//	#define WF_SDO_TRIS			(TRISCbits.TRISC5)
+//	#define WF_RESET_TRIS		(TRISBbits.TRISB1)
+//	#define WF_RESET_IO			(LATBbits.LATB1)
+//	#define WF_INT_TRIS	    	(TRISBbits.TRISB0)
+//	#define WF_INT_IO			(PORTBbits.RB0)
+//	#define WF_CS_IO			(LATCbits.LATC2)
+//	#define WF_HIBERNATE_TRIS   (TRISBbits.TRISB2)
+//	#define	WF_HIBERNATE_IO 	(PORTBbits.RB2)
+//	#define WF_INT_EDGE		    (INTCON2bits.INTEDG0)
+//	#define WF_INT_IE			(INTCONbits.INT0IE)
+//	#define WF_INT_IF			(INTCONbits.INT0IF)
+//	#define WF_SPI_IF			(PIR1bits.SSPIF)
+//	#define WF_SSPBUF			(SSP1BUF)
+//	#define WF_SPISTAT			(SSP1STAT)
+//	#define WF_SPISTATbits		(SSP1STATbits)
+//	#define WF_SPICON1			(SSP1CON1)
+//	#define WF_SPICON1bits		(SSP1CON1bits)
+//	#define WF_SPICON2			(SSP1CON2)
+//	#define WF_SPI_IE			(PIE1bits.SSPIE)
+//	#define WF_SPI_IP			(IPR1bits.SSPIP)
 
 //	// 25LC256 I/O pins
 //	#define EEPROM_CS_TRIS		(TRISAbits.TRISA3)
@@ -420,6 +465,33 @@
 //	#define ENC_SPICON1bits		(SSP1CON1bits)
 //	#define ENC_SPICON2			(SSP1CON2)
 
+//    //----------------
+//    // MRF24WB0M I/O pins
+//    //----------------
+//	#define WF_CS_TRIS			(TRISCbits.TRISC2)	// Uncomment this line if you wish to use the MRF24WB0M on the PICDEM.net 2 board instead of the internal PIC18F97J60 Ethernet module
+//	#define WF_SDI_TRIS			(TRISCbits.TRISC4)
+//	#define WF_SCK_TRIS			(TRISCbits.TRISC3)
+//	#define WF_SDO_TRIS			(TRISCbits.TRISC5)
+//	#define WF_RESET_TRIS		(TRISBbits.TRISB1)
+//	#define WF_RESET_IO			(LATBbits.LATB1)
+//	#define WF_INT_TRIS		    (TRISBbits.TRISB0)
+//	#define WF_INT_IO			(PORTBbits.RB0)
+//	#define WF_CS_IO			(LATCbits.LATC2)
+//	#define WF_HIBERNATE_TRIS   (TRISBbits.TRISB2)
+//	#define	WF_HIBERNATE_IO		(PORTBbits.RB2)
+//	#define WF_INT_EDGE		    (INTCON2bits.INTEDG0)
+//	#define WF_INT_IE			(INTCONbits.INT0IE)
+//	#define WF_INT_IF			(INTCONbits.INT0IF)
+//	#define WF_SPI_IF			(PIR1bits.SSPIF)
+//	#define WF_SSPBUF			(SSP1BUF)
+//	#define WF_SPISTAT			(SSP1STAT)
+//	#define WF_SPISTATbits		(SSP1STATbits)
+//	#define WF_SPICON1			(SSP1CON1)
+//	#define WF_SPICON1bits		(SSP1CON1bits)
+//	#define WF_SPICON2			(SSP1CON2)
+//	#define WF_SPI_IE			(PIE1bits.SSPIE)
+//	#define WF_SPI_IP			(IPR1bits.SSPIP)
+
 //	// 25LC256 I/O pins
 //	#define EEPROM_CS_TRIS		(TRISA3)
 //	#define EEPROM_CS_IO		(LATA3)
@@ -554,7 +626,7 @@
 	#endif
 	
 #elif defined(HPC_EXPLORER) && defined(HI_TECH_C)
-// PICDEM HPC Explorer + Ethernet PICtail	
+// PICDEM HPC Explorer + Ethernet PICtail
 	#define TXSTA				TXSTA1
 	#define RCSTA				RCSTA1
 	#define SPBRG				SPBRG1
@@ -633,12 +705,12 @@
 	#define BUTTON1_IO			PORTCbits.RC6
 	#define BUTTON0_TRIS		TRISAbits.TRISA7		// Multiplexed with LED1
 	#define BUTTON0_IO			PORTAbits.RA7
-		
+	
 	// LED I/O pins
 	#define LED0_TRIS			TRISAbits.TRISA10		// Multiplexed with BUTTON3
 	#define LED0_IO				LATAbits.LATA10
 	#define LED1_TRIS			TRISAbits.TRISA7		// Multiplexed with BUTTON0
-	#define LED1_IO				LATAbits.LATA7				
+	#define LED1_IO				LATAbits.LATA7
 	#define LED2_TRIS			TRISBbits.TRISB8		// Multiplexed with LCD_DATA4
 	#define LED2_IO				LATBbits.LATB8
 	#define LED3_TRIS			TRISBbits.TRISB9		// Multiplexed with LCD_DATA3
@@ -652,7 +724,7 @@
 	#define LED7_TRIS			TRISCbits.TRISC6		// Multiplexed with BUTTON1
 	#define LED7_IO				LATCbits.LATC6
 	#define LED_GET()			(0u)
-	#define LED_PUT(a)			
+	#define LED_PUT(a)
 	
 	// UART I/O Mapping
 	#define UARTTX_TRIS			(TRISCbits.TRISC9)
@@ -736,10 +808,10 @@
 #elif defined(EXPLORER_16)
 // Explorer 16 + PIC24FJ128GA010/PIC24HJ256GP610/dsPIC33FJ256GP710/
 //				 PIC32MX460F512L/PIC32MX360F512L/PIC32MX795F512L PIM + 
-//               Fast 100Mbps Ethernet PICtail Plus or Ethernet PICtail Plus or ZeroG ZG2100M WiFi PICtail Plus
+//               Fast 100Mbps Ethernet PICtail Plus or Ethernet PICtail Plus or MRF24WB0M WiFi PICtail Plus
 
 	#define LED0_TRIS			(TRISAbits.TRISA0)	// Ref D3
-	#define LED0_IO				(LATAbits.LATA0)	
+	#define LED0_IO				(LATAbits.LATA0)
 	#define LED1_TRIS			(TRISAbits.TRISA1)	// Ref D4
 	#define LED1_IO				(LATAbits.LATA1)
 	#define LED2_TRIS			(TRISAbits.TRISA2)	// Ref D5
@@ -773,27 +845,39 @@
 	#define UARTRX_IO			(PORTFbits.RF4)
 
 //	// ENC28J60 I/O pins
-//	#define ENC_CS_TRIS			(TRISDbits.TRISD14)	// Comment this line out if you are using the ENC424J600/624J600, ZeroG ZG2100, or other network controller.
-//	#define ENC_CS_IO			(PORTDbits.RD14)
-//	//#define ENC_RST_TRIS		(TRISDbits.TRISD15)	// Not connected by default.  It is okay to leave this pin completely unconnected, in which case this macro should simply be left undefined.
-//	//#define ENC_RST_IO			(PORTDbits.RD15)
-//	// SPI SCK, SDI, SDO pins are automatically controlled by the 
-//	// PIC24/dsPIC/PIC32 SPI module 
-//	#if defined(__C30__)	// PIC24F, PIC24H, dsPIC30, dsPIC33
-//		#define ENC_SPI_IF			(IFS0bits.SPI1IF)
-//		#define ENC_SSPBUF			(SPI1BUF)
-//		#define ENC_SPISTAT			(SPI1STAT)
-//		#define ENC_SPISTATbits		(SPI1STATbits)
-//		#define ENC_SPICON1			(SPI1CON1)
-//		#define ENC_SPICON1bits		(SPI1CON1bits)
-//		#define ENC_SPICON2			(SPI1CON2)
-//	#else					// PIC32
-//		#define ENC_SPI_IF			(IFS0bits.SPI1RXIF)
-//		#define ENC_SSPBUF			(SPI1BUF)
-//		#define ENC_SPISTATbits		(SPI1STATbits)
-//		#define ENC_SPICON1			(SPI1CON)
-//		#define ENC_SPICON1bits		(SPI1CONbits)
-//		#define ENC_SPIBRG			(SPI1BRG)
+//	#if defined(__PIC24FJ256GA110__)	// PIC24FJ256GA110 must place the ENC28J60 on SPI2 because PIC rev A3 SCK1 output pin is a PPS input only (fixed on A5, but demos use SPI2 for simplicity)
+//		#define ENC_CS_TRIS			(TRISFbits.TRISF12)	// Comment this line out if you are using the ENC424J600/624J600, MRF24WB0M, or other network controller.
+//		#define ENC_CS_IO			(LATFbits.LATF12)
+//		// SPI SCK, SDI, SDO pins are automatically controlled by the 
+//		// PIC24/dsPIC/PIC32 SPI module 
+//		#define ENC_SPI_IF			(IFS2bits.SPI2IF)
+//		#define ENC_SSPBUF			(SPI2BUF)
+//		#define ENC_SPISTAT			(SPI2STAT)
+//		#define ENC_SPISTATbits		(SPI2STATbits)
+//		#define ENC_SPICON1			(SPI2CON1)
+//		#define ENC_SPICON1bits		(SPI2CON1bits)
+//		#define ENC_SPICON2			(SPI2CON2)
+//	#else	// SPI1 for all other processors
+//		#define ENC_CS_TRIS			(TRISDbits.TRISD14)	// Comment this line out if you are using the ENC424J600/624J600, MRF24WB0M, or other network controller.
+//		#define ENC_CS_IO			(LATDbits.LATD14)
+//		// SPI SCK, SDI, SDO pins are automatically controlled by the 
+//		// PIC24/dsPIC/PIC32 SPI module 
+//		#if defined(__C30__)	// PIC24F, PIC24H, dsPIC30, dsPIC33
+//			#define ENC_SPI_IF			(IFS0bits.SPI1IF)
+//			#define ENC_SSPBUF			(SPI1BUF)
+//			#define ENC_SPISTAT			(SPI1STAT)
+//			#define ENC_SPISTATbits		(SPI1STATbits)
+//			#define ENC_SPICON1			(SPI1CON1)
+//			#define ENC_SPICON1bits		(SPI1CON1bits)
+//			#define ENC_SPICON2			(SPI1CON2)
+//		#else					// PIC32
+//			#define ENC_SPI_IF			(IFS0bits.SPI1RXIF)
+//			#define ENC_SSPBUF			(SPI1BUF)
+//			#define ENC_SPISTATbits		(SPI1STATbits)
+//			#define ENC_SPICON1			(SPI1CON)
+//			#define ENC_SPICON1bits		(SPI1CONbits)
+//			#define ENC_SPIBRG			(SPI1BRG)
+//		#endif
 //	#endif
 
 
@@ -871,17 +955,19 @@
 		#define ENC100_SI_RD_RW_IO				(LATDbits.LATD5)
 		#define ENC100_SCK_AL_TRIS				(TRISBbits.TRISB15)
 		#define ENC100_SCK_AL_IO				(LATBbits.LATB15)
-	#else	
+	#else
 		// SPI pinout
-		#define ENC100_CS_TRIS					(TRISDbits.TRISD14)	// CS is mandatory when using the SPI interface
-		#define ENC100_CS_IO					(LATDbits.LATD14)
-		#define ENC100_POR_TRIS					(TRISDbits.TRISD15)	// POR signal is optional.  If your application doesn't have a power disconnect feature, comment out this pin definition.
-		#define ENC100_POR_IO					(LATDbits.LATD15)
-		#define ENC100_SO_WR_B0SEL_EN_TRIS		(TRISFbits.TRISF7)	// SO is ENCX24J600 Serial Out, which needs to connect to the PIC SDI pin for SPI mode
-		#define ENC100_SO_WR_B0SEL_EN_IO		(PORTFbits.RF7)
-		#define ENC100_SI_RD_RW_TRIS			(TRISFbits.TRISF8)	// SI is ENCX24J600 Serial In, which needs to connect to the PIC SDO pin for SPI mode
-		#define ENC100_SI_RD_RW_IO				(LATFbits.LATF8)
-		#define ENC100_SCK_AL_TRIS				(TRISFbits.TRISF6)
+		#if defined(__PIC24FJ256GA110__)	// The PIC24FJ256GA110 must use SPI2 slot on Explorer 16.  If you don't have a PIC24FJ256GA110 but want to use SPI2 for some reason, you can use these definitions.
+			#define ENC100_CS_TRIS					(TRISFbits.TRISF12)	// CS is mandatory when using the SPI interface
+			#define ENC100_CS_IO					(LATFbits.LATF12)
+			#define ENC100_POR_TRIS					(TRISFbits.TRISF13)	// POR signal is optional.  If your application doesn't have a power disconnect feature, comment out this pin definition.
+			#define ENC100_POR_IO					(LATFbits.LATF13)
+		#else	// All other PIC24s, dsPICs, and PIC32s use SPI1 slot (top most closest to LCD)
+			#define ENC100_CS_TRIS					(TRISDbits.TRISD14)	// CS is mandatory when using the SPI interface
+			#define ENC100_CS_IO					(LATDbits.LATD14)
+			#define ENC100_POR_TRIS					(TRISDbits.TRISD15)	// POR signal is optional.  If your application doesn't have a power disconnect feature, comment out this pin definition.
+			#define ENC100_POR_IO					(LATDbits.LATD15)
+		#endif
 	#endif
 
 	// ENC624J600 Bit Bang PSP I/O macros and pin configuration for address and 
@@ -897,77 +983,106 @@
 		#if ENC100_INTERFACE_MODE == 1 || ENC100_INTERFACE_MODE == 2	// Dumultiplexed 8-bit address/data modes
 			// SPI2 CANNOT BE ENABLED WHEN ACCESSING THE ENC624J600 FOR THESE TWO MODES AS THE PINS OVERLAP WITH ADDRESS LINES.
 			#if defined(ENC100_PSP_USE_INDIRECT_RAM_ADDRESSING)	// Only ENC624J600 address pins A0-A8 connected (A9-A14 tied to Vdd)
-				#define ENC100_INIT_PSP_BIT_BANG()	do{((volatile BYTE*)&AD1PCFGH)[1] = 0xFF; ((volatile BYTE*)&AD1PCFGL)[1] |= 0xC0;}while(0)	// Disable AN24-AN31 and AN14-AN15 analog inputs on RE0-RE7 and RB14-RB15 pins (ENCX24J600 AD0-AD7, A1-A0)
-				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISB &= 0x3FFF; TRISG &= 0xFC3F; TRISA &= 0xF9FF; TRISDbits.TRISD11 = 0;}while(0)
-				#define ENC100_SET_ADDR_IO(a)		do{WORD _SetMacro = (a); LATBbits.LATB15 = 0; LATBbits.LATB14 = 0; LATG &= 0xFC3F; LATAbits.LATA10 = 0; LATAbits.LATA9 = 0; LATDbits.LATD11 = 0; if(_SetMacro & 0x0001) LATBbits.LATB15 = 1; if(_SetMacro & 0x0002) LATBbits.LATB14 = 1; if(_SetMacro & 0x0004) LATGbits.LATG9 = 1; if(_SetMacro & 0x0008) LATGbits.LATG8 = 1; if(_SetMacro & 0x0010) LATGbits.LATG7 = 1; if(_SetMacro & 0x0020) LATGbits.LATG6 = 1; if(_SetMacro & 0x0040) LATAbits.LATA10 = 1; if(_SetMacro & 0x0080) LATAbits.LATA9 = 1; if(_SetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
+				#if defined(__PIC24FJ256GB210__)
+					#define ENC100_INIT_PSP_BIT_BANG()	do{ANSA &= 0xF9E7; ANSB &= 0x3FFF; ANSG &= 0xFCFF;} while(0)		// RE0-RE7, RF12, RD11, RD4, RD5 (AD0-AD7, A5, A8, WR, RD) pins are already digital only pins.
+				#else
+					#define ENC100_INIT_PSP_BIT_BANG()	do{((volatile BYTE*)&AD1PCFGH)[1] = 0xFF; ((volatile BYTE*)&AD1PCFGL)[1] |= 0xC0;}while(0)	// Disable AN24-AN31 and AN14-AN15 analog inputs on RE0-RE7 and RB14-RB15 pins (ENCX24J600 AD0-AD7, A1-A0)
+				#endif
+				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISA &= 0xF9E7; TRISB &= 0x3FFF; TRISFbits.TRISF12 = 0; TRISGbits.TRISG9 = 0; TRISDbits.TRISD11 = 0;}while(0)
+				#define ENC100_SET_ADDR_IO(a)		do{WORD _SetMacro = (a); LATBbits.LATB15 = 0; LATBbits.LATB14 = 0; LATGbits.LATG9 = 0; LATA &= 0xF9E7; LATFbits.LATF12 = 0; LATDbits.LATD11 = 0; if(_SetMacro & 0x0001) LATBbits.LATB15 = 1; if(_SetMacro & 0x0002) LATBbits.LATB14 = 1; if(_SetMacro & 0x0004) LATGbits.LATG9 = 1; if(_SetMacro & 0x0008) LATAbits.LATA4 = 1; if(_SetMacro & 0x0010) LATAbits.LATA3 = 1; if(_SetMacro & 0x0020) LATFbits.LATF12 = 1; if(_SetMacro & 0x0040) LATAbits.LATA10 = 1; if(_SetMacro & 0x0080) LATAbits.LATA9 = 1; if(_SetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
 				#define ENC100_SET_AD_TRIS_IN()		(((volatile BYTE*)&TRISE)[0] = 0xFF)
 				#define ENC100_SET_AD_TRIS_OUT()	(((volatile BYTE*)&TRISE)[0] = 0x00)
 				#define ENC100_GET_AD_IO()			(((volatile BYTE*)&PORTE)[0])
-				#define ENC100_SET_AD_IO(data)		(((volatile BYTE*)&LATE)[0] = (data))
+				#define ENC100_SET_AD_IO(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
 			#else 	// All ENC624J600 address pins A0-A14 connected
-				#define ENC100_INIT_PSP_BIT_BANG()	do{((volatile BYTE*)&AD1PCFGH)[1] = 0xFF; ((volatile BYTE*)&AD1PCFGL)[1] |= 0xFC;}while(0)	// Disable AN24-AN31 and AN10-AN15 analog inputs on RE0-RE7 and RB10-RB15 pins (ENCX24J600 AD0-AD7, A1-A0, A13-A10)
-				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISB &= 0x03FF; TRISG &= 0xFC3F; TRISA &= 0xF9FF; TRISF &= 0xFFCF; TRISDbits.TRISD11 = 0;}while(0)
-				#define ENC100_SET_ADDR_IO(a)		do{WORD _SetMacro = (a); LATB &= 0x03FF; LATG &= 0xFC3F; LATAbits.LATA10 = 0; LATAbits.LATA9 = 0; LATFbits.LATF5 = 0; LATFbits.LATF4 = 0; LATDbits.LATD11 = 0; if(_SetMacro & 0x0001) LATBbits.LATB15 = 1; if(_SetMacro & 0x0002) LATBbits.LATB14 = 1; if(_SetMacro & 0x0004) LATGbits.LATG9 = 1; if(_SetMacro & 0x0008) LATGbits.LATG8 = 1; if(_SetMacro & 0x0010) LATGbits.LATG7 = 1; if(_SetMacro & 0x0020) LATGbits.LATG6 = 1; if(_SetMacro & 0x0040) LATAbits.LATA10 = 1; if(_SetMacro & 0x0080) LATAbits.LATA9 = 1; if(_SetMacro & 0x0100) LATFbits.LATF5 = 1; if(_SetMacro & 0x0200) LATFbits.LATF4 = 1; if(_SetMacro & 0x0400) LATBbits.LATB13 = 1; if(_SetMacro & 0x0800) LATBbits.LATB12 = 1; if(_SetMacro & 0x1000) LATBbits.LATB11 = 1; if(_SetMacro & 0x2000) LATBbits.LATB10 = 1; if(_SetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
+				#if defined(__PIC24FJ256GB210__)
+					#define ENC100_INIT_PSP_BIT_BANG()	do{ANSA &= 0xF9E7; ANSB &= 0x03FF; ANSG &= 0xFCFF;} while(0)		// RE0-RE7, RF12, RD11, RD4, RD5 (AD0-AD7, A5, A14, WR, RD) pins are already digital only pins.
+				#else
+					#define ENC100_INIT_PSP_BIT_BANG()	do{((volatile BYTE*)&AD1PCFGH)[1] = 0xFF; ((volatile BYTE*)&AD1PCFGL)[1] |= 0xFC;}while(0)	// Disable AN24-AN31 and AN10-AN15 analog inputs on RE0-RE7 and RB10-RB15 pins (ENCX24J600 AD0-AD7, A1-A0, A13-A10)
+				#endif
+				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISA &= 0xF9E7; TRISB &= 0x03FF; TRISF &= 0xEFCF; TRISGbits.TRISG9 = 0; TRISDbits.TRISD11 = 0;}while(0)
+				#define ENC100_SET_ADDR_IO(a)		do{WORD _SetMacro = (a); LATA &= 0xF9E7; LATB &= 0x03FF; LATF &= 0xEFCF; LATGbits.LATG9 = 0; LATDbits.LATD11 = 0; if(_SetMacro & 0x0001) LATBbits.LATB15 = 1; if(_SetMacro & 0x0002) LATBbits.LATB14 = 1; if(_SetMacro & 0x0004) LATGbits.LATG9 = 1; if(_SetMacro & 0x0008) LATAbits.LATA4 = 1; if(_SetMacro & 0x0010) LATAbits.LATA3 = 1; if(_SetMacro & 0x0020) LATFbits.LATF12 = 1; if(_SetMacro & 0x0040) LATAbits.LATA10 = 1; if(_SetMacro & 0x0080) LATAbits.LATA9 = 1; if(_SetMacro & 0x0100) LATFbits.LATF5 = 1; if(_SetMacro & 0x0200) LATFbits.LATF4 = 1; if(_SetMacro & 0x0400) LATBbits.LATB13 = 1; if(_SetMacro & 0x0800) LATBbits.LATB12 = 1; if(_SetMacro & 0x1000) LATBbits.LATB11 = 1; if(_SetMacro & 0x2000) LATBbits.LATB10 = 1; if(_SetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
 				#define ENC100_SET_AD_TRIS_IN()		(((volatile BYTE*)&TRISE)[0] = 0xFF)
 				#define ENC100_SET_AD_TRIS_OUT()	(((volatile BYTE*)&TRISE)[0] = 0x00)
 				#define ENC100_GET_AD_IO()			(((volatile BYTE*)&PORTE)[0])
-				#define ENC100_SET_AD_IO(data)		(((volatile BYTE*)&LATE)[0] = (data))
+				#define ENC100_SET_AD_IO(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
 			#endif
 		#elif ENC100_INTERFACE_MODE == 3 || ENC100_INTERFACE_MODE == 4	// Dumultiplexed 16-bit address/data modes
 			#if defined(ENC100_PSP_USE_INDIRECT_RAM_ADDRESSING)	// Only ENC624J600 address pins A0-A7 connected (A8-A13 tied to Vdd)
-				#define ENC100_INIT_PSP_BIT_BANG()	do{AD1PCFGH = 0xFFFF; AD1PCFGL = 0xFFFF; AD2PCFGL = 0xFFFF;}while(0)
-				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISB &= 0x3FFF; TRISG &= 0xFC3F; TRISA &= 0xF9FF;}while(0)
-				#define ENC100_SET_ADDR_IO(a)		do{WORD _SetMacro = (a); LATBbits.LATB15 = 0; LATBbits.LATB14 = 0; LATG &= 0xFC3F; LATAbits.LATA10 = 0; LATAbits.LATA9 = 0; if(_SetMacro & 0x0001) LATBbits.LATB15 = 1; if(_SetMacro & 0x0002) LATBbits.LATB14 = 1; if(_SetMacro & 0x0004) LATGbits.LATG9 = 1; if(_SetMacro & 0x0008) LATGbits.LATG8 = 1; if(_SetMacro & 0x0010) LATGbits.LATG7 = 1; if(_SetMacro & 0x0020) LATGbits.LATG6 = 1; if(_SetMacro & 0x0040) LATAbits.LATA10 = 1; if(_SetMacro & 0x0080) LATAbits.LATA9 = 1;}while(0)
-				#define ENC100_WRH_B1SEL_TRIS		ENC100_SO_WR_B0SEL_EN_TRIS
-				#define ENC100_WRH_B1SEL_IO			ENC100_SO_WR_B0SEL_EN_IO
-				#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF; TRISG |= 0x0003; TRISF |= 0x0003; TRISD |= 0x30C0;}while(0)
-				#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISG &= 0xFFFC; TRISF |= 0xFFFC; TRISD |= 0xCF3F;}while(0)
-				#define ENC100_GET_AD_IOL()			(((volatile BYTE*)&PORTE)[0])
-				#if defined(__ENCX24J600_C)
-				    static inline __attribute__((__always_inline__)) BYTE ENC100_GET_AD_IOH(void)
-				    {
-					    BYTE_VAL ret = {0}; if(PORTGbits.RG0) ret.bits.b0 = 1; if(PORTGbits.RG1) ret.bits.b1 = 1; if(PORTFbits.RF1) ret.bits.b2 = 1; if(PORTFbits.RF0) ret.bits.b3 = 1; if(PORTDbits.RD12) ret.bits.b4 = 1; if(PORTDbits.RD13) ret.bits.b5 = 1; if(PORTDbits.RD6) ret.bits.b6 = 1; if(PORTDbits.RD7) ret.bits.b7 = 1; return ret.Val;
-				    }
+				#if defined(__PIC24FJ256GB210__)
+					#define ENC100_INIT_PSP_BIT_BANG()	do{ANSA &= 0x79E7; ANSB &= 0x3FFF; ANSD &= 0xCF0F; ANSG &= 0xFCFC;}while(0)
+				#else
+					#define ENC100_INIT_PSP_BIT_BANG()	do{AD1PCFGH = 0xFFFF; AD1PCFGL = 0xFFFF; AD2PCFGL = 0xFFFF;}while(0)
 				#endif
-				#define ENC100_GET_AD_IO()			((((volatile BYTE*)&PORTE)[0]) | ENC100_GET_AD_IOH();)
-				#define ENC100_SET_AD_IO(data)		do{WORD _SetMacro = (data); ((volatile BYTE*)&LATE)[0] = (BYTE)_SetMacro; LATG &= 0xFFFC; LATF |= 0xFFFC; LATD |= 0xCF3F; if(_SetMacro & 0x0100) LATGbits.LATG0 = 1; if(_SetMacro & 0x0200) LATGbits.LATG1 = 1; if(_SetMacro & 0x0400) LATFbits.LATF1 = 1; if(_SetMacro & 0x0800) LATFbits.LATF0 = 1; if(_SetMacro & 0x1000) LATDbits.LATD12 = 1; if(_SetMacro & 0x2000) LATDbits.LATD13 = 1; if (_SetMacro & 0x4000) LATDbits.LATD6 = 1; if(_SetMacro & 0x8000) LATDbits.LATD7 = 1;}while(0)
-			#else 	// All ENC624J600 address pins A0-A13 connected
-				#define ENC100_INIT_PSP_BIT_BANG()	do{AD1PCFGH = 0xFFFF; AD1PCFGL = 0xFFFF; AD2PCFGL = 0xFFFF;}while(0)
-				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISE &= 0xFF00; TRISG &= 0x8FF0;}while(0)
-				#define ENC100_SET_ADDR_IO(a)		do{WORD _wAddrSetMacro = (a); LATBbits.LATB15 = ((((BYTE*)&_wAddrSetMacro)[0]) & 0x1) == 0x1; LATBbits.LATB14 = ((((BYTE*)&_wAddrSetMacro)[0]) & 0x2) == 0x2; LATGbits.LATG9 = ((((BYTE*)&_wAddrSetMacro)[0]) & 0x4) == 0x4; LATG8bits.LATG8 = ((((BYTE*)&_wAddrSetMacro)[0]) & 0x8) == 0x8; LATGbits.LATG7 = ((((BYTE*)&_wAddrSetMacro)[0]) & 0x10) == 0x10; LATGbits.LATG6 = ((((BYTE*)&_wAddrSetMacro)[0]) & 0x20) == 0x20; LATAbits.LATA10 = ((((BYTE*)&_wAddrSetMacro)[0]) & 0x40) == 0x40; LATAbits.LATA9 = ((((BYTE*)&_wAddrSetMacro)[0]) & 0x80) == 0x80; LATDbits.LATD11 = ((((BYTE*)&_wAddrSetMacro)[1]) & 0x40) == 0x40;}while(0)
+				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISA &= 0xF9E7; TRISBbits.TRISB15 = 0; TRISBbits.TRISB14 = 0; TRISFbits.TRISF12 = 0; TRISGbits.TRISG9 = 0;}while(0)
+				#define ENC100_SET_ADDR_IO(a)		do{WORD _wSetMacro = (a); LATA &= 0xF9E7; LATBbits.LATB15 = 0; LATBbits.LATB14 = 0; LATFbits.LATF12 = 0; LATGbits.LATG9 = 0; if(_wSetMacro & 0x0001) LATBbits.LATB15 = 1; if(_wSetMacro & 0x0002) LATBbits.LATB14 = 1; if(_wSetMacro & 0x0004) LATGbits.LATG9 = 1; if(_wSetMacro & 0x0008) LATAbits.LATA4 = 1; if(_wSetMacro & 0x0010) LATAbits.LATA3 = 1; if(_wSetMacro & 0x0020) LATFbits.LATF12 = 1; if(_wSetMacro & 0x0040) LATAbits.LATA10 = 1; if(_wSetMacro & 0x0080) LATAbits.LATA9 = 1;}while(0)
 				#define ENC100_WRH_B1SEL_TRIS		ENC100_SO_WR_B0SEL_EN_TRIS
 				#define ENC100_WRH_B1SEL_IO			ENC100_SO_WR_B0SEL_EN_IO
-				#define ENC100_SET_AD_TRIS_IN		do{TRISD = 0xFFFF;}while(0)
-				#define ENC100_SET_AD_TRIS_OUT		do{TRISD = 0x0000;}while(0)
-				#define ENC100_GET_AD_IO()			(((volatile WORD*)&PORTD)[0])
-				#define ENC100_SET_AD_IO(data)		(((volatile WORD*)&LATD)[0] = (data))
+				#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF; TRISAbits.TRISA15 = 1; TRISCbits.TRISC13 = 1; TRISD |= 0x30C0; TRISGbits.TRISG0 = 1; TRISGbits.TRISG1 = 1;}while(0)
+				#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISAbits.TRISA15 = 0; TRISCbits.TRISC13 = 0; TRISD &= 0xCF3F; TRISGbits.TRISG0 = 0; TRISGbits.TRISG1 = 0;}while(0)
+				#define ENC100_GET_AD_IOH()			(PORTGbits.RG0 | (PORTGbits.RG1<<1) | (PORTCbits.RC13<<2) | (PORTAbits.RA15<<3) | (PORTDbits.RD12<<4) | (PORTDbits.RD13<<5) | (PORTDbits.RD6<<6) | (PORTDbits.RD7<<7))
+				#define ENC100_GET_AD_IOL()			(((volatile BYTE*)&PORTE)[0])
+				#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = ((BYTE*)&_wSetMacro)[0]; LATG &= 0xFFFC; LATCbits.LATC13 = 0; LATAbits.LATA15 = 0; LATD &= 0xCF3F; if(_wSetMacro & 0x0100) LATGbits.LATG0 = 1; if(_wSetMacro & 0x0200) LATGbits.LATG1 = 1; if(_wSetMacro & 0x0400) LATCbits.LATC13 = 1; if(_wSetMacro & 0x0800) LATAbits.LATA15 = 1; if(_wSetMacro & 0x1000) LATDbits.LATD12 = 1; if(_wSetMacro & 0x2000) LATDbits.LATD13 = 1; if(_wSetMacro & 0x4000) LATDbits.LATD6 = 1; if(_wSetMacro & 0x8000) LATDbits.LATD7 = 1;}while(0)
+				#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
+			#else 	// All ENC624J600 address pins A0-A13 connected
+				#if defined(__PIC24FJ256GB210__)
+					#define ENC100_INIT_PSP_BIT_BANG()	do{ANSA &= 0x79E7; ANSB &= 0x03FF; ANSD &= 0xCF0F; ANSG &= 0xFCFC;}while(0)
+				#else
+					#define ENC100_INIT_PSP_BIT_BANG()	do{AD1PCFGH = 0xFFFF; AD1PCFGL = 0xFFFF; AD2PCFGL = 0xFFFF;}while(0)
+				#endif
+				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISA &= 0xF9E7; TRISB &= 0x03FF; TRISF &= 0xEFCF; TRISGbits.TRISG9 = 0;}while(0)
+				#define ENC100_SET_ADDR_IO(a)		do{WORD _wSetMacro = (a); LATA &= 0xF9E7; LATB &= 0x03FF; LATF &= 0xEFCF; LATGbits.LATG9 = 0; if(_wSetMacro & 0x0001) LATBbits.LATB15 = 1; if(_wSetMacro & 0x0002) LATBbits.LATB14 = 1; if(_wSetMacro & 0x0004) LATGbits.LATG9 = 1; if(_wSetMacro & 0x0008) LATAbits.LATA4 = 1; if(_wSetMacro & 0x0010) LATAbits.LATA3 = 1; if(_wSetMacro & 0x0020) LATFbits.LATF12 = 1; if(_wSetMacro & 0x0040) LATAbits.LATA10 = 1; if(_wSetMacro & 0x0080) LATAbits.LATA9 = 1; if(_wSetMacro & 0x0100) LATFbits.LATF5 = 1; if(_wSetMacro & 0x0200) LATFbits.LATF4 = 1; if(_wSetMacro & 0x0400) LATBbits.LATB13 = 1; if(_wSetMacro & 0x0800) LATBbits.LATB12 = 1; if(_wSetMacro & 0x1000) LATBbits.LATB11 = 1; if(_wSetMacro & 0x2000) LATBbits.LATB10 = 1;}while(0)
+				#define ENC100_WRH_B1SEL_TRIS		ENC100_SO_WR_B0SEL_EN_TRIS
+				#define ENC100_WRH_B1SEL_IO			ENC100_SO_WR_B0SEL_EN_IO
+				#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF; TRISAbits.TRISA15 = 1; TRISCbits.TRISC13 = 1; TRISD |= 0x30C0; TRISGbits.TRISG0 = 1; TRISGbits.TRISG1 = 1;}while(0)
+				#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISAbits.TRISA15 = 0; TRISCbits.TRISC13 = 0; TRISD &= 0xCF3F; TRISGbits.TRISG0 = 0; TRISGbits.TRISG1 = 0;}while(0)
+				#define ENC100_GET_AD_IOH()			(PORTGbits.RG0 | (PORTGbits.RG1<<1) | (PORTCbits.RC13<<2) | (PORTAbits.RA15<<3) | (PORTDbits.RD12<<4) | (PORTDbits.RD13<<5) | (PORTDbits.RD6<<6) | (PORTDbits.RD7<<7))
+				#define ENC100_GET_AD_IOL()			(((volatile BYTE*)&PORTE)[0])
+				#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = ((BYTE*)&_wSetMacro)[0]; LATG &= 0xFFFC; LATCbits.LATC13 = 0; LATAbits.LATA15 = 0; LATD &= 0xCF3F; if(_wSetMacro & 0x0100) LATGbits.LATG0 = 1; if(_wSetMacro & 0x0200) LATGbits.LATG1 = 1; if(_wSetMacro & 0x0400) LATCbits.LATC13 = 1; if(_wSetMacro & 0x0800) LATAbits.LATA15 = 1; if(_wSetMacro & 0x1000) LATDbits.LATD12 = 1; if(_wSetMacro & 0x2000) LATDbits.LATD13 = 1; if(_wSetMacro & 0x4000) LATDbits.LATD6 = 1; if(_wSetMacro & 0x8000) LATDbits.LATD7 = 1;}while(0)
+				#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
 			#endif
 		#elif ENC100_INTERFACE_MODE == 5 || ENC100_INTERFACE_MODE == 6	// Mutliplexed 8-bit address/data modes
 			#if defined(ENC100_PSP_USE_INDIRECT_RAM_ADDRESSING)	// Only ENCX24J600 address pins AD0-AD8 connected (AD9-AD14 tied to Vdd)
-				#define ENC100_INIT_PSP_BIT_BANG()	do{((volatile BYTE*)&AD1PCFGH)[1] = 0xFF;}while(0)	// Disable AN24-AN31 analog inputs on RE0-RE7 pins (ENCX24J600 AD0-AD7)
-				#define ENC100_SET_AD_TRIS_IN		do{((volatile BYTE*)&TRISE)[0] = 0xFF;}while(0)
-				#define ENC100_SET_AD_TRIS_OUT		do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISDbits.TRISD11 = 0;}while(0)
+				#if defined(__PIC24FJ256GB210__)
+					#define ENC100_INIT_PSP_BIT_BANG()	do{ANSB &= 0x7FFF; ANSG &= 0xFEFF;} while(0)		// RE0-RE7, RD11, RD4, RD5 (AD0-AD7, AD8, WR, RD) pins are already digital only pins.  RB15, RG8 (AL, CS) needs to be made digital only.
+				#else
+					#define ENC100_INIT_PSP_BIT_BANG()	do{((volatile BYTE*)&AD1PCFGH)[1] = 0xFF;}while(0)	// Disable AN24-AN31 analog inputs on RE0-RE7 pins (ENCX24J600 AD0-AD7)
+				#endif
+				#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF;}while(0)
+				#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISDbits.TRISD11 = 0;}while(0)
 				#define ENC100_GET_AD_IO()			(((volatile BYTE*)&PORTE)[0])
 				#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = (BYTE)_wSetMacro; LATDbits.LATD11 = 0; if(_wSetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
 				#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
 			#else 	// All ENCX24J600 address pins AD0-AD14 connected
 				// This pinout is bad for doing 8-bit bit-bang operations with all address lines.  The Fast 100Mbps Ethernet PICtail Plus hardware is wired for PMP hardware support, which requires this pinout.  However, if you are designing a custom board, you can simplify these read/write operations dramatically if you wire things more logically by putting all 15 I/O pins, in order, on PORTB or PORTD.  Such a change would enhance performance.
 				// UART2 CANNOT BE USED OR ENABLED FOR THESE TWO MODES AS THE PINS OVERLAP WITH ADDRESS LINES.
-				#define ENC100_INIT_PSP_BIT_BANG()	do{AD1PCFGL |= 0x3C00; ((volatile BYTE*)&AD1PCFGH)[1] = 0xFF;}while(0)	// Disable AN10-AN13 and AN24-AN31 analog inputs on RB10-RB13 and RE0-RE7 pins (ENCX24J600 AD13-AD10 and AD0-AD7)
-				#define ENC100_SET_AD_TRIS_IN		do{((volatile BYTE*)&TRISE)[0] = 0xFF; TRISF |= 0x0030; TRISB |= 0x3C00; TRISD |= 0x0C00;}while(0)
-				#define ENC100_SET_AD_TRIS_OUT		do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISF &= 0xFFCF; TRISB &= 0xC3FF; TRISD &= 0xF3FF;}while(0)
+				#if defined(__PIC24FJ256GB210__)
+					#define ENC100_INIT_PSP_BIT_BANG()	do{ANSB &= 0x43FF; ANSG &= 0xFEFF;} while(0) // Set pins as digital I/Os (not analog).  RD11, RD5, RD4, RE0-RE7, RF4, RF5 are all digital-only pins and therefore no writes to ANSD, ANSE, or ANSF are needed.
+				#else
+					#define ENC100_INIT_PSP_BIT_BANG()	do{AD1PCFGL |= 0x3C00; ((volatile BYTE*)&AD1PCFGH)[1] = 0xFF;}while(0)	// Disable AN10-AN13 and AN24-AN31 analog inputs on RB10-RB13 and RE0-RE7 pins (ENCX24J600 AD13-AD10 and AD0-AD7)
+				#endif
+				#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF;}while(0)
+				#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISFbits.TRISF5 = 0; TRISFbits.TRISF4 = 0; TRISB &= 0x43FF; TRISDbits.TRISD11 = 0;}while(0)
 				#define ENC100_GET_AD_IO()			(((volatile BYTE*)&PORTE)[0])
-				#define ENC100_SET_AD_IO(data)		do{WORD _wDataSetMacro = (data); ((volatile BYTE*)&LATE)[0] = ((BYTE*)&_wDataSetMacro)[0]; LATFbits.LATF5 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x1) == 0x1; LATFbits.LATF4 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x2) == 0x2; LATBbits.LATB13 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x4) == 0x4; LATBbits.LATB12 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x8) == 0x8; LATBbits.LATB11 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x10) == 0x10; LATBbits.LATB10 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x20) == 0x20; LATDbits.LATD10 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x40) == 0x40; LATDbits.LATD11 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x80) == 0x80;}while(0)
+				#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = (BYTE)_wSetMacro; LATFbits.LATF5 = 0; LATFbits.LATF4 = 0; LATB &= 0x43FF; LATDbits.LATD11 = 0; if(_wSetMacro & 0x0100) LATFbits.LATF5 = 1; if(_wSetMacro & 0x0200) LATFbits.LATF4 = 1; if(_wSetMacro & 0x0400) LATBbits.LATB13 = 1; if(_wSetMacro & 0x0800) LATBbits.LATB12 = 1; if(_wSetMacro & 0x1000) LATBbits.LATB11 = 1;  if(_wSetMacro & 0x2000) LATBbits.LATB10 = 1; if(_wSetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
 				#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
 			#endif
 		#elif ENC100_INTERFACE_MODE == 9 || ENC100_INTERFACE_MODE == 10	// Mutliplexed 16-bit address/data modes
 			// All ENC624J600 adddress/data pins AD0-AD15 connected (required for 16-bit data, so there is no differentiation for indirect versus direct addressing mode)
 			// This pinout is awful for doing 16-bit bit-bang operations.  The Fast 100Mbps Ethernet PICtail Plus hardware is wired for PMP hardware support, which requires this pinout.  However, if you are designing a custom board, you can simplify these read/write operations dramatically if you wire things more logically by putting all 16 I/O pins, in order, on PORTB or PORTD.  Such a change would enhance performance.
-			#define ENC100_INIT_PSP_BIT_BANG()	do{((volatile BYTE*)&AD1PCFGH)[1] = 0xFF;}while(0)	// Disable AN24-AN31 analog inputs on RE0-RE7 pins (ENCX24J600 AD0-AD7)
-			#define ENC100_SET_AD_TRIS_IN		do{((volatile BYTE*)&TRISE)[0] = 0xFF; TRISG |= 0x0003; TRISF |= 0x0003; TRISD |= 0x30C0;}while(0)
-			#define ENC100_SET_AD_TRIS_OUT		do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISG &= 0xFFFC; TRISF &= 0xFFFC; TRISD &= 0xCF3F;}while(0)
-			#define ENC100_GET_AD_IO()			(((volatile BYTE*)&PORTE)[0] | (PORTGbits.RG0<<8) | (PORTGbits.RG1<<9) | (PORTFbits.RF1<<10) | (PORTFbits.RF0<<11) | (PORTDbits.RD12<<12) | (PORTDbits.RD13<<13) | (PORTDbits.RD6<<14) | (PORTDbits.RD7<<15)
-			#define ENC100_SET_AD_IO(data)		do{WORD _wDataSetMacro = (data); ((volatile BYTE*)&LATE)[0] = ((BYTE*)&_wDataSetMacro)[0]; LATGbits.LATG0 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x1) == 0x1; LATGbits.LATG1 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x2) == 0x2; LATFbits.LATF1 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x4) == 0x4; LATFbits.LATF0 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x8) == 0x8; LATDbits.LATD12 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x10) == 0x10; LATDbits.LATD13 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x20) == 0x20; LATDbits.LATD6 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x40) == 0x40; LATDbits.LATD7 = ((((BYTE*)&_wDataSetMacro)[1]) & 0x80) == 0x80;}while(0)
+			#if defined(__PIC24FJ256GB210__)
+				#define ENC100_INIT_PSP_BIT_BANG()	do{ANSBbits.ANSB15 = 0; ANSCbits.ANSC13 = 0; ANSD &= 0xCF0F; ANSGbits.ANSG8 = 0;}while(0)	// Set pins as digital I/Os (not analog).  RA15 and RE0-RE7 are all digital-only pins and therefore no writes to ANSA or ANSE are needed.
+			#else
+				#define ENC100_INIT_PSP_BIT_BANG()	do{((volatile BYTE*)&AD1PCFGH)[1] = 0xFF;}while(0)	// Disable AN24-AN31 analog inputs on RE0-RE7 pins (ENCX24J600 AD0-AD7)
+			#endif
+			#define ENC100_WRH_B1SEL_TRIS		ENC100_SO_WR_B0SEL_EN_TRIS
+			#define ENC100_WRH_B1SEL_IO			ENC100_SO_WR_B0SEL_EN_IO
+			#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF; TRISAbits.TRISA15 = 1; TRISCbits.TRISC13 = 1; TRISD |= 0x30C0; TRISGbits.TRISG0 = 1; TRISGbits.TRISG1 = 1;}while(0)
+			#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISAbits.TRISA15 = 0; TRISCbits.TRISC13 = 0; TRISD &= 0xCF3F; TRISGbits.TRISG0 = 0; TRISGbits.TRISG1 = 0;}while(0)
+			#define ENC100_GET_AD_IOH()			(PORTGbits.RG0 | (PORTGbits.RG1<<1) | (PORTCbits.RC13<<2) | (PORTAbits.RA15<<3) | (PORTDbits.RD12<<4) | (PORTDbits.RD13<<5) | (PORTDbits.RD6<<6) | (PORTDbits.RD7<<7))
+			#define ENC100_GET_AD_IOL()			(((volatile BYTE*)&PORTE)[0])
+			#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = ((BYTE*)&_wSetMacro)[0]; LATG &= 0xFFFC; LATCbits.LATC13 = 0; LATAbits.LATA15 = 0; LATD &= 0xCF3F; if(_wSetMacro & 0x0100) LATGbits.LATG0 = 1; if(_wSetMacro & 0x0200) LATGbits.LATG1 = 1; if(_wSetMacro & 0x0400) LATCbits.LATC13 = 1; if(_wSetMacro & 0x0800) LATAbits.LATA15 = 1; if(_wSetMacro & 0x1000) LATDbits.LATD12 = 1; if(_wSetMacro & 0x2000) LATDbits.LATD13 = 1; if(_wSetMacro & 0x4000) LATDbits.LATD6 = 1; if(_wSetMacro & 0x8000) LATDbits.LATD7 = 1;}while(0)
+			#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
 		#endif
 	#endif
 
@@ -976,23 +1091,38 @@
 	// used (ENC100_INTERFACE_MODE is >= 1), then the SPI is not used and this 
 	// section can be ignored or deleted.
 	#if defined(__C30__)	// PIC24F, PIC24H, dsPIC30, dsPIC33
-		#define ENC100_ISR_ENABLE		(IEC1bits.INT2IE)
-		#define ENC100_ISR_FLAG			(IFS1bits.INT2IF)	
-		#define ENC100_ISR_POLARITY		(INTCON2bits.INT2EP)
-		#define ENC100_ISR_PRIORITY		(IPC7bits.INT2IP)
-		#define ENC100_SPI_ENABLE		(ENC100_SPISTATbits.SPIEN)
-		#define ENC100_SPI_IF			(IFS0bits.SPI1IF)
-		#define ENC100_SSPBUF			(SPI1BUF)
-		#define ENC100_SPISTAT			(SPI1STAT)
-		#define ENC100_SPISTATbits		(SPI1STATbits)
-		#define ENC100_SPICON1			(SPI1CON1)
-		#define ENC100_SPICON1bits		(SPI1CON1bits)
-		#define ENC100_SPICON2			(SPI1CON2)
+		#if defined(__PIC24FJ256GA110__)	// The PIC24FJ256GA110 must use SPI2 slot on Explorer 16.  If you don't have a PIC24FJ256GA110 but want to use SPI2 for some reason, you can use these definitions.
+			#define ENC100_ISR_ENABLE		(IEC3bits.INT4IE)
+			#define ENC100_ISR_FLAG			(IFS3bits.INT4IF)
+			#define ENC100_ISR_POLARITY		(INTCON2bits.INT4EP)
+			#define ENC100_ISR_PRIORITY		(IPC13bits.INT4IP)
+			#define ENC100_SPI_ENABLE		(ENC100_SPISTATbits.SPIEN)
+			#define ENC100_SPI_IF			(IFS1bits.SPI2IF)
+			#define ENC100_SSPBUF			(SPI2BUF)
+			#define ENC100_SPISTAT			(SPI2STAT)
+			#define ENC100_SPISTATbits		(SPI2STATbits)
+			#define ENC100_SPICON1			(SPI2CON1)
+			#define ENC100_SPICON1bits		(SPI2CON1bits)
+			#define ENC100_SPICON2			(SPI2CON2)
+		#else	// All other PIC24s and dsPICs use SPI1 slot (top most closest to LCD)
+			#define ENC100_ISR_ENABLE		(IEC1bits.INT2IE)
+			#define ENC100_ISR_FLAG			(IFS1bits.INT2IF)
+			#define ENC100_ISR_POLARITY		(INTCON2bits.INT2EP)
+			#define ENC100_ISR_PRIORITY		(IPC7bits.INT2IP)
+			#define ENC100_SPI_ENABLE		(ENC100_SPISTATbits.SPIEN)
+			#define ENC100_SPI_IF			(IFS0bits.SPI1IF)
+			#define ENC100_SSPBUF			(SPI1BUF)
+			#define ENC100_SPISTAT			(SPI1STAT)
+			#define ENC100_SPISTATbits		(SPI1STATbits)
+			#define ENC100_SPICON1			(SPI1CON1)
+			#define ENC100_SPICON1bits		(SPI1CON1bits)
+			#define ENC100_SPICON2			(SPI1CON2)
+		#endif
 	#else					// PIC32MX
 		#define ENC100_ISR_ENABLE		(IEC0bits.INT2IE)
 		#define ENC100_ISR_FLAG			(IFS0bits.INT2IF)
-		#define ENC100_ISR_POLARITY		(INTCONbits.INT2EP)	
-		#define ENC100_ISR_PRIORITY		(IPC2bits.INT2IP)	
+		#define ENC100_ISR_POLARITY		(INTCONbits.INT2EP)
+		#define ENC100_ISR_PRIORITY		(IPC2bits.INT2IP)
 		#define ENC100_SPI_ENABLE		(ENC100_SPICON1bits.ON)
 		#define ENC100_SPI_IF			(IFS0bits.SPI1RXIF)
 		#define ENC100_SSPBUF			(SPI1BUF)
@@ -1004,8 +1134,26 @@
 
 
 //	// 25LC256 I/O pins
-//	#define EEPROM_CS_TRIS		(TRISDbits.TRISD12)
-//	#define EEPROM_CS_IO		(PORTDbits.RD12)
+//	#if defined(__PIC24FJ256GB110__)
+//		// PIC24FJ256GB110 USB PIM has RD12 pin on Explorer 16 schematic 
+//		// remapped and actually connected to PIC24FJ256GB110 pin 90 (RG0).  
+//		#define EEPROM_CS_TRIS		(TRISGbits.TRISG0)
+//		#define EEPROM_CS_IO		(LATGbits.LATG0)
+//	#elif defined(__PIC24FJ256GB210__)
+//		// PIC24FJ256GB210 USB PIM has RD12 pin on Explorer 16 schematic 
+//		// remapped and actually connected to PIC24FJ256GB210 pin 90 (RG0) when 
+//		// JP1 on PIM has pins 1-2 shorted (USB).  When JP1 pins 2-3 are shorted 
+//		// (PMP), PIC pin 90 does connect to RD12.  To make the PIM work with 
+//		// either jumper setting, we will drive both RG0 and RD12 simultaneously
+//		// as chip select to the same states.  For an actual application, you'd 
+//		// want to specify only the single necessary pin as this double 
+//		// assignment operation generates inefficient code by the C compiler.
+//		#define EEPROM_CS_TRIS		TRISGbits.TRISG0 = TRISDbits.TRISD12
+//		#define EEPROM_CS_IO		LATGbits.LATG0 = LATDbits.LATD12
+//	#else
+//		#define EEPROM_CS_TRIS		(TRISDbits.TRISD12)
+//		#define EEPROM_CS_IO		(LATDbits.LATD12)
+//	#endif
 //	#define EEPROM_SCK_TRIS		(TRISGbits.TRISG6)
 //	#define EEPROM_SDI_TRIS		(TRISGbits.TRISG7)
 //	#define EEPROM_SDO_TRIS		(TRISGbits.TRISG8)
@@ -1096,188 +1244,199 @@
 //	#endif
 
 //    //----------------------------
-//    // ZeroG ZG2100M WiFi I/O pins
+//    // MRF24WB0M WiFi I/O pins
 //    //----------------------------
-//	// If you have a ZeroG ZG2100M WiFi PICtail, you must uncomment one of 
+//	// If you have a MRF24WB0M WiFi PICtail, you must uncomment one of 
 //	// these two lines to use it.  SPI1 is the top-most slot in the Explorer 16 
 //	// (closer to the LCD and prototyping area) while SPI2 corresponds to 
 //	// insertion of the PICtail into the middle of the side edge connector slot.
-//	#define ZG2100_IN_SPI1
-//	//#define ZG2100_IN_SPI2
+//	#define MRF24WB0M_IN_SPI1
+//	//#define MRF24WB0M_IN_SPI2
 //	
-//    #if defined( ZG2100_IN_SPI1 ) && !defined(__32MX460F512L__) && !defined(__32MX795F512L__)
-//        // ZG2100 in SPI1 slot
-//        #define ZG_CS_TRIS			(TRISBbits.TRISB2)
-//    	#define ZG_CS_IO			(LATBbits.LATB2)
-//    	#define ZG_SDI_TRIS			(TRISFbits.TRISF7)
-//    	#define ZG_SCK_TRIS			(TRISFbits.TRISF6)
-//    	#define ZG_SDO_TRIS			(TRISFbits.TRISF8)
-//      	#define ZG_RST_TRIS			(TRISFbits.TRISF0)	
-//    	#define ZG_RST_IO			(LATFbits.LATF0)  
+//	// PIC24FJ256GA110 PIM on Explorer 16 must use SPI2, not SPI1
+//	#if defined(MRF24WB0M_IN_SPI1) && defined(__PIC24FJ256GA110__)
+//		#undef MRF24WB0M_IN_SPI1
+//		#define MRF24WB0M_IN_SPI2
+//	#endif
+//
+//    #if defined( MRF24WB0M_IN_SPI1 ) && !defined(__32MX460F512L__) && !defined(__32MX795F512L__) && !defined(__PIC24FJ256GA110__)
+//        // MRF24WB0M in SPI1 slot
+//        #define WF_CS_TRIS			(TRISBbits.TRISB2)
+//    	#define WF_CS_IO			(LATBbits.LATB2)
+//    	#define WF_SDI_TRIS			(TRISFbits.TRISF7)
+//    	#define WF_SCK_TRIS			(TRISFbits.TRISF6)
+//    	#define WF_SDO_TRIS			(TRISFbits.TRISF8)
+//      	#define WF_RESET_TRIS		(TRISFbits.TRISF0)
+//    	#define WF_RESET_IO			(LATFbits.LATF0)
 //        #if defined(__dsPIC33FJ256GP710__) || defined(__PIC24HJ256GP610__)
-//			#define ZG_EINT_TRIS	(TRISAbits.TRISA12)
-//			#define ZG_EINT_IO		(PORTAbits.RA12)
+//			#define WF_INT_TRIS	    (TRISAbits.TRISA12)
+//			#define WF_INT_IO		(PORTAbits.RA12)
 //        #else
-//			#define ZG_EINT_TRIS	(TRISEbits.TRISE8)  // INT1
-//			#define ZG_EINT_IO		(PORTEbits.RE8)     
+//			#define WF_INT_TRIS	    (TRISEbits.TRISE8)  // INT1
+//			#define WF_INT_IO		(PORTEbits.RE8)
 //        #endif
-//    	#define XCEN33_TRIS		    (TRISFbits.TRISF1)  
-//    	#define	XCEN33_IO			(PORTFbits.RF1)
+//    	#define WF_HIBERNATE_TRIS	(TRISFbits.TRISF1)
+//    	#define	WF_HIBERNATE_IO		(PORTFbits.RF1)
 //    	#if defined( __C30__ )
-//            #define ZG_EINT_EDGE		(INTCON2bits.INT1EP)
-//        	#define ZG_EINT_IE			(IEC1bits.INT1IE)
-//        	#define ZG_EINT_IF			(IFS1bits.INT1IF)
+//            #define WF_INT_EDGE		    (INTCON2bits.INT1EP)
+//        	#define WF_INT_IE			(IEC1bits.INT1IE)
+//        	#define WF_INT_IF			(IFS1bits.INT1IF)
 //    	#elif defined( __PIC32MX__ )
-//            #define ZG_EINT_EDGE		(INTCONbits.INT1EP)
-//        	#define ZG_EINT_IE			(IEC0bits.INT1IE)
-//        	#define ZG_EINT_IF			(IFS0bits.INT1IF)
-//        	#define ZG_EINT_IE_CLEAR    IEC0CLR
-//        	#define ZG_EINT_IF_CLEAR    IFS0CLR
-//        	#define ZG_EINT_IE_SET      IEC0SET
-//        	#define ZG_EINT_IF_SET      IFS0SET
-//        	#define ZG_EINT_BIT         0x00000080
-//        	#define ZG_EINT_IPCSET      IPC1SET
-//        	#define ZG_EINT_IPCCLR      IPC1CLR
-//        	#define ZG_EINT_IPC_MASK    0xFF000000
-//        	#define ZG_EINT_IPC_VALUE   0x0C000000
+//            #define WF_INT_EDGE		    (INTCONbits.INT1EP)
+//        	#define WF_INT_IE			(IEC0bits.INT1IE)
+//        	#define WF_INT_IF			(IFS0bits.INT1IF)
+//        	#define WF_INT_IE_CLEAR     IEC0CLR
+//        	#define WF_INT_IF_CLEAR     IFS0CLR
+//        	#define WF_INT_IE_SET       IEC0SET
+//        	#define WF_INT_IF_SET       IFS0SET
+//        	#define WF_INT_BIT          0x00000080
+//        	#define WF_INT_IPCSET       IPC1SET
+//        	#define WF_INT_IPCCLR       IPC1CLR
+//        	#define WF_INT_IPC_MASK     0xFF000000
+//        	#define WF_INT_IPC_VALUE    0x0C000000
 //        #else
-//            #error Determine ZG2100 external interrupt
+//            #error Determine MRF24WB0M external interrupt
 //        #endif
 //
-//    	#define ZG_SSPBUF			(SPI1BUF)
-//    	#define ZG_SPISTAT			(SPI1STAT)
-//    	#define ZG_SPISTATbits		(SPI1STATbits)
+//    	#define WF_SSPBUF			(SPI1BUF)
+//    	#define WF_SPISTAT			(SPI1STAT)
+//    	#define WF_SPISTATbits		(SPI1STATbits)
 //    	#if defined( __C30__ )
-//        	#define ZG_SPICON1			(SPI1CON1)
-//        	#define ZG_SPICON1bits		(SPI1CON1bits)
-//        	#define ZG_SPICON2			(SPI1CON2)
-//        	#define ZG_SPI_IE			(IEC0bits.SPI1IE)
-//    //    	#define ZG_SPI_IP			(IPC2bits.SPI1IP)
-//        	#define ZG_SPI_IF			(IFS0bits.SPI1IF)
+//        	#define WF_SPICON1			(SPI1CON1)
+//        	#define WF_SPICON1bits		(SPI1CON1bits)
+//        	#define WF_SPICON2			(SPI1CON2)
+//        	#define WF_SPI_IE			(IEC0bits.SPI1IE)
+//    //    	#define WF_SPI_IP			(IPC2bits.SPI1IP)
+//        	#define WF_SPI_IF			(IFS0bits.SPI1IF)
 //        #elif defined( __PIC32MX__ )
-//        	#define ZG_SPICON1			(SPI1CON)
-//        	#define ZG_SPICON1bits		(SPI1CONbits)
-//            #define ZG_SPI_IE_CLEAR     IEC0CLR
-//            #define ZG_SPI_IF_CLEAR     IFS0CLR
-//            #define ZG_SPI_INT_BITS     0x03800000
-//    		#define ZG_SPI_BRG		    (SPI1BRG)
-//            #define ZG_MAX_SPI_FREQ     (10000000ul)	// Hz
+//        	#define WF_SPICON1			(SPI1CON)
+//        	#define WF_SPICON1bits		(SPI1CONbits)
+//            #define WF_SPI_IE_CLEAR     IEC0CLR
+//            #define WF_SPI_IF_CLEAR     IFS0CLR
+//            #define WF_SPI_INT_BITS     0x03800000
+//    		#define WF_SPI_BRG		    (SPI1BRG)
+//            #define WF_MAX_SPI_FREQ     (10000000ul)	// Hz
 //        #else
-//            #error Determine ZG2100 SPI information
+//            #error Determine MRF24WB0M SPI information
 //        #endif
 //        
-//    #elif defined( ZG2100_IN_SPI2 ) && !defined(__32MX460F512L__) && !defined(__32MX795F512L__)
-//        // ZG2100 in SPI2 slot
-//        #define ZG_CS_TRIS			(TRISGbits.TRISG9)
-//    	#define ZG_CS_IO			(LATGbits.LATG9)
-//    	#define ZG_SDI_TRIS			(TRISGbits.TRISG7)
-//    	#define ZG_SCK_TRIS			(TRISGbits.TRISG6)
-//    	#define ZG_SDO_TRIS			(TRISGbits.TRISG8)
-//      	#define ZG_RST_TRIS			(TRISGbits.TRISG0)	
-//    	#define ZG_RST_IO			(LATGbits.LATG0)  
-//    	#define ZG_EINT_TRIS		(TRISAbits.TRISA14) // INT3 
-//    	#define ZG_EINT_IO			(PORTAbits.RA14)     
-//    	#define XCEN33_TRIS		    (TRISGbits.TRISG1)  
-//    	#define	XCEN33_IO			(PORTGbits.RG1)
+//    #elif defined( MRF24WB0M_IN_SPI2 ) && !defined(__32MX460F512L__) && !defined(__32MX795F512L__)
+//        // MRF24WB0M in SPI2 slot
+//        #define WF_CS_TRIS			(TRISGbits.TRISG9)
+//    	#define WF_CS_IO			(LATGbits.LATG9)
+//    	#define WF_SDI_TRIS			(TRISGbits.TRISG7)
+//    	#define WF_SCK_TRIS			(TRISGbits.TRISG6)
+//    	#define WF_SDO_TRIS			(TRISGbits.TRISG8)
+//      	#define WF_RESET_TRIS		(TRISGbits.TRISG0)
+//    	#define WF_RESET_IO			(LATGbits.LATG0)
+//		#if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256GB210__)
+//			#define WF_INT_TRIS		    (TRISCbits.TRISC3)	// INT3
+//			#define WF_INT_IO			(PORTCbits.RC3)
+//		#else
+//			#define WF_INT_TRIS		    (TRISAbits.TRISA14)	// INT3
+//			#define WF_INT_IO			(PORTAbits.RA14)
+//		#endif
+//    	#define WF_HIBERNATE_TRIS	    (TRISGbits.TRISG1)
+//    	#define	WF_HIBERNATE_IO			(PORTGbits.RG1)
 //    	#if defined( __C30__ )
-//            #define ZG_EINT_EDGE		(INTCON2bits.INT3EP)
-//        	#define ZG_EINT_IE			(IEC3bits.INT3IE)
-//        	#define ZG_EINT_IF			(IFS3bits.INT3IF)
+//            #define WF_INT_EDGE		    (INTCON2bits.INT3EP)
+//        	#define WF_INT_IE			(IEC3bits.INT3IE)
+//        	#define WF_INT_IF			(IFS3bits.INT3IF)
 //    	#elif defined( __PIC32MX__ )
-//            #define ZG_EINT_EDGE		(INTCONbits.INT3EP)
-//        	#define ZG_EINT_IE			(IEC0bits.INT3IE)
-//        	#define ZG_EINT_IF			(IFS0bits.INT3IF)
-//        	#define ZG_EINT_IE_CLEAR    IEC0CLR
-//        	#define ZG_EINT_IF_CLEAR    IFS0CLR
-//        	#define ZG_EINT_IE_SET      IEC0SET
-//        	#define ZG_EINT_IF_SET      IFS0SET
-//        	#define ZG_EINT_BIT         0x00008000
-//        	#define ZG_EINT_IPCSET      IPC3SET
-//        	#define ZG_EINT_IPCCLR      IPC3CLR
-//        	#define ZG_EINT_IPC_MASK    0xFF000000
-//        	#define ZG_EINT_IPC_VALUE   0x0C000000
+//            #define WF_INT_EDGE		    (INTCONbits.INT3EP)
+//        	#define WF_INT_IE			(IEC0bits.INT3IE)
+//        	#define WF_INT_IF			(IFS0bits.INT3IF)
+//        	#define WF_INT_IE_CLEAR     IEC0CLR
+//        	#define WF_INT_IF_CLEAR     IFS0CLR
+//        	#define WF_INT_IE_SET       IEC0SET
+//        	#define WF_INT_IF_SET       IFS0SET
+//        	#define WF_INT_BIT          0x00008000
+//        	#define WF_INT_IPCSET       IPC3SET
+//        	#define WF_INT_IPCCLR       IPC3CLR
+//        	#define WF_INT_IPC_MASK     0xFF000000
+//        	#define WF_INT_IPC_VALUE    0x0C000000
 //        #else
-//            #error Determine ZG2100 external interrupt
+//            #error Determine MRF24WB0M external interrupt
 //        #endif
 //        
-//    	#define ZG_SSPBUF			(SPI2BUF)
-//    	#define ZG_SPISTAT			(SPI2STAT)
-//    	#define ZG_SPISTATbits		(SPI2STATbits)
+//    	#define WF_SSPBUF			(SPI2BUF)
+//    	#define WF_SPISTAT			(SPI2STAT)
+//    	#define WF_SPISTATbits		(SPI2STATbits)
 //    	#if defined( __C30__ )
-//        	#define ZG_SPICON1			(SPI2CON1)
-//        	#define ZG_SPICON1bits		(SPI2CON1bits)
-//        	#define ZG_SPICON2			(SPI2CON2)
-//        	#define ZG_SPI_IE			(IEC2bits.SPI2IE)
-//    //    	#define ZG_SPI_IP			(IPC8bits.SPI2IP)
-//        	#define ZG_SPI_IF			(IFS2bits.SPI2IF)
+//        	#define WF_SPICON1			(SPI2CON1)
+//        	#define WF_SPICON1bits		(SPI2CON1bits)
+//        	#define WF_SPICON2			(SPI2CON2)
+//        	#define WF_SPI_IE			(IEC2bits.SPI2IE)
+//    //    	#define WF_SPI_IP			(IPC8bits.SPI2IP)
+//        	#define WF_SPI_IF			(IFS2bits.SPI2IF)
 //        #elif defined( __PIC32MX__ )
-//        	#define ZG_SPICON1			(SPI2CON)
-//        	#define ZG_SPICON1bits		(SPI2CONbits)
-//            #define ZG_SPI_IE_CLEAR     IEC1CLR
-//            #define ZG_SPI_IF_CLEAR     IFS1CLR
-//            #define ZG_SPI_INT_BITS     0x000000e0
-//    		#define ZG_SPI_BRG		    (SPI2BRG)
-//            #define ZG_MAX_SPI_FREQ     (10000000ul)	// Hz
+//        	#define WF_SPICON1			(SPI2CON)
+//        	#define WF_SPICON1bits		(SPI2CONbits)
+//            #define WF_SPI_IE_CLEAR     IEC1CLR
+//            #define WF_SPI_IF_CLEAR     IFS1CLR
+//            #define WF_SPI_INT_BITS     0x000000e0
+//    		#define WF_SPI_BRG		    (SPI2BRG)
+//            #define WF_MAX_SPI_FREQ     (10000000ul)	// Hz
 //        #else
-//            #error Determine ZG2100 SPI information
+//            #error Determine MRF24WB0M SPI information
 //        #endif
 //
-//	#elif defined( ZG2100_IN_SPI1 ) && (defined(__32MX460F512L__) || defined(__32MX795F512L__))
-//        // ZG2100 in SPI1 slot
-//        #define ZG_CS_TRIS			(TRISDbits.TRISD9)
-//    	#define ZG_CS_IO			(LATDbits.LATD9)
-//    	#define ZG_SDI_TRIS			(TRISCbits.TRISC4)
-//    	#define ZG_SCK_TRIS			(TRISDbits.TRISD10)
-//    	#define ZG_SDO_TRIS			(TRISDbits.TRISD0)
-//      	#define ZG_RST_TRIS			(TRISFbits.TRISF0)	
-//    	#define ZG_RST_IO			(LATFbits.LATF0)  
-//    	#define ZG_EINT_TRIS		(TRISEbits.TRISE8)  // INT1  
-//    	#define ZG_EINT_IO			(PORTEbits.RE8)     
-//    	#define XCEN33_TRIS		    (TRISFbits.TRISF1)  
-//    	#define	XCEN33_IO			(PORTFbits.RF1)
+//	#elif defined( MRF24WB0M_IN_SPI1 ) && (defined(__32MX460F512L__) || defined(__32MX795F512L__))
+//        // MRF24WB0M in SPI1 slot
+//        #define WF_CS_TRIS			(TRISDbits.TRISD9)
+//    	#define WF_CS_IO			(LATDbits.LATD9)
+//    	#define WF_SDI_TRIS			(TRISCbits.TRISC4)
+//    	#define WF_SCK_TRIS			(TRISDbits.TRISD10)
+//    	#define WF_SDO_TRIS			(TRISDbits.TRISD0)
+//      	#define WF_RESET_TRIS		(TRISFbits.TRISF0)
+//    	#define WF_RESET_IO			(LATFbits.LATF0)
+//    	#define WF_INT_TRIS		    (TRISEbits.TRISE8)  // INT1
+//    	#define WF_INT_IO			(PORTEbits.RE8)
+//    	#define WF_HIBERNATE_TRIS	(TRISFbits.TRISF1)
+//    	#define WF_HIBERNATE_IO		(PORTFbits.RF1)
 //    	#if defined( __C30__ )
-//            #define ZG_EINT_EDGE		(INTCON2bits.INT1EP)
-//        	#define ZG_EINT_IE			(IEC1bits.INT1IE)
-//        	#define ZG_EINT_IF			(IFS1bits.INT1IF)
+//            #define WF_INT_EDGE		    (INTCON2bits.INT1EP)
+//        	#define WF_INT_IE			(IEC1bits.INT1IE)
+//        	#define WF_INT_IF			(IFS1bits.INT1IF)
 //    	#elif defined( __PIC32MX__ )
-//            #define ZG_EINT_EDGE		(INTCONbits.INT1EP)
-//        	#define ZG_EINT_IE			(IEC0bits.INT1IE)
-//        	#define ZG_EINT_IF			(IFS0bits.INT1IF)
-//        	#define ZG_EINT_IE_CLEAR    IEC0CLR
-//        	#define ZG_EINT_IF_CLEAR    IFS0CLR
-//        	#define ZG_EINT_IE_SET      IEC0SET
-//        	#define ZG_EINT_IF_SET      IFS0SET
-//        	#define ZG_EINT_BIT         0x00000080
-//        	#define ZG_EINT_IPCSET      IPC1SET
-//        	#define ZG_EINT_IPCCLR      IPC1CLR
-//        	#define ZG_EINT_IPC_MASK    0xFF000000
-//        	#define ZG_EINT_IPC_VALUE   0x0C000000
+//            #define WF_INT_EDGE		    (INTCONbits.INT1EP)
+//        	#define WF_INT_IE			(IEC0bits.INT1IE)
+//        	#define WF_INT_IF			(IFS0bits.INT1IF)
+//        	#define WF_INT_IE_CLEAR     IEC0CLR
+//        	#define WF_INT_IF_CLEAR     IFS0CLR
+//        	#define WF_INT_IE_SET       IEC0SET
+//        	#define WF_INT_IF_SET       IFS0SET
+//        	#define WF_INT_BIT          0x00000080
+//        	#define WF_INT_IPCSET       IPC1SET
+//        	#define WF_INT_IPCCLR       IPC1CLR
+//        	#define WF_INT_IPC_MASK     0xFF000000
+//        	#define WF_INT_IPC_VALUE    0x0C000000
 //        #else
-//            #error Determine ZG2100 external interrupt
+//            #error Determine MRF24WB0M external interrupt
 //        #endif
 //
-//    	#define ZG_SSPBUF			(SPI1BUF)
-//    	#define ZG_SPISTAT			(SPI1STAT)
-//    	#define ZG_SPISTATbits		(SPI1STATbits)
+//    	#define WF_SSPBUF			(SPI1BUF)
+//    	#define WF_SPISTAT			(SPI1STAT)
+//    	#define WF_SPISTATbits		(SPI1STATbits)
 //    	#if defined( __C30__ )
-//        	#define ZG_SPICON1			(SPI1CON1)
-//        	#define ZG_SPICON1bits		(SPI1CON1bits)
-//        	#define ZG_SPICON2			(SPI1CON2)
-//        	#define ZG_SPI_IE			(IEC0bits.SPI1IE)
-//    //    	#define ZG_SPI_IP			(IPC2bits.SPI1IP)
-//        	#define ZG_SPI_IF			(IFS0bits.SPI1IF)
+//        	#define WF_SPICON1			(SPI1CON1)
+//        	#define WF_SPICON1bits		(SPI1CON1bits)
+//        	#define WF_SPICON2			(SPI1CON2)
+//        	#define WF_SPI_IE			(IEC0bits.SPI1IE)
+//    //    	#define WF_SPI_IP			(IPC2bits.SPI1IP)
+//        	#define WF_SPI_IF			(IFS0bits.SPI1IF)
 //        #elif defined( __PIC32MX__ )
-//        	#define ZG_SPICON1			(SPI1CON)
-//        	#define ZG_SPICON1bits		(SPI1CONbits)
-//            #define ZG_SPI_IE_CLEAR     IEC0CLR
-//            #define ZG_SPI_IF_CLEAR     IFS0CLR
-//            #define ZG_SPI_INT_BITS     0x03800000
-//    		#define ZG_SPI_BRG		    (SPI1BRG)
-//            #define ZG_MAX_SPI_FREQ     (10000000ul)	// Hz
+//        	#define WF_SPICON1			(SPI1CON)
+//        	#define WF_SPICON1bits		(SPI1CONbits)
+//            #define WF_SPI_IE_CLEAR     IEC0CLR
+//            #define WF_SPI_IF_CLEAR     IFS0CLR
+//            #define WF_SPI_INT_BITS     0x03800000
+//    		#define WF_SPI_BRG		    (SPI1BRG)
+//            #define WF_MAX_SPI_FREQ     (10000000ul)	// Hz
 //        #else
-//            #error Determine ZG2100 SPI information
+//            #error Determine MRF24WB0M SPI information
 //        #endif
-//    #elif defined( ZG2100_IN_SPI2 ) && (defined(__32MX460F512L__) || defined(__32MX795F512L__))
+//    #elif defined( MRF24WB0M_IN_SPI2 ) && (defined(__32MX460F512L__) || defined(__32MX795F512L__))
 //    	#error "/RST and /CE are on RG2 and RG3 which are multiplexed with USB D+ and D-."
 //    #endif
 
@@ -1294,7 +1453,7 @@
 // 7. dsPICDEM RG3 -> PICtail 25LC256 CS (PICtail pin 20)
 
 	#define LED0_TRIS			(TRISDbits.TRISD3)	// Ref LED4
-	#define LED0_IO				(PORTDbits.RD3)	
+	#define LED0_IO				(PORTDbits.RD3)
 	#define LED1_TRIS			(TRISDbits.TRISD2)	// Ref LED3
 	#define LED1_IO				(PORTDbits.RD2)
 	#define LED2_TRIS			(TRISDbits.TRISD1)	// Ref LED2
@@ -1302,7 +1461,7 @@
 	#define LED3_TRIS			(TRISDbits.TRISD0)	// Ref LED1
 	#define LED3_IO				(PORTDbits.RD0)
 	#define LED4_TRIS			(TRISDbits.TRISD3)	// No LED, Remapped to Ref LED4
-	#define LED4_IO				(PORTDbits.RD3)	
+	#define LED4_IO				(PORTDbits.RD3)
 	#define LED5_TRIS			(TRISDbits.TRISD2)	// No LED, Remapped to Ref LED3
 	#define LED5_IO				(PORTDbits.RD2)
 	#define LED6_TRIS			(TRISDbits.TRISD1)	// No LED, Remapped to Ref LED2
@@ -1447,31 +1606,31 @@
 //	#define ENC_SPICON2			(SSP1CON2)
 
 //    //----------------
-//    // ZG2100 I/O pins
+//    // MRF24WB0M I/O pins
 //    //----------------
-//	#define ZG_CS_TRIS			(TRISCbits.TRISC2)	// Uncomment this line if you wish to use the ZG2100 on the PICDEM.net 2 board instead of the internal PIC18F97J60 Ethernet module
-//	#define ZG_SDI_TRIS			(TRISCbits.TRISC4)
-//	#define ZG_SCK_TRIS			(TRISCbits.TRISC3)
-//	#define ZG_SDO_TRIS			(TRISCbits.TRISC5)
-//	#define ZG_RST_TRIS			(TRISBbits.TRISB1)	
-//	#define ZG_RST_IO			(LATBbits.LATB1)  
-//	#define ZG_EINT_TRIS		(TRISBbits.TRISB0)  
-//	#define ZG_EINT_IO			(PORTBbits.RB0)     
-//	#define ZG_CS_IO			(LATCbits.LATC2)
-//	#define XCEN33_TRIS		    (TRISBbits.TRISB2)  
-//	#define	XCEN33_IO			(PORTBbits.RB2)
-//	#define ZG_EINT_EDGE		(INTCON2bits.INTEDG0)
-//	#define ZG_EINT_IE			(INTCONbits.INT0IE)
-//	#define ZG_EINT_IF			(INTCONbits.INT0IF)
-//	#define ZG_SPI_IF			(PIR1bits.SSPIF)
-//	#define ZG_SSPBUF			(SSP1BUF)
-//	#define ZG_SPISTAT			(SSP1STAT)
-//	#define ZG_SPISTATbits		(SSP1STATbits)
-//	#define ZG_SPICON1			(SSP1CON1)
-//	#define ZG_SPICON1bits		(SSP1CON1bits)
-//	#define ZG_SPICON2			(SSP1CON2)
-//	#define ZG_SPI_IE			(PIE1bits.SSPIE)
-//	#define ZG_SPI_IP			(IPR1bits.SSPIP)
+//	#define WF_CS_TRIS			(TRISCbits.TRISC2)	// Uncomment this line if you wish to use the MRF24WB0M on the PICDEM.net 2 board instead of the internal PIC18F97J60 Ethernet module
+//	#define WF_SDI_TRIS			(TRISCbits.TRISC4)
+//	#define WF_SCK_TRIS			(TRISCbits.TRISC3)
+//	#define WF_SDO_TRIS			(TRISCbits.TRISC5)
+//	#define WF_RESET_TRIS		(TRISBbits.TRISB1)
+//	#define WF_RESET_IO			(LATBbits.LATB1)
+//	#define WF_INT_TRIS		    (TRISBbits.TRISB0)
+//	#define WF_INT_IO			(PORTBbits.RB0)
+//	#define WF_CS_IO			(LATCbits.LATC2)
+//	#define WF_HIBERNATE_TRIS   (TRISBbits.TRISB2)
+//	#define	WF_HIBERNATE_IO	    (PORTBbits.RB2)
+//	#define WF_INT_EDGE		    (INTCON2bits.INTEDG0)
+//	#define WF_INT_IE			(INTCONbits.INT0IE)
+//	#define WF_INT_IF			(INTCONbits.INT0IF)
+//	#define WF_SPI_IF			(PIR1bits.SSPIF)
+//	#define WF_SSPBUF			(SSP1BUF)
+//	#define WF_SPISTAT			(SSP1STAT)
+//	#define WF_SPISTATbits		(SSP1STATbits)
+//	#define WF_SPICON1			(SSP1CON1)
+//	#define WF_SPICON1bits		(SSP1CON1bits)
+//	#define WF_SPICON2			(SSP1CON2)
+//	#define WF_SPI_IE			(PIE1bits.SSPIE)
+//	#define WF_SPI_IP			(IPR1bits.SSPIP)
 
 //	// 25LC256 I/O pins
 //	#define EEPROM_CS_TRIS		(TRISDbits.TRISD7)
@@ -1733,7 +1892,7 @@
 	
     // VLSI VS1011/VS1053 audio encoder/decoder and DAC
 	#define MP3_DREQ_TRIS			(TRISBbits.TRISB0)	// Data Request
-	#define MP3_DREQ_IO 			(PORTBbits.RB0)		
+	#define MP3_DREQ_IO 			(PORTBbits.RB0)
 	#define MP3_XRESET_TRIS			(TRISDbits.TRISD0)	// Reset, active low
 	#define MP3_XRESET_IO			(LATDbits.LATD0)
 	#define MP3_XDCS_TRIS			(TRISBbits.TRISB1)	// Data Chip Select
@@ -1764,13 +1923,13 @@
     #define oledD_C_TRIS            (TRISGbits.TRISG4)
 
 
-#elif defined(PIC32_STARTER_KIT)
+#elif defined(PIC32_GP_SK_DM320001) || defined(PIC32_USB_DM320003_1) || defined(PIC32_USB_SK_DM320003_2)
 // PIC32 (General Purpose) Starter Kit (02-02002) with PIC32MX360F512L processor, 
 // PIC32 USB Starter Board (02-02030) with PIC32MX460F512L processor, or
 // PIC32 USB Starter Kit II (02-02148) with PIC32MX795F512L processor +
 // PIC32 I/O Expansion Board (05-02029) +
 // Ethernet PICtail Plus, Fast 100Mbps Ethernet PICtail Plus, or 
-// ZeroG ZG2100M 802.11 WiFi PICtail Plus
+// MRF24WB0M 802.11 WiFi PICtail Plus
 
 	// Specify which SPI to use for the ENC28J60 or ENC624J600.  SPI1 is 
 	// the topmost slot with pin 1 on it.  SPI2 is the middle slot 
@@ -1786,12 +1945,12 @@
 		#define ENC_IN_SPI2
 	#endif
 
-    
+	
     // Hardware mappings
     #define LED0_TRIS			(TRISDbits.TRISD0)	// Ref LED1
 	#define LED0_IO				(LATDbits.LATD0)
 	#define LED1_TRIS			(TRISDbits.TRISD1)	// Ref LED2
-	#define LED1_IO				(LATDbits.LATD1)	
+	#define LED1_IO				(LATDbits.LATD1)
 	#define LED2_TRIS			(TRISDbits.TRISD2)	// Ref LED3
 	#define LED2_IO				(LATDbits.LATD2)
 	#define LED3_TRIS			(LED2_TRIS)			// No such LED
@@ -1804,7 +1963,7 @@
 	#define LED6_IO				(LATDbits.LATD6)
 	#define LED7_TRIS			(LED2_TRIS)			// No such LED
 	#define LED7_IO				(LATDbits.LATD6)
-    
+	
 	#define LED_GET()			((BYTE)LATD & 0x07)
 	#define LED_PUT(a)			do{LATD = (LATD & 0xFFF8) | ((a)&0x07);}while(0)
 
@@ -1816,17 +1975,17 @@
 	#define	BUTTON2_IO			(PORTDbits.RD13)
 	#define BUTTON3_TRIS		(TRISDbits.TRISD13)	// No BUTTON3 on this board
 	#define	BUTTON3_IO			(1)
-    
-    // UART configuration (not too important since we don't have a UART 
-    // connector attached normally, but needed to compile if the STACK_USE_UART 
-    // or STACK_USE_UART2TCP_BRIDGE features are enabled.
-    #define UARTTX_TRIS			(TRISFbits.TRISF3)
-    #define UARTRX_TRIS			(TRISFbits.TRISF2)
-    
-    
+	
+	// UART configuration (not too important since we don't have a UART 
+	// connector attached normally, but needed to compile if the STACK_USE_UART 
+	// or STACK_USE_UART2TCP_BRIDGE features are enabled.
+	#define UARTTX_TRIS			(TRISFbits.TRISF3)
+	#define UARTRX_TRIS			(TRISFbits.TRISF2)
+	
+	
 //	// ENC28J60 I/O pins
 //	#if defined ENC_IN_SPI1
-//		#define ENC_CS_TRIS			(TRISDbits.TRISD14)	// Comment this line out if you are using the ENC424J600/624J600, ZeroG ZG2100, or other network controller.
+//		#define ENC_CS_TRIS			(TRISDbits.TRISD14)	// Comment this line out if you are using the ENC424J600/624J600, MRF24WB0M, or other network controller.
 //		#define ENC_CS_IO			(PORTDbits.RD14)
 //		//#define ENC_RST_TRIS		(TRISDbits.TRISD15)	// Not connected by default.  It is okay to leave this pin completely unconnected, in which case this macro should simply be left undefined.
 //		//#define ENC_RST_IO		(PORTDbits.RD15)
@@ -1839,7 +1998,7 @@
 //		#define ENC_SPIBRG			(SPI1BRG)
 //		#define ENC_SPISTATbits		(SPI1STATbits)
 //	#elif defined ENC_IN_SPI2
-//		#define ENC_CS_TRIS			(TRISFbits.TRISF12) // Comment this line out if you are using the ENC424J600/624J600, ZeroG ZG2100, or other network controller.
+//		#define ENC_CS_TRIS			(TRISFbits.TRISF12) // Comment this line out if you are using the ENC424J600/624J600, MRF24WB0M, or other network controller.
 //		#define ENC_CS_IO			(PORTFbits.RF12)
 //		//#define ENC_RST_TRIS		(TRISFbits.TRISF13)	// Not connected by default
 //		//#define ENC_RST_IO		(PORTFbits.RF13)
@@ -1853,7 +2012,7 @@
 //		#define ENC_SPICON1bits		(SPI2CONbits)
 //		#define ENC_SPIBRG			(SPI2BRG)
 //	#endif
-    
+	
 
 
 	// ENC624J600 Interface Configuration
@@ -1921,7 +2080,7 @@
 		#define ENC100_SI_RD_RW_IO				(LATDbits.LATD5)
 		#define ENC100_SCK_AL_TRIS				(TRISBbits.TRISB15)
 		#define ENC100_SCK_AL_IO				(LATBbits.LATB15)
-	#else	
+	#else
 		// SPI pinout
     	#if defined ENC_IN_SPI1
         	#define ENC100_CS_TRIS					(TRISDbits.TRISD14)	// CS is mandatory when using the SPI interface
@@ -1955,8 +2114,8 @@
 	#if defined ENC_IN_SPI1
 		#define ENC100_ISR_ENABLE		(IEC0bits.INT2IE)
 		#define ENC100_ISR_FLAG			(IFS0bits.INT2IF)
-		#define ENC100_ISR_POLARITY		(INTCONbits.INT2EP)	
-		#define ENC100_ISR_PRIORITY		(IPC2bits.INT2IP)	
+		#define ENC100_ISR_POLARITY		(INTCONbits.INT2EP)
+		#define ENC100_ISR_PRIORITY		(IPC2bits.INT2IP)
 		#define ENC100_SPI_ENABLE		(ENC100_SPICON1bits.ON)
 		#define ENC100_SPI_IF			(IFS0bits.SPI1RXIF)
 		#define ENC100_SSPBUF			(SPI1BUF)
@@ -1967,8 +2126,8 @@
 	#elif defined ENC_IN_SPI2
 		#define ENC100_ISR_ENABLE		(IEC0bits.INT4IE)
 		#define ENC100_ISR_FLAG			(IFS0bits.INT4IF)
-		#define ENC100_ISR_POLARITY		(INTCONbits.INT4EP)	
-		#define ENC100_ISR_PRIORITY		(IPC2bits.INT4IP)	
+		#define ENC100_ISR_POLARITY		(INTCONbits.INT4EP)
+		#define ENC100_ISR_PRIORITY		(IPC2bits.INT4IP)
 		#define ENC100_SPI_ENABLE		(ENC100_SPICON1bits.ON)
 		#define ENC100_SPI_IF			(IFS1bits.SPI2RXIF)
 		#define ENC100_SSPBUF			(SPI2BUF)
@@ -1977,173 +2136,533 @@
 		#define ENC100_SPICON1bits		(SPI2CONbits)
 		#define ENC100_SPIBRG			(SPI2BRG)
 	#endif
- 
+	
 
 //	//----------------------------
-//	// ZeroG ZG2100M WiFi I/O pins
+//	// MRF24WB0M WiFi I/O pins
 //	//----------------------------
-//	// If you have a ZeroG ZG2100M WiFi PICtail, you must uncomment one of 
+//	// If you have a MRF24WB0M WiFi PICtail, you must uncomment one of 
 //	// these two lines to use it.  SPI1 is the top-most slot while SPI2 corresponds to 
 //	// insertion of the PICtail into the middle of the side edge connector slot.
 //
-//	#define ZG2100_IN_SPI1
-//	//#define ZG2100_IN_SPI2
-//	#if defined( ZG2100_IN_SPI1 )
-//		// ZG2100 in SPI1 slot
-//		#define ZG_CS_TRIS			(TRISBbits.TRISB2)
-//    	#define ZG_CS_IO			(LATBbits.LATB2)
-//    	#define ZG_SDI_TRIS			(TRISFbits.TRISF7)
-//    	#define ZG_SCK_TRIS			(TRISFbits.TRISF6)
-//    	#define ZG_SDO_TRIS			(TRISFbits.TRISF8)
-//      	#define ZG_RST_TRIS			(TRISFbits.TRISF0)	
-//    	#define ZG_RST_IO			(LATFbits.LATF0)  
-//    	#define ZG_EINT_TRIS		(TRISEbits.TRISE8)  // INT1  
-//    	#define ZG_EINT_IO			(PORTEbits.RE8)     
-//    	#define XCEN33_TRIS		    (TRISFbits.TRISF1)  
-//    	#define	XCEN33_IO			(PORTFbits.RF1)
-//    	#if defined( __C30__ )
-//           #define ZG_EINT_EDGE		(INTCON2bits.INT1EP)
-//        	#define ZG_EINT_IE			(IEC1bits.INT1IE)
-//        	#define ZG_EINT_IF			(IFS1bits.INT1IF)
-//    	#elif defined( __PIC32MX__ )
-//           #define ZG_EINT_EDGE		(INTCONbits.INT1EP)
-//        	#define ZG_EINT_IE			(IEC0bits.INT1IE)
-//        	#define ZG_EINT_IF			(IFS0bits.INT1IF)
-//        	#define ZG_EINT_IE_CLEAR    IEC0CLR
-//        	#define ZG_EINT_IF_CLEAR    IFS0CLR
-//        	#define ZG_EINT_IE_SET      IEC0SET
-//        	#define ZG_EINT_IF_SET      IFS0SET
-//        	#define ZG_EINT_BIT         0x00000080
-//        	#define ZG_EINT_IPCSET      IPC1SET
-//        	#define ZG_EINT_IPCCLR      IPC1CLR
-//        	#define ZG_EINT_IPC_MASK    0xFF000000
-//        	#define ZG_EINT_IPC_VALUE   0x0C000000
-//       #else
-//           #error Determine ZG2100 external interrupt
-//       #endif
+//	#define MRF24WB0M_IN_SPI1
+//	//#define MRF24WB0M_IN_SPI2
+//	#if defined( MRF24WB0M_IN_SPI1 )
+//		// MRF24WB0M in SPI1 slot
+//		#define WF_CS_TRIS			(TRISBbits.TRISB2)
+//    	#define WF_CS_IO			(LATBbits.LATB2)
+//    	#define WF_SDI_TRIS			(TRISFbits.TRISF7)
+//    	#define WF_SCK_TRIS			(TRISFbits.TRISF6)
+//    	#define WF_SDO_TRIS			(TRISFbits.TRISF8)
+//      	#define WF_RESET_TRIS		(TRISFbits.TRISF0)
+//    	#define WF_RESET_IO			(LATFbits.LATF0)
+//    	#define WF_INT_TRIS		    (TRISEbits.TRISE8)  // INT1
+//    	#define WF_INT_IO			(PORTEbits.RE8)
+//    	#define WF_HIBERNATE_TRIS   (TRISFbits.TRISF1)
+//    	#define	WF_HIBERNATE_IO		(PORTFbits.RF1)
+//       #define WF_INT_EDGE		    (INTCONbits.INT1EP)
+//       #define WF_INT_IE			(IEC0bits.INT1IE)
+//       #define WF_INT_IF			(IFS0bits.INT1IF)
+//       #define WF_INT_IE_CLEAR      IEC0CLR
+//       #define WF_INT_IF_CLEAR      IFS0CLR
+//       #define WF_INT_IE_SET        IEC0SET
+//       #define WF_INT_IF_SET        IFS0SET
+//       #define WF_INT_BIT           0x00000080
+//       #define WF_INT_IPCSET        IPC1SET
+//       #define WF_INT_IPCCLR        IPC1CLR
+//       #define WF_INT_IPC_MASK      0xFF000000
+//       #define WF_INT_IPC_VALUE     0x0C000000
 //
-//    	#define ZG_SSPBUF			(SPI1BUF)
-//    	#define ZG_SPISTAT			(SPI1STAT)
-//    	#define ZG_SPISTATbits		(SPI1STATbits)
-//    	#if defined( __C30__ )
-//        	#define ZG_SPICON1			(SPI1CON1)
-//        	#define ZG_SPICON1bits		(SPI1CON1bits)
-//        	#define ZG_SPICON2			(SPI1CON2)
-//        	#define ZG_SPI_IE			(IEC0bits.SPI1IE)
-//    //    	#define ZG_SPI_IP			(IPC2bits.SPI1IP)
-//        	#define ZG_SPI_IF			(IFS0bits.SPI1IF)
-//       #elif defined( __PIC32MX__ )
-//        	#define ZG_SPICON1			(SPI1CON)
-//        	#define ZG_SPICON1bits		(SPI1CONbits)
-//           #define ZG_SPI_IE_CLEAR     IEC0CLR
-//           #define ZG_SPI_IF_CLEAR     IFS0CLR
-//           #define ZG_SPI_INT_BITS     0x03800000
-//    		#define ZG_SPI_BRG		    (SPI1BRG)
-//           #define ZG_MAX_SPI_FREQ     (10000000ul)	// Hz
-//       #else
-//           #error Determine ZG2100 SPI information
-//		#endif
-//        
-//	#elif defined( ZG2100_IN_SPI2 )
-//       // ZG2100 in SPI2 slot
-//       #define ZG_CS_TRIS			(TRISGbits.TRISG9)
-//    	#define ZG_CS_IO			(LATGbits.LATG9)
-//    	#define ZG_SDI_TRIS			(TRISGbits.TRISG7)
-//    	#define ZG_SCK_TRIS			(TRISGbits.TRISG6)
-//    	#define ZG_SDO_TRIS			(TRISGbits.TRISG8)
-//      	#define ZG_RST_TRIS			(TRISGbits.TRISG0)	
-//    	#define ZG_RST_IO			(LATGbits.LATG0)  
-//    	#define ZG_EINT_TRIS		(TRISAbits.TRISA14) // INT3 
-//    	#define ZG_EINT_IO			(PORTAbits.RA14)     
-//    	#define XCEN33_TRIS		    (TRISGbits.TRISG1)  
-//    	#define	XCEN33_IO			(PORTGbits.RG1)
-//    	#if defined( __C30__ )
-//           #define ZG_EINT_EDGE		(INTCON2bits.INT3EP)
-//        	#define ZG_EINT_IE			(IEC3bits.INT3IE)
-//        	#define ZG_EINT_IF			(IFS3bits.INT3IF)
-//    	#elif defined( __PIC32MX__ )
-//           #define ZG_EINT_EDGE		(INTCONbits.INT3EP)
-//        	#define ZG_EINT_IE			(IEC0bits.INT3IE)
-//        	#define ZG_EINT_IF			(IFS0bits.INT3IF)
-//        	#define ZG_EINT_IE_CLEAR    IEC0CLR
-//        	#define ZG_EINT_IF_CLEAR    IFS0CLR
-//        	#define ZG_EINT_IE_SET      IEC0SET
-//        	#define ZG_EINT_IF_SET      IFS0SET
-//        	#define ZG_EINT_BIT         0x00008000
-//        	#define ZG_EINT_IPCSET      IPC3SET
-//        	#define ZG_EINT_IPCCLR      IPC3CLR
-//        	#define ZG_EINT_IPC_MASK    0xFF000000
-//        	#define ZG_EINT_IPC_VALUE   0x0C000000
-//       #else
-//			#error Determine ZG2100 external interrupt
-//       #endif
-//        
-//    	#define ZG_SSPBUF			(SPI2BUF)
-//    	#define ZG_SPISTAT			(SPI2STAT)
-//    	#define ZG_SPISTATbits		(SPI2STATbits)
-//    	#if defined( __C30__ )
-//        	#define ZG_SPICON1			(SPI2CON1)
-//        	#define ZG_SPICON1bits		(SPI2CON1bits)
-//        	#define ZG_SPICON2			(SPI2CON2)
-//        	#define ZG_SPI_IE			(IEC2bits.SPI2IE)
-//    //    	#define ZG_SPI_IP			(IPC8bits.SPI2IP)
-//        	#define ZG_SPI_IF			(IFS2bits.SPI2IF)
-//       #elif defined( __PIC32MX__ )
-//        	#define ZG_SPICON1			(SPI2CON)
-//        	#define ZG_SPICON1bits		(SPI2CONbits)
-//           #define ZG_SPI_IE_CLEAR     IEC1CLR
-//           #define ZG_SPI_IF_CLEAR     IFS1CLR
-//           #define ZG_SPI_INT_BITS     0x000000e0
-//    		#define ZG_SPI_BRG		    (SPI2BRG)
-//           #define ZG_MAX_SPI_FREQ     (10000000ul)	// Hz
-//       #else
-//			#error Determine ZG2100 SPI information
-//		#endif
+//    	#define WF_SSPBUF			(SPI1BUF)
+//    	#define WF_SPISTAT			(SPI1STAT)
+//    	#define WF_SPISTATbits		(SPI1STATbits)
+//       #define WF_SPICON1			(SPI1CON)
+//       #define WF_SPICON1bits		(SPI1CONbits)
+//       #define WF_SPI_IE_CLEAR     IEC0CLR
+//       #define WF_SPI_IF_CLEAR     IFS0CLR
+//       #define WF_SPI_INT_BITS     0x03800000
+//    	#define WF_SPI_BRG		    (SPI1BRG)
+//       #define WF_MAX_SPI_FREQ     (10000000ul)	// Hz
+//		
+//	#elif defined( MRF24WB0M_IN_SPI2 )
+//       // MRF24WB0M in SPI2 slot
+//       #define WF_CS_TRIS			(TRISGbits.TRISG9)
+//    	#define WF_CS_IO			(LATGbits.LATG9)
+//    	#define WF_SDI_TRIS			(TRISGbits.TRISG7)
+//    	#define WF_SCK_TRIS			(TRISGbits.TRISG6)
+//    	#define WF_SDO_TRIS			(TRISGbits.TRISG8)
+//      	#define WF_RESET_TRIS		(TRISGbits.TRISG0)
+//    	#define WF_RESET_IO			(LATGbits.LATG0)
+//    	#define WF_INT_TRIS		    (TRISAbits.TRISA14) // INT3
+//    	#define WF_INT_IO			(PORTAbits.RA14)
+//    	#define WF_HIBERNATE_TRIS   (TRISGbits.TRISG1)
+//    	#define	WF_HIBERNATE_IO	    (PORTGbits.RG1)
+//       #define WF_INT_EDGE		    (INTCONbits.INT3EP)
+//       #define WF_INT_IE			(IEC0bits.INT3IE)
+//       #define WF_INT_IF			(IFS0bits.INT3IF)
+//       #define WF_INT_IE_CLEAR      IEC0CLR
+//       #define WF_INT_IF_CLEAR      IFS0CLR
+//       #define WF_INT_IE_SET        IEC0SET
+//       #define WF_INT_IF_SET        IFS0SET
+//       #define WF_INT_BIT           0x00008000
+//       #define WF_INT_IPCSET        IPC3SET
+//       #define WF_INT_IPCCLR        IPC3CLR
+//       #define WF_INT_IPC_MASK      0xFF000000
+//       #define WF_INT_IPC_VALUE     0x0C000000
+//		
+//    	#define WF_SSPBUF			(SPI2BUF)
+//    	#define WF_SPISTAT			(SPI2STAT)
+//    	#define WF_SPISTATbits		(SPI2STATbits)
+//       #define WF_SPICON1			(SPI2CON)
+//       #define WF_SPICON1bits		(SPI2CONbits)
+//       #define WF_SPI_IE_CLEAR     IEC1CLR
+//       #define WF_SPI_IF_CLEAR     IFS1CLR
+//       #define WF_SPI_INT_BITS     0x000000e0
+//    	#define WF_SPI_BRG		    (SPI2BRG)
+//       #define WF_MAX_SPI_FREQ     (10000000ul)	// Hz
 //	#endif
 
 
-#elif defined(PIC32_ETH_STARTER_KIT)
+#elif defined(PIC32_ENET_SK_DM320004)
 // PIC32 Ethernet Starter Kit (04-02146) with PIC32MX795F512L processor and National DP83848 10/100 PHY
 	// External SMSC PHY configuration
 	#define	PHY_RMII				// external PHY runs in RMII mode
 	#define	PHY_CONFIG_ALTERNATE	// alternate configuration used
 	#define	PHY_ADDRESS			0x1	// the address of the National DP83848 PHY
 
-	// I/O pins configuration
-	#define BUTTON1_TRIS		(TRISDbits.TRISD6)
-	#define	BUTTON1_IO			(PORTDbits.RD6)
-	#define BUTTON2_TRIS		(TRISDbits.TRISD7)
-	#define	BUTTON2_IO			(PORTDbits.RD7)
-	#define BUTTON3_TRIS		(TRISDbits.TRISD13)
-	#define	BUTTON3_IO			(PORTDbits.RD13)
-
-	#define BUTTON0_TRIS		BUTTON1_TRIS		// no button 0. map to 1
-	#define	BUTTON0_IO			BUTTON1_IO
-
-	#define LED0_TRIS			(TRISDbits.TRISD0)
+    // Hardware mappings
+    #define LED0_TRIS			(TRISDbits.TRISD0)	// Ref LED1
 	#define LED0_IO				(LATDbits.LATD0)
-	#define LED1_TRIS			(TRISDbits.TRISD1)
+	#define LED1_TRIS			(TRISDbits.TRISD1)	// Ref LED2
 	#define LED1_IO				(LATDbits.LATD1)
-	#define LED2_TRIS			(TRISDbits.TRISD2)
+	#define LED2_TRIS			(TRISDbits.TRISD2)	// Ref LED3
 	#define LED2_IO				(LATDbits.LATD2)
-	// no other LED's
-	#define LED3_TRIS			LED2_TRIS
-	#define LED3_IO				LED2_IO
-	#define LED4_TRIS			LED2_TRIS
-	#define LED4_IO				LED2_IO
-	#define LED5_TRIS			LED2_TRIS
-	#define LED5_IO				LED2_IO
-	#define LED6_TRIS			LED2_TRIS
-	#define LED6_IO				LED2_IO
-	#define LED7_TRIS			LED2_TRIS
-	#define LED7_IO				LED2_IO
+	#define LED3_TRIS			(LED2_TRIS)			// No such LED
+	#define LED3_IO				(LATDbits.LATD6)
+	#define LED4_TRIS			(LED2_TRIS)			// No such LED
+	#define LED4_IO				(LATDbits.LATD6)
+	#define LED5_TRIS			(LED2_TRIS)			// No such LED
+	#define LED5_IO				(LATDbits.LATD6)
+	#define LED6_TRIS			(LED2_TRIS)			// No such LED
+	#define LED6_IO				(LATDbits.LATD6)
+	#define LED7_TRIS			(LED2_TRIS)			// No such LED
+	#define LED7_IO				(LATDbits.LATD6)
+	
+	#define LED_GET()			((BYTE)LATD & 0x07)
+	#define LED_PUT(a)			do{LATD = (LATD & 0xFFF8) | ((a)&0x07);}while(0)
 
-	#define LED_GET()			(*((volatile unsigned char*)(&LATD)))
-	#define LED_PUT(a)			(*((volatile unsigned char*)(&LATD)) = (a))
+    #define BUTTON0_TRIS		(TRISDbits.TRISD6)	// Ref SW1
+	#define	BUTTON0_IO			(PORTDbits.RD6)
+	#define BUTTON1_TRIS		(TRISDbits.TRISD7)	// Ref SW2
+	#define	BUTTON1_IO			(PORTDbits.RD7)
+	#define BUTTON2_TRIS		(TRISDbits.TRISD13)	// Ref SW3
+	#define	BUTTON2_IO			(PORTDbits.RD13)
+	#define BUTTON3_TRIS		(TRISDbits.TRISD13)	// No BUTTON3 on this board
+	#define	BUTTON3_IO			(1)
 
-	// Note, it is not possible to use a ZeroG ZG2100M 802.11 WiFi PICtail 
+
+	// Note, it is not possible to use a MRF24WB0M 802.11 WiFi PICtail 
 	// Plus card with this starter kit.  The required interrupt signal, among 
 	// possibly other I/O pins aren't available on the Starter Kit board.  
+
+#elif defined(PIC24FJ256DA210_DEV_BOARD)
+// PIC24FJ256DA210 Development Board (Graphics) + 
+//   Fast 100Mbps Ethernet PICtail Plus or Ethernet PICtail Plus or MRF24WB0M WiFi PICtail Plus
+
+	#define LED0_TRIS			(TRISAbits.TRISA7)		// Ref D4: Jumper JP11 must have a shunt shorting pins 1 and 2 together
+	#define LED0_IO				(LATAbits.LATA7)
+	#define LED1_TRIS			(((BYTE*)&NVMKEY)[1])	// No such LED, map to dummy register.  D3 is the natural choice for LED0, but the D3 pin (RB5) is multiplexed with R3 potentiometer and MDIX signal on Fast 100Mbps Ethernet PICtail Plus, so it cannot be used
+	#define LED1_IO				(((BYTE*)&NVMKEY)[1])
+	#define LED2_TRIS			(TRISEbits.TRISE9)		// Ref D2.  NOTE: When using the PSP interface, this RE9 signal also controls the POR (SHDN) signal on the Fast 100Mbps Ethernet PICtail Plus.
+	#define LED2_IO				(LATEbits.LATE9)
+	#define LED3_TRIS			(TRISGbits.TRISG8)		// Ref D1.  NOTE: When using the PSP interface, this RG8 signal also controls the CS signal on the Fast 100Mbps Ethernet PICtail Plus.
+	#define LED3_IO				(LATGbits.LATG8)
+	#define LED4_TRIS			(((BYTE*)&NVMKEY)[1])	// No such LED, map to dummy register
+	#define LED4_IO				(((BYTE*)&NVMKEY)[1])
+	#define LED5_TRIS			(((BYTE*)&NVMKEY)[1])	// No such LED, map to dummy register
+	#define LED5_IO				(((BYTE*)&NVMKEY)[1])
+	#define LED6_TRIS			(((BYTE*)&NVMKEY)[1])	// No such LED, map to dummy register
+	#define LED6_IO				(((BYTE*)&NVMKEY)[1])
+	#define LED7_TRIS			(((BYTE*)&NVMKEY)[1])	// No such LED, map to dummy register
+	#define LED7_IO				(((BYTE*)&NVMKEY)[1])
+	#define LED_GET()			((LATGbits.LATG8<<3) | (LATEbits.LATE9<<2) | LATAbits.LATA7)
+	#define LED_PUT(a)			do{BYTE vTemp = (a); LED0_IO = vTemp&0x1; LED2_IO = vTemp&0x4; LED3_IO = vTemp&0x8;} while(0)
+
+
+	#define BUTTON0_TRIS		(((BYTE*)&NVMKEY)[1])	// Ref S3: NOTE: This pin is multiplexed with D3 and cannot be used simulatneously.  Therefore, we will pretend there is no such button.
+	#define	BUTTON0_IO			(1)
+	#define BUTTON1_TRIS		(((BYTE*)&NVMKEY)[1])	// Ref S2: NOTE: This pin is multiplexed with D2 and cannot be used simulatneously.  Therefore, we will pretend there is no such button.
+	#define	BUTTON1_IO			(1)
+	#define BUTTON2_TRIS		(((BYTE*)&NVMKEY)[1])	// Ref S1: NOTE: This pin is multiplexed with D1 and cannot be used simulatneously.  Therefore, we will pretend there is no such button.
+	#define	BUTTON2_IO			(1)
+	#define BUTTON3_TRIS		(((BYTE*)&NVMKEY)[1])	// No such button
+	#define	BUTTON3_IO			(1)
+
+
+	#define UARTTX_TRIS			(TRISFbits.TRISF3)
+	#define UARTTX_IO			(PORTFbits.RF3)
+	#define UARTRX_TRIS			(TRISDbits.TRISD0)
+	#define UARTRX_IO			(PORTDbits.RD0)
+
+
+	// NOTE: You must also set SPIFlash.h file to define SPI_FLASH_SST, define 
+	//       SPI_FLASH_SECTOR_SIZE as 4096, and define SPI_FLASH_PAGE_SIZE as 0.  
+	//       Jumper JP23 must have a shunt shorting pins 2-3 (not the default).
+	// SST SST25VF016B (16Mbit/2Mbyte)
+	#define SPIFLASH_CS_TRIS		(TRISAbits.TRISA14)
+	#define SPIFLASH_CS_IO			(LATAbits.LATA14)
+	#define SPIFLASH_SCK_TRIS		(TRISDbits.TRISD8)
+	#define SPIFLASH_SDI_TRIS		(TRISBbits.TRISB0)
+	#define SPIFLASH_SDI_IO			(PORTBbits.RB0)
+	#define SPIFLASH_SDO_TRIS		(TRISBbits.TRISB1)
+	#define SPIFLASH_SPI_IF			(IFS0bits.SPI1IF)
+	#define SPIFLASH_SSPBUF			(SPI1BUF)
+	#define SPIFLASH_SPICON1		(SPI1CON1)
+	#define SPIFLASH_SPICON1bits	(SPI1CON1bits)
+	#define SPIFLASH_SPICON2		(SPI1CON2)
+	#define SPIFLASH_SPISTAT		(SPI1STAT)
+	#define SPIFLASH_SPISTATbits	(SPI1STATbits)
+
+
+//	// ENC28J60 I/O pins
+//	#define ENC_CS_TRIS			(TRISGbits.TRISG6)	// Comment this line out if you are using the ENC424J600/624J600, MRF24WB0M, or other network controller.
+//	#define ENC_CS_IO			(LATGbits.LATG6)
+//	//#define ENC_RST_TRIS		(TRISAbits.TRISA7)	// Not connected by default.  It is okay to leave this pin completely unconnected, in which case this macro should simply be left undefined.
+//	//#define ENC_RST_IO			(LATAbits.LATA7)
+//	// SPI SCK, SDI, SDO pins are automatically controlled by the 
+//	// PIC24 SPI module, but Peripheral Pin Select must be configured correctly.
+//	// MISO = RB0 (RP0); MOSI = RB1 (RP1); SCK = RD8 (RP2)
+//	#define ENC_SPI_IF			(IFS0bits.SPI1IF)
+//	#define ENC_SSPBUF			(SPI1BUF)
+//	#define ENC_SPISTAT			(SPI1STAT)
+//	#define ENC_SPISTATbits		(SPI1STATbits)
+//	#define ENC_SPICON1			(SPI1CON1)
+//	#define ENC_SPICON1bits		(SPI1CON1bits)
+//	#define ENC_SPICON2			(SPI1CON2)
+
+
+	// ENC624J600 Interface Configuration
+	// Comment out ENC100_INTERFACE_MODE if you don't have an ENC624J600 or 
+	// ENC424J600.  Otherwise, choose the correct setting for the interface you 
+	// are using.  Legal values are:
+	//  - Commented out: No ENC424J600/624J600 present or used.  All other 
+	//                   ENC100_* macros are ignored.
+	//	- 0: SPI mode using CS, SCK, SI, and SO pins
+	//  - 1: 8-bit demultiplexed PSP Mode 1 with RD and WR pins
+	//  - 2: 8-bit demultiplexed PSP Mode 2 with R/Wbar and EN pins
+	//  - 3: 16-bit demultiplexed PSP Mode 3 with RD, WRL, and WRH pins
+	//  - 4: 16-bit demultiplexed PSP Mode 4 with R/Wbar, B0SEL, and B1SEL pins
+	//  - 5: 8-bit multiplexed PSP Mode 5 with RD and WR pins
+	//  - 6: 8-bit multiplexed PSP Mode 6 with R/Wbar and EN pins
+	//  - 9: 16-bit multiplexed PSP Mode 9 with AL, RD, WRL, and WRH pins
+	//  - 10: 16-bit multiplexed PSP Mode 10 with AL, R/Wbar, B0SEL, and B1SEL 
+	//        pins
+	#define ENC100_INTERFACE_MODE			5
+
+	// If using a parallel interface, direct RAM addressing can be used (if all 
+	// addresses wires are connected), or a reduced number of pins can be used 
+	// for indirect addressing.  If using an SPI interface or PSP Mode 9 or 10 
+	// (multiplexed 16-bit modes), which require all address lines to always be 
+	// connected, then this option is ignored. Comment out or uncomment this 
+	// macro to match your hardware connections.
+	#define ENC100_PSP_USE_INDIRECT_RAM_ADDRESSING
+
+	// ENC424J600/624J600 parallel indirect address remapping macro function.
+	// This section translates SFR and RAM addresses presented to the 
+	// ReadMemory() and WriteMemory() APIs in ENCX24J600.c to the actual 
+	// addresses that must be presented on the parallel interface.  This macro 
+	// must be modified to match your hardware if you are using an indirect PSP 
+	// addressing mode (ENC100_PSP_USE_INDIRECT_RAM_ADDRESSING is defined) and 
+	// have some of your address lines tied off to Vdd.  If you are using the 
+	// SPI interface, then this section can be ignored or deleted.
+	#if (ENC100_INTERFACE_MODE == 1) || (ENC100_INTERFACE_MODE == 2) || (ENC100_INTERFACE_MODE == 5) || (ENC100_INTERFACE_MODE == 6) // 8-bit PSP
+		#define ENC100_TRANSLATE_TO_PIN_ADDR(a)		((((a)&0x0100)<<6) | ((a)&0x00FF))
+	#elif (ENC100_INTERFACE_MODE == 3) || (ENC100_INTERFACE_MODE == 4) // 16-bit PSP
+		#define ENC100_TRANSLATE_TO_PIN_ADDR(a)		(a)
+	#endif
+
+	// Auto-crossover pins on Fast 100Mbps Ethernet PICtail/PICtail Plus.  If 
+	// your circuit doesn't have such a feature, delete these two defines.
+	#define ENC100_MDIX_TRIS				(TRISBbits.TRISB5)
+	#define ENC100_MDIX_IO					(LATBbits.LATB5)
+
+	// ENC624J600 I/O control and status pins
+	// If a pin is not required for your selected ENC100_INTERFACE_MODE 
+	// interface selection (ex: WRH/B1SEL for PSP modes 1, 2, 5, and 6), then 
+	// you can ignore, delete, or put anything for the pin definition.  Also, 
+	// the INT and POR pins are entirely optional.  If not connected, comment 
+	// them out.
+	#define ENC100_INT_TRIS					(TRISAbits.TRISA15)		// INT signal is optional and currently unused in the Microchip TCP/IP Stack.  Leave this pin disconnected and comment out this pin definition if you don't want it.
+	#define ENC100_INT_IO					(PORTAbits.RA15)
+	#if (ENC100_INTERFACE_MODE >= 1)	// Parallel mode
+		// PSP control signal pinout
+		#define ENC100_CS_TRIS				(TRISGbits.TRISG8)	// CS is optional in PSP mode.  If you are not sharing the parallel bus with another device, tie CS to Vdd and comment out this pin definition.
+		#define ENC100_CS_IO				(LATGbits.LATG8)
+		#define ENC100_POR_TRIS				(TRISEbits.TRISE9)	// POR signal is optional.  If your application doesn't have a power disconnect feature, comment out this pin definition.
+		#define ENC100_POR_IO				(LATEbits.LATE9)
+		#define ENC100_SO_WR_B0SEL_EN_TRIS	(TRISDbits.TRISD4)
+		#define ENC100_SO_WR_B0SEL_EN_IO	(LATDbits.LATD4)
+		#define ENC100_SI_RD_RW_TRIS		(TRISDbits.TRISD5)
+		#define ENC100_SI_RD_RW_IO			(LATDbits.LATD5)
+		#define ENC100_SCK_AL_TRIS			(TRISBbits.TRISB15)
+		#define ENC100_SCK_AL_IO			(LATBbits.LATB15)
+		#undef LED1_TRIS
+		#undef LED1_IO
+		#undef LED2_TRIS
+		#undef LED2_IO
+		#undef LED_GET
+		#undef LED_PUT
+		#define LED1_TRIS					(((BYTE*)&NVMKEY)[1])	// No such LED, map to dummy register.  This is required with the Fast 100Mbps Ethernet PICtail Plus in parallel mode because this RE9 signal also controls the POR (SHDN) signal.
+		#define LED1_IO						(((BYTE*)&NVMKEY)[1])
+		#define LED2_TRIS					(((BYTE*)&NVMKEY)[1])	// No such LED, map to dummy register.  This is required with the Fast 100Mbps Ethernet PICtail Plus in parallel mode because this RG8 signal also controls the CS signal.
+		#define LED2_IO						(((BYTE*)&NVMKEY)[1])
+		#define LED_GET()					LED0_IO
+		#define LED_PUT(a)					(LED0_IO = (a) & 0x1)
+	#else
+		// SPI pinout
+		#define ENC100_CS_TRIS				(TRISGbits.TRISG6)	// CS is mandatory when using the SPI interface
+		#define ENC100_CS_IO				(LATGbits.LATG6)
+		#define ENC100_POR_TRIS				(TRISCbits.TRISC13)	// POR signal is optional.  If your application doesn't have a power disconnect feature, comment out this pin definition.
+		#define ENC100_POR_IO				(LATCbits.LATC13)
+		#define ENC100_SO_WR_B0SEL_EN_TRIS	(TRISBbits.TRISB0)	// SO is ENCX24J600 Serial Out, which needs to connect to the PIC SDI pin for SPI mode
+		#define ENC100_SO_WR_B0SEL_EN_IO	(PORTBbits.RB0)
+		#define ENC100_SI_RD_RW_TRIS		(TRISBbits.TRISB1)	// SI is ENCX24J600 Serial In, which needs to connect to the PIC SDO pin for SPI mode
+		#define ENC100_SI_RD_RW_IO			(LATBbits.LATB1)
+		#define ENC100_SCK_AL_TRIS			(TRISDbits.TRISD8)
+	#endif
+
+
+	// ENC624J600 SPI SFR register selection (controls which SPI peripheral to 
+	// use on PICs with multiple SPI peripherals).  If a parallel interface is 
+	// used (ENC100_INTERFACE_MODE is >= 1), then the SPI is not used and this 
+	// section can be ignored or deleted.
+	#define ENC100_ISR_ENABLE		(IEC1bits.INT2IE)
+	#define ENC100_ISR_FLAG			(IFS1bits.INT2IF)
+	#define ENC100_ISR_POLARITY		(INTCON2bits.INT2EP)
+	#define ENC100_ISR_PRIORITY		(IPC7bits.INT2IP)
+	#define ENC100_SPI_ENABLE		(ENC100_SPISTATbits.SPIEN)
+	#define ENC100_SPI_IF			(IFS0bits.SPI1IF)
+	#define ENC100_SSPBUF			(SPI1BUF)
+	#define ENC100_SPISTAT			(SPI1STAT)
+	#define ENC100_SPISTATbits		(SPI1STATbits)
+	#define ENC100_SPICON1			(SPI1CON1)
+	#define ENC100_SPICON1bits		(SPI1CON1bits)
+	#define ENC100_SPICON2			(SPI1CON2)
+
+	// ENC624J600 Bit Bang PSP I/O macros and pin configuration for address and 
+	// data.  If using the SPI interface (ENC100_INTERFACE_MODE is 0) then this 
+	// section is not used and can be ignored or deleted.  The Enhanced PMP 
+	// module available on the PIC24FJ256DA210 family will not work with the 
+	// ENC424J600/624J600, so bit bang mode must be used if parallel access is 
+	// desired.
+	#define ENC100_BIT_BANG_PMP
+	#if defined(ENC100_BIT_BANG_PMP)
+		#if ENC100_INTERFACE_MODE == 1 || ENC100_INTERFACE_MODE == 2	// Dumultiplexed 8-bit address/data modes
+			#if defined(ENC100_PSP_USE_INDIRECT_RAM_ADDRESSING)	// Only ENC624J600 address pins A0-A8 connected (A9-A14 tied to Vdd)
+				// AD0-AD7: "PMD0-PMD7" -> RE0-RE7
+				// A0: "PMA0" -> RB15
+				// A1: "PMA1" -> RB14
+				// A2: "PMA2" -> RG9
+				// A3: "PMA3" -> RA4
+				// A4: "PMA4" -> RA3
+				// A5: "PMA5" -> RF12
+				// A6: "PMA6" -> RA10
+				// A7: "PMA7" -> RA9
+				// A8: "PMA14_TO_P104" "PMA14" -> RD11
+				// RD: "PMRD/RD5" -> RD5
+				// WR: "PMWR/RD4 -> RD4
+				// CS: "AN19/RG8_TO_P72" "AN19/RG8" -> RG8
+				#define ENC100_INIT_PSP_BIT_BANG()	do{ANSA &= 0xF9E7; ANSB &= 0x3FFF; ANSG &= 0xFCFF;} while(0)		// RE0-RE7, RF12, RD11, RD4, RD5 (AD0-AD7, A5, A8, WR, RD) pins are already digital only pins.
+				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISA &= 0xF9E7; TRISB &= 0x3FFF; TRISFbits.TRISF12 = 0; TRISGbits.TRISG9 = 0; TRISDbits.TRISD11 = 0;}while(0)
+				#define ENC100_SET_ADDR_IO(a)		do{WORD _SetMacro = (a); LATBbits.LATB15 = 0; LATBbits.LATB14 = 0; LATGbits.LATG9 = 0; LATA &= 0xF9E7; LATFbits.LATF12 = 0; LATDbits.LATD11 = 0; if(_SetMacro & 0x0001) LATBbits.LATB15 = 1; if(_SetMacro & 0x0002) LATBbits.LATB14 = 1; if(_SetMacro & 0x0004) LATGbits.LATG9 = 1; if(_SetMacro & 0x0008) LATAbits.LATA4 = 1; if(_SetMacro & 0x0010) LATAbits.LATA3 = 1; if(_SetMacro & 0x0020) LATFbits.LATF12 = 1; if(_SetMacro & 0x0040) LATAbits.LATA10 = 1; if(_SetMacro & 0x0080) LATAbits.LATA9 = 1; if(_SetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
+				#define ENC100_SET_AD_TRIS_IN()		(((volatile BYTE*)&TRISE)[0] = 0xFF)
+				#define ENC100_SET_AD_TRIS_OUT()	(((volatile BYTE*)&TRISE)[0] = 0x00)
+				#define ENC100_GET_AD_IO()			(((volatile BYTE*)&PORTE)[0])
+				#define ENC100_SET_AD_IO(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
+			#else 	// All ENC624J600 address pins A0-A14 connected
+				// AD0-AD7: "PMD0-PMD7" -> RE0-RE7
+				// A0: "PMA0" -> RB15
+				// A1: "PMA1" -> RB14
+				// A2: "PMA2" -> RG9
+				// A3: "PMA3" -> RA4
+				// A4: "PMA4" -> RA3
+				// A5: "PMA5" -> RF12
+				// A6: "PMA6" -> RA10
+				// A7: "PMA7" -> RA9
+				// A8: "PMA8" -> RF5
+				// A9: "PMA9" -> RF4
+				// A10: "PMA10" -> RB13
+				// A11: "PMA11" -> RB12
+				// A12: "PMA12" -> RB11
+				// A13: "PMA13" -> RB10
+				// A14: "PMA14_TO_P104" "PMA14" -> RD11
+				// RD: "PMRD/RD5" -> RD5
+				// WR: "PMWR/RD4 -> RD4
+				// CS: "AN19/RG8_TO_P72" "AN19/RG8" -> RG8
+				#define ENC100_INIT_PSP_BIT_BANG()	do{ANSA &= 0xF9E7; ANSB &= 0x03FF; ANSG &= 0xFCFF;} while(0)		// RE0-RE7, RF12, RD11, RD4, RD5 (AD0-AD7, A5, A14, WR, RD) pins are already digital only pins.
+				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISA &= 0xF9E7; TRISB &= 0x03FF; TRISF &= 0xEFCF; TRISGbits.TRISG9 = 0; TRISDbits.TRISD11 = 0;}while(0)
+				#define ENC100_SET_ADDR_IO(a)		do{WORD _SetMacro = (a); LATA &= 0xF9E7; LATB &= 0x03FF; LATF &= 0xEFCF; LATGbits.LATG9 = 0; LATDbits.LATD11 = 0; if(_SetMacro & 0x0001) LATBbits.LATB15 = 1; if(_SetMacro & 0x0002) LATBbits.LATB14 = 1; if(_SetMacro & 0x0004) LATGbits.LATG9 = 1; if(_SetMacro & 0x0008) LATAbits.LATA4 = 1; if(_SetMacro & 0x0010) LATAbits.LATA3 = 1; if(_SetMacro & 0x0020) LATFbits.LATF12 = 1; if(_SetMacro & 0x0040) LATAbits.LATA10 = 1; if(_SetMacro & 0x0080) LATAbits.LATA9 = 1; if(_SetMacro & 0x0100) LATFbits.LATF5 = 1; if(_SetMacro & 0x0200) LATFbits.LATF4 = 1; if(_SetMacro & 0x0400) LATBbits.LATB13 = 1; if(_SetMacro & 0x0800) LATBbits.LATB12 = 1; if(_SetMacro & 0x1000) LATBbits.LATB11 = 1; if(_SetMacro & 0x2000) LATBbits.LATB10 = 1; if(_SetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
+				#define ENC100_SET_AD_TRIS_IN()		(((volatile BYTE*)&TRISE)[0] = 0xFF)
+				#define ENC100_SET_AD_TRIS_OUT()	(((volatile BYTE*)&TRISE)[0] = 0x00)
+				#define ENC100_GET_AD_IO()			(((volatile BYTE*)&PORTE)[0])
+				#define ENC100_SET_AD_IO(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
+			#endif
+		#elif ENC100_INTERFACE_MODE == 3 || ENC100_INTERFACE_MODE == 4	// Dumultiplexed 16-bit address/data modes
+			#if defined(ENC100_PSP_USE_INDIRECT_RAM_ADDRESSING)	// Only ENC624J600 address pins A0-A7 connected (A8-A13 tied to Vdd)
+				// A0: "PMA0" -> RB15
+				// A1: "PMA1" -> RB14
+				// A2: "PMA2" -> RG9
+				// A3: "PMA3" -> RA4
+				// A4: "PMA4" -> RA3
+				// A5: "PMA5" -> RF12
+				// A6: "PMA6" -> RA10
+				// A7: "PMA7" -> RA9
+				// AD0-AD7: "PMD0-PMD7" -> RE0-RE7
+				// AD8: "PMD8" -> RG0
+				// AD9: "PMD9" -> RG1
+				// AD10: "RC13_PMD10_TO_P30" "RC13" -> RC13
+				// AD11: "PMBE1_PMD11_TO_P28" "PMBE1" -> RA15
+				// AD12: "PMD12" -> RD12
+				// AD13: "PMD13" -> RD13
+				// AD14: "PMD14" -> RD6
+				// AD15: "PMD15" -> RD7
+				// RD: "PMRD/RD5" -> RD5
+				// WRL & WRH: "PMWR/RD4 -> RD4
+				// CS: "AN19/RG8_TO_P72" "AN19/RG8" -> RG8
+				#define ENC100_INIT_PSP_BIT_BANG()	do{ANSA &= 0x79E7; ANSB &= 0x3FFF; ANSD &= 0xCF0F; ANSG &= 0xFCFC;}while(0)
+				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISA &= 0xF9E7; TRISBbits.TRISB15 = 0; TRISBbits.TRISB14 = 0; TRISFbits.TRISF12 = 0; TRISGbits.TRISG9 = 0;}while(0)
+				#define ENC100_SET_ADDR_IO(a)		do{WORD _wSetMacro = (a); LATA &= 0xF9E7; LATBbits.LATB15 = 0; LATBbits.LATB14 = 0; LATFbits.LATF12 = 0; LATGbits.LATG9 = 0; if(_wSetMacro & 0x0001) LATBbits.LATB15 = 1; if(_wSetMacro & 0x0002) LATBbits.LATB14 = 1; if(_wSetMacro & 0x0004) LATGbits.LATG9 = 1; if(_wSetMacro & 0x0008) LATAbits.LATA4 = 1; if(_wSetMacro & 0x0010) LATAbits.LATA3 = 1; if(_wSetMacro & 0x0020) LATFbits.LATF12 = 1; if(_wSetMacro & 0x0040) LATAbits.LATA10 = 1; if(_wSetMacro & 0x0080) LATAbits.LATA9 = 1;}while(0)
+				#define ENC100_WRH_B1SEL_TRIS		ENC100_SO_WR_B0SEL_EN_TRIS
+				#define ENC100_WRH_B1SEL_IO			ENC100_SO_WR_B0SEL_EN_IO
+				#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF; TRISAbits.TRISA15 = 1; TRISCbits.TRISC13 = 1; TRISD |= 0x30C0; TRISGbits.TRISG0 = 1; TRISGbits.TRISG1 = 1;}while(0)
+				#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISAbits.TRISA15 = 0; TRISCbits.TRISC13 = 0; TRISD &= 0xCF3F; TRISGbits.TRISG0 = 0; TRISGbits.TRISG1 = 0;}while(0)
+				#define ENC100_GET_AD_IOH()			(PORTGbits.RG0 | (PORTGbits.RG1<<1) | (PORTCbits.RC13<<2) | (PORTAbits.RA15<<3) | (PORTDbits.RD12<<4) | (PORTDbits.RD13<<5) | (PORTDbits.RD6<<6) | (PORTDbits.RD7<<7))
+				#define ENC100_GET_AD_IOL()			(((volatile BYTE*)&PORTE)[0])
+				#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = ((BYTE*)&_wSetMacro)[0]; LATG &= 0xFFFC; LATCbits.LATC13 = 0; LATAbits.LATA15 = 0; LATD &= 0xCF3F; if(_wSetMacro & 0x0100) LATGbits.LATG0 = 1; if(_wSetMacro & 0x0200) LATGbits.LATG1 = 1; if(_wSetMacro & 0x0400) LATCbits.LATC13 = 1; if(_wSetMacro & 0x0800) LATAbits.LATA15 = 1; if(_wSetMacro & 0x1000) LATDbits.LATD12 = 1; if(_wSetMacro & 0x2000) LATDbits.LATD13 = 1; if(_wSetMacro & 0x4000) LATDbits.LATD6 = 1; if(_wSetMacro & 0x8000) LATDbits.LATD7 = 1;}while(0)
+				#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
+			#else 	// All ENC624J600 address pins A0-A13 connected
+				// A0: "PMA0" -> RB15
+				// A1: "PMA1" -> RB14
+				// A2: "PMA2" -> RG9
+				// A3: "PMA3" -> RA4
+				// A4: "PMA4" -> RA3
+				// A5: "PMA5" -> RF12
+				// A6: "PMA6" -> RA10
+				// A7: "PMA7" -> RA9
+				// A8: "PMA8" -> RF5
+				// A9: "PMA9" -> RF4
+				// A10: "PMA10" -> RB13
+				// A11: "PMA11" -> RB12
+				// A12: "PMA12" -> RB11
+				// A13: "PMA13" -> RB10
+				// AD0-AD7: "PMD0-PMD7" -> RE0-RE7
+				// AD8: "PMD8" -> RG0
+				// AD9: "PMD9" -> RG1
+				// AD10: "RC13_PMD10_TO_P30" "RC13" -> RC13
+				// AD11: "PMBE1_PMD11_TO_P28" "PMBE1" -> RA15
+				// AD12: "PMD12" -> RD12
+				// AD13: "PMD13" -> RD13
+				// AD14: "PMD14" -> RD6
+				// AD15: "PMD15" -> RD7
+				// RD: "PMRD/RD5" -> RD5
+				// WRL & WRH: "PMWR/RD4 -> RD4
+				// CS: "AN19/RG8_TO_P72" "AN19/RG8" -> RG8
+				#define ENC100_INIT_PSP_BIT_BANG()	do{ANSA &= 0x79E7; ANSB &= 0x03FF; ANSD &= 0xCF0F; ANSG &= 0xFCFC;}while(0)
+				#define ENC100_SET_ADDR_TRIS_OUT()	do{TRISA &= 0xF9E7; TRISB &= 0x03FF; TRISF &= 0xEFCF; TRISGbits.TRISG9 = 0;}while(0)
+				#define ENC100_SET_ADDR_IO(a)		do{WORD _wSetMacro = (a); LATA &= 0xF9E7; LATB &= 0x03FF; LATF &= 0xEFCF; LATGbits.LATG9 = 0; if(_wSetMacro & 0x0001) LATBbits.LATB15 = 1; if(_wSetMacro & 0x0002) LATBbits.LATB14 = 1; if(_wSetMacro & 0x0004) LATGbits.LATG9 = 1; if(_wSetMacro & 0x0008) LATAbits.LATA4 = 1; if(_wSetMacro & 0x0010) LATAbits.LATA3 = 1; if(_wSetMacro & 0x0020) LATFbits.LATF12 = 1; if(_wSetMacro & 0x0040) LATAbits.LATA10 = 1; if(_wSetMacro & 0x0080) LATAbits.LATA9 = 1; if(_wSetMacro & 0x0100) LATFbits.LATF5 = 1; if(_wSetMacro & 0x0200) LATFbits.LATF4 = 1; if(_wSetMacro & 0x0400) LATBbits.LATB13 = 1; if(_wSetMacro & 0x0800) LATBbits.LATB12 = 1; if(_wSetMacro & 0x1000) LATBbits.LATB11 = 1; if(_wSetMacro & 0x2000) LATBbits.LATB10 = 1;}while(0)
+				#define ENC100_WRH_B1SEL_TRIS		ENC100_SO_WR_B0SEL_EN_TRIS
+				#define ENC100_WRH_B1SEL_IO			ENC100_SO_WR_B0SEL_EN_IO
+				#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF; TRISAbits.TRISA15 = 1; TRISCbits.TRISC13 = 1; TRISD |= 0x30C0; TRISGbits.TRISG0 = 1; TRISGbits.TRISG1 = 1;}while(0)
+				#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISAbits.TRISA15 = 0; TRISCbits.TRISC13 = 0; TRISD &= 0xCF3F; TRISGbits.TRISG0 = 0; TRISGbits.TRISG1 = 0;}while(0)
+				#define ENC100_GET_AD_IOH()			(PORTGbits.RG0 | (PORTGbits.RG1<<1) | (PORTCbits.RC13<<2) | (PORTAbits.RA15<<3) | (PORTDbits.RD12<<4) | (PORTDbits.RD13<<5) | (PORTDbits.RD6<<6) | (PORTDbits.RD7<<7))
+				#define ENC100_GET_AD_IOL()			(((volatile BYTE*)&PORTE)[0])
+				#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = ((BYTE*)&_wSetMacro)[0]; LATG &= 0xFFFC; LATCbits.LATC13 = 0; LATAbits.LATA15 = 0; LATD &= 0xCF3F; if(_wSetMacro & 0x0100) LATGbits.LATG0 = 1; if(_wSetMacro & 0x0200) LATGbits.LATG1 = 1; if(_wSetMacro & 0x0400) LATCbits.LATC13 = 1; if(_wSetMacro & 0x0800) LATAbits.LATA15 = 1; if(_wSetMacro & 0x1000) LATDbits.LATD12 = 1; if(_wSetMacro & 0x2000) LATDbits.LATD13 = 1; if(_wSetMacro & 0x4000) LATDbits.LATD6 = 1; if(_wSetMacro & 0x8000) LATDbits.LATD7 = 1;}while(0)
+				#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
+			#endif
+		#elif ENC100_INTERFACE_MODE == 5 || ENC100_INTERFACE_MODE == 6	// Mutliplexed 8-bit address/data modes
+			#if defined(ENC100_PSP_USE_INDIRECT_RAM_ADDRESSING)	// Only ENCX24J600 address pins AD0-AD8 connected (AD9-AD14 tied to Vdd)
+				#define ENC100_INIT_PSP_BIT_BANG()	do{ANSB &= 0x7FFF; ANSG &= 0xFEFF;} while(0)		// RE0-RE7, RD11, RD4, RD5 (AD0-AD7, AD8, WR, RD) pins are already digital only pins.  RB15, RG8 (AL, CS) needs to be made digital only.
+				#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF;}while(0)
+				#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISDbits.TRISD11 = 0;}while(0)
+				#define ENC100_GET_AD_IO()			(((volatile BYTE*)&PORTE)[0])
+				#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = (BYTE)_wSetMacro; LATDbits.LATD11 = 0; if(_wSetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
+				#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
+			#else 	// All ENCX24J600 address pins AD0-AD14 connected
+				// AD0-AD7: "PMD0-PMD7" -> RE0-RE7
+				// AD8: "PMA8" -> RF5
+				// AD9: "PMA9" -> RF4
+				// AD10: "PMA10" -> RB13
+				// AD11: "PMA11" -> RB12
+				// AD12: "PMA12" -> RB11
+				// AD13: "PMA13" -> RB10
+				// AD14: "PMA14_TO_P104" "PMA14" -> RD11
+				// RD: "PMRD/RD5" -> RD5
+				// WR: "PMWR/RD4 -> RD4
+				// AL: "PMA0" -> RB15
+				// CS: "AN19/RG8_TO_P72" "AN19/RG8" -> RG8
+				#define ENC100_INIT_PSP_BIT_BANG()	do{ANSB &= 0x43FF; ANSG &= 0xFEFF;} while(0) // Set pins as digital I/Os (not analog).  RD11, RD5, RD4, RE0-RE7, RF4, RF5 are all digital-only pins and therefore no writes to ANSD, ANSE, or ANSF are needed.
+				#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF;}while(0)
+				#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISFbits.TRISF5 = 0; TRISFbits.TRISF4 = 0; TRISB &= 0x43FF; TRISDbits.TRISD11 = 0;}while(0)
+				#define ENC100_GET_AD_IO()			(((volatile BYTE*)&PORTE)[0])
+				#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = (BYTE)_wSetMacro; LATFbits.LATF5 = 0; LATFbits.LATF4 = 0; LATB &= 0x43FF; LATDbits.LATD11 = 0; if(_wSetMacro & 0x0100) LATFbits.LATF5 = 1; if(_wSetMacro & 0x0200) LATFbits.LATF4 = 1; if(_wSetMacro & 0x0400) LATBbits.LATB13 = 1; if(_wSetMacro & 0x0800) LATBbits.LATB12 = 1; if(_wSetMacro & 0x1000) LATBbits.LATB11 = 1;  if(_wSetMacro & 0x2000) LATBbits.LATB10 = 1; if(_wSetMacro & 0x4000) LATDbits.LATD11 = 1;}while(0)
+				#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
+			#endif
+		#elif ENC100_INTERFACE_MODE == 9 || ENC100_INTERFACE_MODE == 10	// Mutliplexed 16-bit address/data modes
+			// All ENC624J600 adddress/data pins AD0-AD15 connected (required for 16-bit data, so there is no differentiation for indirect versus direct addressing mode)
+			// This pinout is awful for doing 16-bit bit-bang operations.  The Fast 100Mbps Ethernet PICtail Plus hardware is wired for PMP hardware support, which requires this pinout.  However, if you are designing a custom board, you can simplify these read/write operations dramatically if you wire things more logically by putting all 16 I/O pins, in order, on PORTB or PORTD.  Such a change would enhance performance.
+			// AD0-AD7: "PMD0-PMD7" -> RE0-RE7
+			// AD8: "PMD8" -> RG0
+			// AD9: "PMD9" -> RG1
+			// AD10: "RC13_PMD10_TO_P30" "RC13" -> RC13
+			// AD11: "PMBE1_PMD11_TO_P28" "PMBE1" -> RA15
+			// AD12: "PMD12" -> RD12
+			// AD13: "PMD13" -> RD13
+			// AD14: "PMD14" -> RD6
+			// AD15: "PMD15" -> RD7
+			// RD: "PMRD/RD5" -> RD5
+			// WRL & WRH: "PMWR/RD4 -> RD4
+			// AL: "PMA0" -> RB15
+			// CS: "AN19/RG8_TO_P72" "AN19/RG8" -> RG8
+			#define ENC100_INIT_PSP_BIT_BANG()	do{ANSBbits.ANSB15 = 0; ANSCbits.ANSC13 = 0; ANSD &= 0xCF0F; ANSGbits.ANSG8 = 0;}while(0)	// Set pins as digital I/Os (not analog).  RA15 and RE0-RE7 are all digital-only pins and therefore no writes to ANSA or ANSE are needed.
+			#define ENC100_WRH_B1SEL_TRIS		ENC100_SO_WR_B0SEL_EN_TRIS
+			#define ENC100_WRH_B1SEL_IO			ENC100_SO_WR_B0SEL_EN_IO
+			#define ENC100_SET_AD_TRIS_IN()		do{((volatile BYTE*)&TRISE)[0] = 0xFF; TRISAbits.TRISA15 = 1; TRISCbits.TRISC13 = 1; TRISD |= 0x30C0; TRISGbits.TRISG0 = 1; TRISGbits.TRISG1 = 1;}while(0)
+			#define ENC100_SET_AD_TRIS_OUT()	do{((volatile BYTE*)&TRISE)[0] = 0x00; TRISAbits.TRISA15 = 0; TRISCbits.TRISC13 = 0; TRISD &= 0xCF3F; TRISGbits.TRISG0 = 0; TRISGbits.TRISG1 = 0;}while(0)
+			#define ENC100_GET_AD_IOH()			(PORTGbits.RG0 | (PORTGbits.RG1<<1) | (PORTCbits.RC13<<2) | (PORTAbits.RA15<<3) | (PORTDbits.RD12<<4) | (PORTDbits.RD13<<5) | (PORTDbits.RD6<<6) | (PORTDbits.RD7<<7))
+			#define ENC100_GET_AD_IOL()			(((volatile BYTE*)&PORTE)[0])
+			#define ENC100_SET_AD_IO(data)		do{WORD _wSetMacro = (data); ((volatile BYTE*)&LATE)[0] = ((BYTE*)&_wSetMacro)[0]; LATG &= 0xFFFC; LATCbits.LATC13 = 0; LATAbits.LATA15 = 0; LATD &= 0xCF3F; if(_wSetMacro & 0x0100) LATGbits.LATG0 = 1; if(_wSetMacro & 0x0200) LATGbits.LATG1 = 1; if(_wSetMacro & 0x0400) LATCbits.LATC13 = 1; if(_wSetMacro & 0x0800) LATAbits.LATA15 = 1; if(_wSetMacro & 0x1000) LATDbits.LATD12 = 1; if(_wSetMacro & 0x2000) LATDbits.LATD13 = 1; if(_wSetMacro & 0x4000) LATDbits.LATD6 = 1; if(_wSetMacro & 0x8000) LATDbits.LATD7 = 1;}while(0)
+			#define ENC100_SET_AD_IOL(data)		(((volatile BYTE*)&LATE)[0] = (BYTE)(data))
+		#endif
+	#endif
+
+
+//	//----------------------------
+//	// MRF24WB0M WiFi I/O pins
+//	//----------------------------
+//	#define WF_CS_TRIS			(TRISGbits.TRISG8)		// Comment this line out if you are using the ENC28J60, ENC424J600/624J600, or other network controller.
+//	#define WF_CS_IO			(LATGbits.LATG8)
+//	#define WF_SDI_TRIS			(TRISBbits.TRISB1)
+//	#define WF_SCK_TRIS			(TRISDbits.TRISD8)
+//	#define WF_SDO_TRIS			(TRISBbits.TRISB0)
+//	#define WF_RESET_TRIS		(TRISAbits.TRISA15)
+//	#define WF_RESET_IO			(LATAbits.LATA15)
+//	#define WF_INT_TRIS		    (TRISEbits.TRISE9)  // INT1
+//	#define WF_INT_IO			(PORTEbits.RE9)
+//	#define WF_HIBERNATE_TRIS   (TRISAbits.TRISA7)
+//	#define	WF_HIBERNATE_IO		(LATAbits.LATA7)
+//	#define WF_INT_EDGE		    (INTCON2bits.INT1EP)
+//	#define WF_INT_IE			(IEC1bits.INT1IE)
+//	#define WF_INT_IF			(IFS1bits.INT1IF)
+//	#define WF_SSPBUF			(SPI1BUF)
+//	#define WF_SPISTAT			(SPI1STAT)
+//	#define WF_SPISTATbits		(SPI1STATbits)
+//	#define WF_SPICON1			(SPI1CON1)
+//	#define WF_SPICON1bits		(SPI1CON1bits)
+//	#define WF_SPICON2			(SPI1CON2)
+//	#define WF_SPI_IE			(IEC0bits.SPI1IE)
+//	//#define WF_SPI_IP			(IPC2bits.SPI1IP)
+//	#define WF_SPI_IF			(IFS0bits.SPI1IF)
+
 
 #elif defined(YOUR_BOARD)
 // Define your own board hardware profile here

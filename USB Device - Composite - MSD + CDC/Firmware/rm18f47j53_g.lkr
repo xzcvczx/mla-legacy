@@ -1,5 +1,5 @@
 // File: 18f47j53_g.lkr
-// Example modified linker script for the PIC18F46J50 processor
+// Example modified linker script for the PIC18F47J53 processor
 // for use with internal flash MSD USB demo.  Also
 // allows for programming with the HID Bootloader
 

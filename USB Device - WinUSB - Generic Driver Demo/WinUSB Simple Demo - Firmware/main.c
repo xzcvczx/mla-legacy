@@ -36,9 +36,15 @@
   Rev   Description
   ----  -----------------------------------------
   1.0   Initial release
+
   2.1   Updated for simplicity and to use common
         coding style
-  2.6   Added Support for PIC32MX795F512L & PIC24FJ256DA210
+
+  2.6   Added support for PIC32MX795F512L & PIC24FJ256DA210
+
+  2.6a  Added support for PIC24FJ256GB210
+
+  2.7   No change
 ********************************************************************/
 
 /** INCLUDES *******************************************************/

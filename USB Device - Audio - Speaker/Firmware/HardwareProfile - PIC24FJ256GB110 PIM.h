@@ -36,8 +36,6 @@
                      coding style
   2.3   09/15/2008   Broke out each hardware platform into its own
                      "HardwareProfile - xxx.h" file
-
-  2.6   11/12/2009	 Updated for USB Audio Class Speaker demo
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC24FJ256GB110_PIM_H
@@ -145,12 +143,12 @@
 	   		#define NO_OF_SAMPLES_IN_A_USB_FRAME 44
 	   		#define PWM_PERIOD	CLOCK_FREQ/(2*44100)-1
 	#endif
-
+	
 	/*** Intialize Audio Driver on the Speech Playback Card *********************************************/
  	#define mInitAudioDriver()  {TRISDbits.TRISD8=0; LATDbits.LATD8 = 1; }
 	#define mAudioDriverON()	LATDbits.LATD8 = 0;
 	#define mAudioDriverOFF()	LATDbits.LATD8 = 1;
-
+	
 	/****** PWM Intialization************************************/
 	// pin remapping of RP11 as Output Comapre 1 output.
 	// configure RD0 as output for PWM
@@ -167,13 +165,13 @@
 									OC1CON2bits.SYNCSEL = 0x1F;\
 								}
     #define PWM_PERIOD_INTERRUPT_FLAG  IFS0bits.OC1IF
-    #define DUTY_CYCLE OC1R   // Duty Cycle register of the PWM Peripheral.
+    #define DUTY_CYCLE OC1R   // Duty Cycle register of the PWM Peripheral. 
     #define MULTIPLY_FACTOR 1
 	/****** Timer2 Intialization************************************/
 	#define mInitTimerInterrupt() { IFS0bits.OC1IF = 0;\
 									IEC0bits.OC1IE = 0;\
 								  }
-	#define mInitTimer()//PIC24F256GB110 has a PWM module with dedicated timer. So this macro does not do anything.
+	#define mInitTimer()//PIC24F256GB110 has a PWM module with dedicated timer. So this macro does not do anything.  
 
 	#define TimerInterruptFlag IFS0bits.OC1IF
 	#define TimerInterruptEnable IEC0bits.OC1IE
@@ -182,7 +180,7 @@
 	/****** Unmask OC1 Interrupt ************************************/
 	#define mStartAudio()  {IEC0bits.OC1IE = 1;} // unmask Output Compare 1 interrupt
 
-    /******* Mask OC1 Interrupt  ***********************************/
+    /******* Mask OC1 Interrupt  ***********************************/ 
     #define mStopAudio()          {IEC0bits.OC1IE = 0;} //  mask Output Compare 1 interrupt
 
 

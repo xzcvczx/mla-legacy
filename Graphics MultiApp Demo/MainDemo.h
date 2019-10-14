@@ -58,14 +58,16 @@
         #if defined(__PIC24FJ256GB110__) || defined(__PIC24FJ256DA210__) || defined(__PIC24FJ256GB210__)
             #include "usb_config.h"
             #include "USB\usb.h"
+            #include "USB\usb_host_msd.h"
             #include "USB\usb_host_hid_parser.h"
             #include "USB\usb_host_hid.h"
         #endif
         #include "MDD File System\FSIO.h"
     #elif defined(__PIC32MX__)
-        #if defined(__32MX460F512L__)
+        #if defined(__32MX460F512L__) || defined(__32MX795F512L__)
             #include "usb_config.h"
             #include "USB\usb.h"
+            #include "USB\usb_host_msd.h"
             #include "USB\usb_host_hid_parser.h"
             #include "USB\usb_host_hid.h"
         #endif
@@ -80,7 +82,7 @@
     #include "SlideShowDemo.h"
     #include "rtcc.h"
     #include "FlashProgrammer.h"
-
+    #include "cpld.h"
 /////////////////////////////////////////////////////////////////////////////
 //                             FONTS USED
 /////////////////////////////////////////////////////////////////////////////
@@ -188,10 +190,7 @@ void    CreateCtrlButtons(XCHAR *pTextA, XCHAR *pTextB, XCHAR *pTextC, XCHAR *pT
 
 // Macros to enable demos and features
     #define ENABLE_DEMO_MODE            // enables the automatic demo mode
-    #define USE_EXTERNAL_ICONS          // enable the use of icons sourced from external flash
-
-//#define ENABLE_SCREEN_CAPTURE				// capture screen to PC via UART. Cannot be used with USE_FOCUS enabled
-    #define USE_EXTERNAL_IMAGES 1       // use external pictures
+	//#define ENABLE_SCREEN_CAPTURE		// capture screen to PC via UART. Cannot be used with USE_FOCUS enabled
     #include "ID.h"
     #include "DemoSelection.h"
     #include "RGBDemo.h"

@@ -38,7 +38,7 @@
  Change History:
   Rev            Description
   ----           -----------------------
-  1.2.4 - 1.2.5  No major changes
+  1.2.4 - 1.2.6  No major changes
 ********************************************************************/
 //DOM-IGNORE-END
 

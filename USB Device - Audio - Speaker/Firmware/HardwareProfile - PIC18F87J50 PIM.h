@@ -36,7 +36,6 @@
                      coding style
   2.3   09/15/2008   Broke out each hardware platform into its own
                      "HardwareProfile - xxx.h" file
-  2.6   11/12/2009	 Updated for USB Audio Class Speaker demo
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC18F87J50_PIM_H
@@ -68,7 +67,7 @@
     #define self_power          1
     #endif
 
-    //#define USE_USB_BUS_SENSE_IO		//JP1 must be in R-U position to use this feature on this board
+    //#define USE_USB_BUS_SENSE_IO		//JP1 must be in R-U position to use this feature on this board	
     #define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
     #if defined(USE_USB_BUS_SENSE_IO)
     #define USB_BUS_SENSE       PORTBbits.RB5
@@ -77,10 +76,10 @@
     #endif
 
 
-
-    //Uncomment this to make the output HEX of this project
+   
+    //Uncomment this to make the output HEX of this project 
     //   to be able to be bootloaded using the HID bootloader
-	#define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER
+	#define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER		
 
     /*******************************************************************/
     /*******************************************************************/
@@ -100,15 +99,15 @@
     #define DEMO_BOARD PIC18F87J50_PIM
     #define PIC18F87J50_PIM
     #define CLOCK_FREQ 48000000
-
+  
     /** LED ************************************************************/
     #define mInitAllLEDs()      {LATE &= 0xFC; TRISE &= 0xFC; LATD &= 0xF3; TRISD &= 0xF3;}
-
+    
     #define mLED_1              LATEbits.LATE0
     #define mLED_2              LATEbits.LATE1
     #define mLED_3              LATDbits.LATD2
     #define mLED_4              LATDbits.LATD3
-
+    
     #define mGetLED_1()         mLED_1
     #define mGetLED_2()         mLED_2
     #define mGetLED_3()         mLED_3
@@ -118,17 +117,17 @@
     #define mLED_2_On()         mLED_2 = 1;
     #define mLED_3_On()         mLED_3 = 1;
     #define mLED_4_On()         mLED_4 = 1;
-
+    
     #define mLED_1_Off()        mLED_1 = 0;
     #define mLED_2_Off()        mLED_2 = 0;
     #define mLED_3_Off()        mLED_3 = 0;
     #define mLED_4_Off()        mLED_4 = 0;
-
+    
     #define mLED_1_Toggle()     mLED_1 = !mLED_1;
     #define mLED_2_Toggle()     mLED_2 = !mLED_2;
     #define mLED_3_Toggle()     mLED_3 = !mLED_3;
     #define mLED_4_Toggle()     mLED_4 = !mLED_4;
-
+    
     /** SWITCH *********************************************************/
     #define mInitAllSwitches()  TRISBbits.TRISB4=1;
     #define mInitSwitch2()      TRISBbits.TRISB4=1;
@@ -151,15 +150,15 @@
 	#elif defined AUDIO_SAMPLING_FREQUENCY_44100
    		#define NO_OF_SAMPLES_IN_A_USB_FRAME 44
    		#define PWM_PERIOD	(CLOCK_FREQ/44100)-1
-	#endif
-
+	#endif 	
+	
 	/*** Intialize Audio Driver in Speech Playback Card *********************************************/
- 	#define mInitAudioDriver()  {TRISAbits.TRISA4=OUTPUT_PIN; LATAbits.LATA4 = 1; }
-	#define mAudioDriverON()	LATAbits.LATA4 = 0;
+ 	#define mInitAudioDriver()  {TRISAbits.TRISA4=OUTPUT_PIN; LATAbits.LATA4 = 1; } 
+	#define mAudioDriverON()	LATAbits.LATA4 = 0;    
 	#define mAudioDriverOFF()	LATAbits.LATA4 = 1;
-
-	/****** PWM Intialization************************************/
-	// configure RC2 as output for PWM
+	
+	/****** PWM Intialization************************************/ 
+	// configure RC2 as output for PWM 
 	// PWM mode, Single output, Active High
 	#define mInitPWM() 			{ PR2 = PWM_PERIOD;\
 								  CCPR1L = 0;\
@@ -168,26 +167,26 @@
 								  CCP1CON = 0x0c;\
 								}
 	#define DUTY_CYCLE CCPR1L  // Duty Cycle register of the PWM Peripheral.
-	/****** Timer2 Intialization************************************/
+	/****** Timer2 Intialization************************************/ 	
 	// Enable Interrupt priority
 	// Enable all unmasked low priority interrupts
-	// Enable all unmasked high priority interrupts
-	// Timer2 interrupt is low priority
+	// Enable all unmasked high priority interrupts	
+	// Timer2 interrupt is low priority 							
 	#define mInitTimerInterrupt() {RCONbits.IPEN = 1; INTCONbits.GIEL = 1; INTCONbits.GIEH = 1; IPR1bits.TMR2IP = 0; }
-
+	
 	// Timer 2 on, Prescaler is 1, Postscaler is 1
 	// unmask timer 2 interrupt
 	#define mInitTimer() {TMR2 = 0; T2CON = 0x00; PIE1bits.TMR2IE = 0; T2CONbits.TMR2ON =1;}
 	#define PWM_INTERRUPT_FLAG PIR1bits.TMR2IF
 	#define TimerInterruptEnable PIE1bits.TMR2IE
-
-
+	
+	
     /****** Unmask Timer2 Interrupt ************************************/
     #define mStartAudio()  {PIE1bits.TMR2IE = 1;} // unmask timer 2 interrupt
-
+    
     /******* Mask Timer2 Interrupt  ***********************************/
     #define mStopAudio()   {PIE1bits.TMR2IE = 0;}// mask timer 2 interrupt
+	
 
-
-
+	
 #endif  //HARDWARE_PROFILE_PIC18F87J50_PIM_H

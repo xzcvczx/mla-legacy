@@ -36,7 +36,6 @@
                      coding style
   2.3   09/15/2008   Broke out each hardware platform into its own
                      "HardwareProfile - xxx.h" file
-  2.6   11/12/2009	 Updated for USB Audio Class Speaker demo
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PICDEM_FSUSB_H
@@ -74,13 +73,13 @@
     #endif
 
 
-    //Uncomment the following line to make the output HEX of this
-    //  project work with the MCHPUSB Bootloader
+    //Uncomment the following line to make the output HEX of this  
+    //  project work with the MCHPUSB Bootloader    
     //#define PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER
-
-    //Uncomment the following line to make the output HEX of this
+	
+    //Uncomment the following line to make the output HEX of this 
     //  project work with the HID Bootloader
-    #define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER
+    #define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER		
 
     /*******************************************************************/
     /*******************************************************************/
@@ -104,12 +103,12 @@
 
     /** LED ************************************************************/
     #define mInitAllLEDs()      LATD &= 0xF0; TRISD &= 0xF0;
-
+    
     #define mLED_1              LATDbits.LATD0
     #define mLED_2              LATDbits.LATD1
     #define mLED_3              LATDbits.LATD2
     #define mLED_4              LATDbits.LATD3
-
+    
     #define mGetLED_1()         mLED_1
     #define mGetLED_2()         mLED_2
     #define mGetLED_3()         mLED_3
@@ -119,24 +118,24 @@
     #define mLED_2_On()         mLED_2 = 1;
     #define mLED_3_On()         mLED_3 = 1;
     #define mLED_4_On()         mLED_4 = 1;
-
+    
     #define mLED_1_Off()        mLED_1 = 0;
     #define mLED_2_Off()        mLED_2 = 0;
     #define mLED_3_Off()        mLED_3 = 0;
     #define mLED_4_Off()        mLED_4 = 0;
-
+    
     #define mLED_1_Toggle()     mLED_1 = !mLED_1;
     #define mLED_2_Toggle()     mLED_2 = !mLED_2;
     #define mLED_3_Toggle()     mLED_3 = !mLED_3;
     #define mLED_4_Toggle()     mLED_4 = !mLED_4;
-
+    
     /** SWITCH *********************************************************/
     #define mInitAllSwitches()  TRISBbits.TRISB4=1;TRISBbits.TRISB5=1;
     #define mInitSwitch2()      TRISBbits.TRISB4=1;
     #define mInitSwitch3()      TRISBbits.TRISB5=1;
     #define sw2                 PORTBbits.RB4
     #define sw3                 PORTBbits.RB5
-
+    
     /** USB external transceiver interface (optional) ******************/
     #define tris_usb_vpo        TRISBbits.TRISB3    // Output
     #define tris_usb_vmo        TRISBbits.TRISB2    // Output
@@ -144,9 +143,9 @@
     #define tris_usb_vp         TRISCbits.TRISC5    // Input
     #define tris_usb_vm         TRISCbits.TRISC4    // Input
     #define tris_usb_oe         TRISCbits.TRISC1    // Output
-
+    
     #define tris_usb_suspnd     TRISAbits.TRISA3    // Output
-
+    
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
@@ -161,38 +160,38 @@
 	#elif defined AUDIO_SAMPLING_FREQUENCY_44100
    		#define NO_OF_SAMPLES_IN_A_USB_FRAME 44
    		#define PWM_PERIOD	(CLOCK_FREQ/44100)-1
-	#endif
+	#endif 	
 
     /*** Intialize Audio Driver on the Speech Playback Card *********************************************/
- 	#define mInitAudioDriver()  {TRISAbits.TRISA4=OUTPUT_PIN; LATAbits.LATA4 = 1; }
-	#define mAudioDriverON()	LATAbits.LATA4 = 0;
+ 	#define mInitAudioDriver()  {TRISAbits.TRISA4=OUTPUT_PIN; LATAbits.LATA4 = 1; } 
+	#define mAudioDriverON()	LATAbits.LATA4 = 0;    
 	#define mAudioDriverOFF()	LATAbits.LATA4 = 1;
-
-	/****** PWM Intialization************************************/
-	// configure RC2 as output for PWM
+	
+	/****** PWM Intialization************************************/ 
+	// configure RC2 as output for PWM  
 	// PWM mode, Single output, Active High
 	#define mInitPWM() 			{TRISCbits.TRISC2 = OUTPUT_PIN;  PR2 = PWM_PERIOD; CCPR1L = 0; CCP1CON = 0x0c;}
-	#define DUTY_CYCLE CCPR1L  // Duty Cycle register of the PWM Peripheral.
-
-	/****** Timer2 Intialization************************************/
+	#define DUTY_CYCLE CCPR1L  // Duty Cycle register of the PWM Peripheral. 
+	
+	/****** Timer2 Intialization************************************/ 	
 	// Enable Interrupt priority
 	// Enable all unmasked low priority interrupts
-	// Enable all unmasked high priority interrupts
-	// Timer2 interrupt is low priority
+	// Enable all unmasked high priority interrupts	
+	// Timer2 interrupt is low priority 							
 	#define mInitTimerInterrupt() {RCONbits.IPEN = 1; INTCONbits.GIEL = 1; INTCONbits.GIEH = 1; IPR1bits.TMR2IP = 0; }
-
+	
 	// Timer 2 on, Prescaler is 1, Postscaler is 1
 	// unmask timer 2 interrupt
 	#define mInitTimer() {TMR2 = 0; T2CON = 0x00; PIE1bits.TMR2IE = 0; T2CONbits.TMR2ON =1;}
-
+	
 	#define PWM_INTERRUPT_FLAG PIR1bits.TMR2IF
-
+	
 	#define TimerInterruptEnable PIE1bits.TMR2IE
 
     /****** Unmask Timer2 Interrupt ************************************/
     #define mStartAudio()  {PIE1bits.TMR2IE = 1;} // unmask timer 2 interrupt
-
+    
     /******* Mask Timer2 Interrupt  ***********************************/
     #define mStopAudio()   {PIE1bits.TMR2IE = 0;}// mask timer 2 interrupt
-
+	
 #endif  //HARDWARE_PROFILE_PICDEM_FSUSB_H

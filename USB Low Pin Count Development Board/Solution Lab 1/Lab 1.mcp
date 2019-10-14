@@ -8,7 +8,7 @@ dir_src=
 dir_bin=..\Lab 1\output
 dir_tmp=..\Lab 1\output
 dir_sin=
-dir_inc=..\Lab 1;..\..\Microchip\USB;C:\Microchip Solutions\Microchip\Include;C:\mcc18\h
+dir_inc=..\..\Microchip\include;..\Lab 1;C:\mcc18\h
 dir_lib=c:\mcc18\lib
 dir_lkr=c:\mcc18\lkr
 [CAT_FILTERS]
@@ -102,7 +102,7 @@ file_014=..\..\Microchip\Include\USB\usb_function_hid.h
 file_015=..\..\Microchip\Include\USB\usb_hal.h
 file_016=..\Lab 1\usb_config.h
 file_017=..\Lab 1\HardwareProfile.h
-file_018=C:\MCC18\lkr\18f14k50.lkr
+file_018=C:\MCC18\bin\lkr\18f14k50_g.lkr
 [SUITE_INFO]
 suite_guid={5B7D72DD-9861-47BD-9F60-2BE967BF8416}
 suite_state=

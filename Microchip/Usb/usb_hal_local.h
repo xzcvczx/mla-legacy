@@ -48,7 +48,7 @@ Change History:
     //#include "USB PIC24.h"
 #elif defined (__PIC32MX__)
     #include "p32xxxx.h"
-//    #include "usb_pic32.h"
+    #include "usb_pic32.h"
 #else
     #error "Error!  Unsupported processor"
 #endif

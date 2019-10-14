@@ -32,12 +32,18 @@ printer.
 
 /******************************************************************************
 
-* FileName:         Simple Full Sheet Demo.c
-* Dependencies:     USB Embedded Host library
-* Processor:        PIC24F
-* Compiler:         C30 v3.10b/C32 v1.02
-* Company:          Microchip Technology, Inc.
+ FileName:         Simple Full Sheet Demo.c
+ Dependencies:     USB Embedded Host library
+ Processor:        PIC24F
+ Compiler:         C30 v3.10b/C32 v1.02
+ Company:          Microchip Technology, Inc.
 
+ Change History:
+  Rev           Description
+  ----------    -----------
+  2.6 - 2.6A    No chance except stack revision number
+  2.7           Updated the demo to show how to use the USBHostPrinterGetStatus()
+                function.
 *******************************************************************************/
 
 #include <stdlib.h>
@@ -144,6 +150,8 @@ typedef struct
 {
     BYTE    printer;
     BYTE    printerAttached     : 1;
+    BYTE    printerStatusSent   : 1;
+    BYTE    printerStatusDone   : 1;
     BYTE    pagePrinted         : 1;
     BYTE    overcurrentStateUSB : 1;
 } PRINT_STATUS;
@@ -252,6 +260,8 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
         case EVENT_PRINTER_ATTACH:
             UART2PrintString( "APP:  Printer attached.\r\n" );
             status.printerAttached      = 1;
+            status.printerStatusSent    = 0;
+            status.printerStatusDone    = 0;
             printerInfo                 = *(USB_PRINTER_DEVICE_ID *)data;
             return TRUE;
             break;
@@ -265,6 +275,8 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
             UART2PrintString( "APP:  Printer detached\r\n" );
             status.printerAttached      = 0;
             status.pagePrinted          = 0;
+            status.printerStatusSent    = 0;
+            status.printerStatusDone    = 0;
             printerInfo.deviceAddress   = 0;
             return TRUE;
             break;
@@ -283,6 +295,7 @@ BOOL USB_ApplicationEventHandler( BYTE address, USB_EVENT event, void *data, DWO
 //            UART2PrintString( "APP: Printer Status: " );
 //            UART2PutHex( status.printer );
 //            UART2PrintString( "\r\n" );
+            status.printerStatusDone    = 1;
             return TRUE;
             break;
 
@@ -620,205 +633,230 @@ int main (void)
 
         if (status.printerAttached)
         {
-            if (!status.pagePrinted)
+            if(status.printerStatusDone == 0)
             {
-                status.pagePrinted = 1;
-
-                UART2PrintString( "Printing to full sheet printer...\r\n" );
-
-                // Initialize
-                USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_JOB_START, USB_NULL, 0, 0 );
-
-                if (!printerInfo.support.supportFlags.supportsVectorGraphics)
+                if(status.printerStatusSent == 0)
                 {
-                    // In the demo's initial configuration, this section executes for the HP Deskjet 460.
+                    if(USBHostPrinterGetStatus( printerInfo.deviceAddress, &status.printer ) == USB_SUCCESS)
+                    {
+                        status.printerStatusSent = 1;
+                    }
+                }
+            } 
+            else
+            {
 
-                    UART2PrintString( "Vector graphics are not supported.\r\n" );
-
-                    imageInfo.resolution    = 75;
-                    imageInfo.scale         = 1.0;
-                    imageInfo.positionX     = (PRINTER_PAGE_PORTRAIT_WIDTH - 0x120)/2;
-                    imageInfo.positionY     = 100;
-                    #if defined( __C30__ )
-                        PrintImageFullSheet( (BYTE __prog__ *)(logoMCHP.address), &imageInfo );
-                    #elif defined( __PIC32MX__ )
-                        PrintImageFullSheet( (const BYTE *)(logoMCHP.address), &imageInfo );
-                    #endif
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_COURIER, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)24, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_BOLD, USB_NULL, 0, 0 );
-
-                    WriteLine( 200, 325, &(businessCard[0][0]) );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_MEDIUM, USB_NULL, 0, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)20, 0 );
-
-                    WriteLine( 200, 350, &(businessCard[1][0]) );
-                    WriteLine( 200, 375, &(businessCard[2][0]) );
-                    WriteLine( 200, 400, &(businessCard[3][0]) );
-                    WriteLine( 200, 425, &(businessCard[4][0]) );
-                    WriteLine( 200, 450, &(businessCard[5][0]) );
-                    WriteLine( 200, 475, &(businessCard[6][0]) );
-                    WriteLine( 200, 500, &(businessCard[7][0]) );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_TIMES_NEW_ROMAN, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)18, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_BOLD, USB_NULL, 0, 0 );
-
-                    WriteLine( 50, PRINTER_PAGE_PORTRAIT_HEIGHT - 145, &(adddressMicrochip[0][0]) );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_MEDIUM, USB_NULL, 0, 0 );
-
-                    WriteLine( 50, PRINTER_PAGE_PORTRAIT_HEIGHT - 120, &(adddressMicrochip[1][0]) );
-                    WriteLine( 50, PRINTER_PAGE_PORTRAIT_HEIGHT - 95, &(adddressMicrochip[2][0]) );
-                    WriteLine( 50, PRINTER_PAGE_PORTRAIT_HEIGHT - 70, &(adddressMicrochip[3][0]) );
+                if(status.printer != 0x18)
+                {
+                    //if there was an error in the printer status then setup to 
+                    //  check the status again
+                    status.printerStatusSent = 0;
+                    status.printerStatusDone = 0;
                 }
                 else
                 {
-                    // In the demo's initial configuration, this section executes for the Lexmark E250dn.
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_ORIENTATION_LANDSCAPE, USB_NULL, 0, 0 );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_WIDTH, USB_NULL, PRINTER_LINE_WIDTH_THICK, 0 );
-
-                    params.sBevel.xL    = 50;     // X-axis position of the left side of the bevel.
-                    params.sBevel.yT    = 50;     // Y-axis position of the top of the bevel.
-                    params.sBevel.xR    = PRINTER_PAGE_LANDSCAPE_WIDTH  - 50;     // X-axis position of the right side of the bevel.
-                    params.sBevel.yB    = PRINTER_PAGE_LANDSCAPE_HEIGHT - 50;     // Y-axis position of the bottom of the bevel.
-                    params.sBevel.r     = 20;      // The radius of the cicle that defines the rounded corner
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_BEVEL, USB_DATA_POINTER_RAM(&params), sizeof(params.sBevel), 0 );
-
-                    imageInfo.resolution    = 75;
-                    imageInfo.scale         = 1.0;
-                    imageInfo.positionX     = 100;
-                    imageInfo.positionY     = 100;
-                    #if defined( __C30__ )
-                        PrintImageFullSheet( (BYTE __prog__ *)(logoMCHP.address), &imageInfo );
-                    #elif defined( __PIC32MX__ )
-                        PrintImageFullSheet( (const BYTE *)(logoMCHP.address), &imageInfo );
-                    #endif
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_HELVETICA, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)18, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_BOLD, USB_NULL, 0, 0 );
-
-                    WriteLine( 100, PRINTER_PAGE_LANDSCAPE_HEIGHT - 145, &(adddressMicrochip[0][0]) );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_MEDIUM, USB_NULL, 0, 0 );
-
-                    WriteLine( 100, PRINTER_PAGE_LANDSCAPE_HEIGHT - 120, &(adddressMicrochip[1][0]) );
-                    WriteLine( 100, PRINTER_PAGE_LANDSCAPE_HEIGHT - 95, &(adddressMicrochip[2][0]) );
-                    WriteLine( 100, PRINTER_PAGE_LANDSCAPE_HEIGHT - 70, &(adddressMicrochip[3][0]) );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_AVANT_GARDE, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)24, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_BOLD, USB_NULL, 0, 0 );
-
-                    WriteLine( 450, 125, &(businessCard[0][0]) );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_MEDIUM, USB_NULL, 0, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)20, 0 );
-
-                    WriteLine( 450, 150, &(businessCard[1][0]) );
-                    WriteLine( 450, 175, &(businessCard[2][0]) );
-                    WriteLine( 450, 200, &(businessCard[3][0]) );
-                    WriteLine( 450, 225, &(businessCard[4][0]) );
-                    WriteLine( 450, 250, &(businessCard[5][0]) );
-                    WriteLine( 450, 275, &(businessCard[6][0]) );
-                    WriteLine( 450, 300, &(businessCard[7][0]) );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_PALATINO, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)16, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_ITALIC, USB_NULL, 0, 0 );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_WIDTH, USB_NULL, PRINTER_LINE_WIDTH_NORMAL, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_TYPE, USB_NULL, PRINTER_LINE_TYPE_DASHED, 0 );
-
-                    WriteLine( 120, 310, &(notes[0][0]) );
-                    params.sLine.x1 = 170;
-                    params.sLine.y1 = 290;
-                    params.sLine.x2 = 220;
-                    params.sLine.y2 = 260;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
-
-                    WriteLine( 216, 396, &(notes[1][0]) );
-                    params.sLine.x1 = 266;
-                    params.sLine.y1 = 400;
-                    params.sLine.x2 = 216;
-                    params.sLine.y2 = 445;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
-
-                    WriteLine( 440, 330, &(notes[2][0]) );
-                    params.sLine.x1 = 490;
-                    params.sLine.y1 = 310;
-                    params.sLine.x2 = 515;
-                    params.sLine.y2 = 280;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
-
-                    WriteLine( 450, 410, &(notes[3][0]) );
-                    params.sLine.x1 = 550;
-                    params.sLine.y1 = 415;
-                    params.sLine.x2 = 590;
-                    params.sLine.y2 = 430;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
-                    params.sLine.x1 = 500;
-                    params.sLine.y1 = 415;
-                    params.sLine.x2 = 500;
-                    params.sLine.y2 = 540;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
-
-                    #define TAO_UNIT    4
-                    #define TAO_XL      (PRINTER_PAGE_LANDSCAPE_WIDTH - 200)
-                    #define TAO_YT      (PRINTER_PAGE_LANDSCAPE_HEIGHT - 200)
-                    #define TAO_XC      (TAO_XL + TAU_UNIT * 12)
-                    #define TAO_YC      (TAO_YL + TAU_UNIT * 12)
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_WIDTH, USB_NULL, PRINTER_LINE_WIDTH_NORMAL, 0 );
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_TYPE, USB_NULL, PRINTER_LINE_TYPE_SOLID, 0 );
-
-                    params.sArc.xL       = TAO_XL;
-                    params.sArc.yT       = TAO_YT;
-                    params.sArc.xR       = TAO_XL + TAO_UNIT * 24;
-                    params.sArc.yB       = TAO_YT + TAO_UNIT * 24;
-                    params.sArc.r1       = 0;
-                    params.sArc.r2       = TAO_UNIT * 12;
-                    params.sArc.octant   = 0xF0;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_ARC, USB_DATA_POINTER_RAM(&params), sizeof(params.sArc), 0 );
-
-                    params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
-                    params.sCircle.y    = TAO_YT + TAO_UNIT * 18;
-                    params.sCircle.r    = TAO_UNIT * 6;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE_FILLED, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_COLOR, USB_NULL, PRINTER_COLOR_WHITE, 0 );
-
-                    params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
-                    params.sCircle.y    = TAO_YT + TAO_UNIT * 6;
-                    params.sCircle.r    = TAO_UNIT * 6;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE_FILLED, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
-
-                    params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
-                    params.sCircle.y    = TAO_YT + TAO_UNIT * 18;
-                    params.sCircle.r    = TAO_UNIT;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE_FILLED, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
-
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_COLOR, USB_NULL, PRINTER_COLOR_BLACK, 0 );
-
-                    params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
-                    params.sCircle.y    = TAO_YT + TAO_UNIT * 6;
-                    params.sCircle.r    = TAO_UNIT;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE_FILLED, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
-
-                    params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
-                    params.sCircle.y    = TAO_YT + TAO_UNIT * 12;
-                    params.sCircle.r    = TAO_UNIT * 12;
-                    USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
+    
+                    if (!status.pagePrinted)
+                    {
+                        status.pagePrinted = 1;
+        
+                        UART2PrintString( "Printing to full sheet printer...\r\n" );
+        
+                        // Initialize
+                        USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_JOB_START, USB_NULL, 0, 0 );
+        
+                        if (!printerInfo.support.supportFlags.supportsVectorGraphics)
+                        {
+                            // In the demo's initial configuration, this section executes for the HP Deskjet 460.
+        
+                            UART2PrintString( "Vector graphics are not supported.\r\n" );
+        
+                            imageInfo.resolution    = 75;
+                            imageInfo.scale         = 1.0;
+                            imageInfo.positionX     = (PRINTER_PAGE_PORTRAIT_WIDTH - 0x120)/2;
+                            imageInfo.positionY     = 100;
+                            #if defined( __C30__ )
+                                PrintImageFullSheet( (BYTE __prog__ *)(logoMCHP.address), &imageInfo );
+                            #elif defined( __PIC32MX__ )
+                                PrintImageFullSheet( (const BYTE *)(logoMCHP.address), &imageInfo );
+                            #endif
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_COURIER, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)24, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_BOLD, USB_NULL, 0, 0 );
+        
+                            WriteLine( 200, 325, &(businessCard[0][0]) );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_MEDIUM, USB_NULL, 0, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)20, 0 );
+        
+                            WriteLine( 200, 350, &(businessCard[1][0]) );
+                            WriteLine( 200, 375, &(businessCard[2][0]) );
+                            WriteLine( 200, 400, &(businessCard[3][0]) );
+                            WriteLine( 200, 425, &(businessCard[4][0]) );
+                            WriteLine( 200, 450, &(businessCard[5][0]) );
+                            WriteLine( 200, 475, &(businessCard[6][0]) );
+                            WriteLine( 200, 500, &(businessCard[7][0]) );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_TIMES_NEW_ROMAN, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)18, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_BOLD, USB_NULL, 0, 0 );
+        
+                            WriteLine( 50, PRINTER_PAGE_PORTRAIT_HEIGHT - 145, &(adddressMicrochip[0][0]) );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_MEDIUM, USB_NULL, 0, 0 );
+        
+                            WriteLine( 50, PRINTER_PAGE_PORTRAIT_HEIGHT - 120, &(adddressMicrochip[1][0]) );
+                            WriteLine( 50, PRINTER_PAGE_PORTRAIT_HEIGHT - 95, &(adddressMicrochip[2][0]) );
+                            WriteLine( 50, PRINTER_PAGE_PORTRAIT_HEIGHT - 70, &(adddressMicrochip[3][0]) );
+                        }
+                        else
+                        {
+                            // In the demo's initial configuration, this section executes for the Lexmark E250dn.
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_ORIENTATION_LANDSCAPE, USB_NULL, 0, 0 );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_WIDTH, USB_NULL, PRINTER_LINE_WIDTH_THICK, 0 );
+        
+                            params.sBevel.xL    = 50;     // X-axis position of the left side of the bevel.
+                            params.sBevel.yT    = 50;     // Y-axis position of the top of the bevel.
+                            params.sBevel.xR    = PRINTER_PAGE_LANDSCAPE_WIDTH  - 50;     // X-axis position of the right side of the bevel.
+                            params.sBevel.yB    = PRINTER_PAGE_LANDSCAPE_HEIGHT - 50;     // Y-axis position of the bottom of the bevel.
+                            params.sBevel.r     = 20;      // The radius of the cicle that defines the rounded corner
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_BEVEL, USB_DATA_POINTER_RAM(&params), sizeof(params.sBevel), 0 );
+        
+                            imageInfo.resolution    = 75;
+                            imageInfo.scale         = 1.0;
+                            imageInfo.positionX     = 100;
+                            imageInfo.positionY     = 100;
+                            #if defined( __C30__ )
+                                PrintImageFullSheet( (BYTE __prog__ *)(logoMCHP.address), &imageInfo );
+                            #elif defined( __PIC32MX__ )
+                                PrintImageFullSheet( (const BYTE *)(logoMCHP.address), &imageInfo );
+                            #endif
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_HELVETICA, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)18, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_BOLD, USB_NULL, 0, 0 );
+        
+                            WriteLine( 100, PRINTER_PAGE_LANDSCAPE_HEIGHT - 145, &(adddressMicrochip[0][0]) );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_MEDIUM, USB_NULL, 0, 0 );
+        
+                            WriteLine( 100, PRINTER_PAGE_LANDSCAPE_HEIGHT - 120, &(adddressMicrochip[1][0]) );
+                            WriteLine( 100, PRINTER_PAGE_LANDSCAPE_HEIGHT - 95, &(adddressMicrochip[2][0]) );
+                            WriteLine( 100, PRINTER_PAGE_LANDSCAPE_HEIGHT - 70, &(adddressMicrochip[3][0]) );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_AVANT_GARDE, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)24, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_BOLD, USB_NULL, 0, 0 );
+        
+                            WriteLine( 450, 125, &(businessCard[0][0]) );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_MEDIUM, USB_NULL, 0, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)20, 0 );
+        
+                            WriteLine( 450, 150, &(businessCard[1][0]) );
+                            WriteLine( 450, 175, &(businessCard[2][0]) );
+                            WriteLine( 450, 200, &(businessCard[3][0]) );
+                            WriteLine( 450, 225, &(businessCard[4][0]) );
+                            WriteLine( 450, 250, &(businessCard[5][0]) );
+                            WriteLine( 450, 275, &(businessCard[6][0]) );
+                            WriteLine( 450, 300, &(businessCard[7][0]) );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_NAME, USB_NULL, USB_PRINTER_FONT_PALATINO, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_SIZE, USB_NULL, (DWORD)16, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_FONT_ITALIC, USB_NULL, 0, 0 );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_WIDTH, USB_NULL, PRINTER_LINE_WIDTH_NORMAL, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_TYPE, USB_NULL, PRINTER_LINE_TYPE_DASHED, 0 );
+        
+                            WriteLine( 120, 310, &(notes[0][0]) );
+                            params.sLine.x1 = 170;
+                            params.sLine.y1 = 290;
+                            params.sLine.x2 = 220;
+                            params.sLine.y2 = 260;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
+        
+                            WriteLine( 216, 396, &(notes[1][0]) );
+                            params.sLine.x1 = 266;
+                            params.sLine.y1 = 400;
+                            params.sLine.x2 = 216;
+                            params.sLine.y2 = 445;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
+        
+                            WriteLine( 440, 330, &(notes[2][0]) );
+                            params.sLine.x1 = 490;
+                            params.sLine.y1 = 310;
+                            params.sLine.x2 = 515;
+                            params.sLine.y2 = 280;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
+        
+                            WriteLine( 450, 410, &(notes[3][0]) );
+                            params.sLine.x1 = 550;
+                            params.sLine.y1 = 415;
+                            params.sLine.x2 = 590;
+                            params.sLine.y2 = 430;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
+                            params.sLine.x1 = 500;
+                            params.sLine.y1 = 415;
+                            params.sLine.x2 = 500;
+                            params.sLine.y2 = 540;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE, USB_DATA_POINTER_RAM(&params), sizeof(params.sLine), 0 );
+        
+                            #define TAO_UNIT    4
+                            #define TAO_XL      (PRINTER_PAGE_LANDSCAPE_WIDTH - 200)
+                            #define TAO_YT      (PRINTER_PAGE_LANDSCAPE_HEIGHT - 200)
+                            #define TAO_XC      (TAO_XL + TAU_UNIT * 12)
+                            #define TAO_YC      (TAO_YL + TAU_UNIT * 12)
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_WIDTH, USB_NULL, PRINTER_LINE_WIDTH_NORMAL, 0 );
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_LINE_TYPE, USB_NULL, PRINTER_LINE_TYPE_SOLID, 0 );
+        
+                            params.sArc.xL       = TAO_XL;
+                            params.sArc.yT       = TAO_YT;
+                            params.sArc.xR       = TAO_XL + TAO_UNIT * 24;
+                            params.sArc.yB       = TAO_YT + TAO_UNIT * 24;
+                            params.sArc.r1       = 0;
+                            params.sArc.r2       = TAO_UNIT * 12;
+                            params.sArc.octant   = 0xF0;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_ARC, USB_DATA_POINTER_RAM(&params), sizeof(params.sArc), 0 );
+        
+                            params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
+                            params.sCircle.y    = TAO_YT + TAO_UNIT * 18;
+                            params.sCircle.r    = TAO_UNIT * 6;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE_FILLED, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_COLOR, USB_NULL, PRINTER_COLOR_WHITE, 0 );
+        
+                            params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
+                            params.sCircle.y    = TAO_YT + TAO_UNIT * 6;
+                            params.sCircle.r    = TAO_UNIT * 6;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE_FILLED, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
+        
+                            params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
+                            params.sCircle.y    = TAO_YT + TAO_UNIT * 18;
+                            params.sCircle.r    = TAO_UNIT;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE_FILLED, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
+        
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_COLOR, USB_NULL, PRINTER_COLOR_BLACK, 0 );
+        
+                            params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
+                            params.sCircle.y    = TAO_YT + TAO_UNIT * 6;
+                            params.sCircle.r    = TAO_UNIT;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE_FILLED, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
+        
+                            params.sCircle.x    = TAO_XL + TAO_UNIT * 12;
+                            params.sCircle.y    = TAO_YT + TAO_UNIT * 12;
+                            params.sCircle.r    = TAO_UNIT * 12;
+                            USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_GRAPHICS_CIRCLE, USB_DATA_POINTER_RAM(&params), sizeof(params.sCircle), 0 );
+                        }
+        
+                        // Terminate
+                        UART2PrintString( "Demo complete.\r\n" );
+                        USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_JOB_STOP, USB_NULL, 0, 0 );
+                    }
                 }
-
-                // Terminate
-                UART2PrintString( "Demo complete.\r\n" );
-                USBHostPrinterCommandWithReadyWait( &returnCode, printerInfo.deviceAddress, USB_PRINTER_JOB_STOP, USB_NULL, 0, 0 );
             }
         }
 

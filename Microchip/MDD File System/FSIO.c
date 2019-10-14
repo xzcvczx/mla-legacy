@@ -44,6 +44,8 @@
   -----   -----------
   1.2.5   Fixed bug that prevented writes to alternate FAT tables
   1.2.5   Fixed bug that prevented FAT being updated when media is re-inserted
+  1.2.6   Fixed bug that resulted in a bus error when attempts to read a invalid memory region
+  1.2.6   Fixed bug that prevented the Windows Explorer to show the Date Creation field for directories
 ********************************************************************/
 
 #include "Compiler.h"
@@ -130,9 +132,9 @@ FSFILE  gFileTemp;                  // Global variable used for file operations.
 
 
 #ifdef __18CXX
-    #pragma udata dataBuffer
+    #pragma udata dataBuffer = DATA_BUFFER_ADDRESS
     BYTE gDataBuffer[MEDIA_SECTOR_SIZE];    // The global data sector buffer
-    #pragma udata FATBuffer
+    #pragma udata FATBuffer = FAT_BUFFER_ADDRESS
     BYTE gFATBuffer[MEDIA_SECTOR_SIZE];     // The global FAT sector buffer
 #endif
 
@@ -2512,8 +2514,10 @@ BYTE FindEmptyEntries(FILEOBJ fo, WORD *fHandle)
                 dir = Cache_File_Entry( fo, fHandle, FALSE);
 
                 // Read the first char of the file name
-                a = dir->DIR_Name[0];
-
+                if(dir != NULL) // Last entry of the cluster
+                {
+                    a = dir->DIR_Name[0];
+                }
                 // increase number
                 (*fHandle)++;
             }while((a == DIR_DEL || a == DIR_EMPTY) && (dir != (DIRENTRY)NULL) &&  (++amountfound < 1));
@@ -2630,18 +2634,9 @@ BYTE PopulateEntries(FILEOBJ fo, char *name , WORD *fHandle, BYTE mode)
     dir->DIR_CrtTimeTenth = 0xB2;        // millisecond stamp
     dir->DIR_CrtTime =      0x7278;      // time created
     dir->DIR_CrtDate =      0x32B0;      // date created
-    if (mode != DIRECTORY)
-    {
-        dir->DIR_LstAccDate =   0x32B0;      // Last Access date
-        dir->DIR_WrtTime =      0x7279;      // last update time
-        dir->DIR_WrtDate =      0x32B0;      // last update date
-    }
-    else
-    {
-        dir->DIR_LstAccDate =   0x0000;      // Last Access date
-        dir->DIR_WrtTime =      0x0000;      // last update time
-        dir->DIR_WrtDate =      0x0000;      // last update date
-    }
+    dir->DIR_LstAccDate =   0x32B0;      // Last Access date
+    dir->DIR_WrtTime =      0x7279;      // last update time
+    dir->DIR_WrtDate =      0x32B0;      // last update date
 #endif
 
 #ifdef USEREALTIMECLOCK
@@ -2649,18 +2644,9 @@ BYTE PopulateEntries(FILEOBJ fo, char *name , WORD *fHandle, BYTE mode)
     dir->DIR_CrtTimeTenth = gTimeCrtMS;        // millisecond stamp
     dir->DIR_CrtTime =      gTimeCrtTime;      // time created //
     dir->DIR_CrtDate =      gTimeCrtDate;      // date created (1/1/2004)
-    if (mode != DIRECTORY)
-    {
-        dir->DIR_LstAccDate =   gTimeAccDate;      // Last Access date
-        dir->DIR_WrtTime =      gTimeWrtTime;      // last update time
-        dir->DIR_WrtDate =      gTimeWrtDate;      // last update date
-    }
-    else
-    {
-        dir->DIR_LstAccDate =   0x0000;      // Last Access date
-        dir->DIR_WrtTime =      0x0000;      // last update time
-        dir->DIR_WrtDate =      0x0000;      // last update date
-    }
+    dir->DIR_LstAccDate =   gTimeAccDate;      // Last Access date
+    dir->DIR_WrtTime =      gTimeWrtTime;      // last update time
+    dir->DIR_WrtDate =      gTimeWrtDate;      // last update date
 #endif
 
 #ifdef USERDEFINEDCLOCK
@@ -2668,18 +2654,9 @@ BYTE PopulateEntries(FILEOBJ fo, char *name , WORD *fHandle, BYTE mode)
     dir->DIR_CrtTimeTenth = gTimeCrtMS;
     dir->DIR_CrtTime =      gTimeCrtTime;
     dir->DIR_CrtDate =       gTimeCrtDate;
-    if (mode != DIRECTORY)
-    {
-        dir->DIR_LstAccDate =   gTimeAccDate;
-        dir->DIR_WrtTime =       gTimeWrtTime;
-        dir->DIR_WrtDate =      gTimeWrtDate;
-    }
-    else
-    {
-        dir->DIR_LstAccDate =   0x0000;      // Last Access date
-        dir->DIR_WrtTime =      0x0000;      // last update time
-        dir->DIR_WrtDate =      0x0000;      // last update date
-    }
+    dir->DIR_LstAccDate =   gTimeAccDate;
+    dir->DIR_WrtTime =       gTimeWrtTime;
+    dir->DIR_WrtDate =      gTimeWrtDate;
 #endif
 
     fo->size        = dir->DIR_FileSize;

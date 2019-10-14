@@ -102,7 +102,7 @@ PROGRESSBAR *PbCreate
 {
     PROGRESSBAR *pPb = NULL;
 
-    pPb = (PROGRESSBAR *)malloc(sizeof(PROGRESSBAR));
+    pPb = (PROGRESSBAR *)GFX_malloc(sizeof(PROGRESSBAR));
     if(pPb == NULL)
         return (pPb);
 
@@ -265,53 +265,113 @@ WORD PbDraw(PROGRESSBAR *pPb)
             state = BAR_DRAW;
 
         case BAR_DRAW:
-            x1 = ((DWORD) pPb->pos) * (pPb->hdr.right - pPb->hdr.left - (2 * GOL_EMBOSS_SIZE)) / pPb->range;
-            x2 = ((DWORD) pPb->prevPos) * (pPb->hdr.right - pPb->hdr.left - (2 * GOL_EMBOSS_SIZE)) / pPb->range;
-            x1 += (pPb->hdr.left + GOL_EMBOSS_SIZE);
-            x2 += (pPb->hdr.left + GOL_EMBOSS_SIZE);
+        	if(GetState(pPb, PB_VERTICAL))
+            {
+	            x2 = ((DWORD) (pPb->range-pPb->pos)) * (pPb->hdr.bottom - pPb->hdr.top - (2 * GOL_EMBOSS_SIZE)) / pPb->range;
+	            x1 = ((DWORD) (pPb->range-pPb->prevPos)) * (pPb->hdr.bottom - pPb->hdr.top - (2 * GOL_EMBOSS_SIZE)) / pPb->range;
+	            x1 += (pPb->hdr.top + GOL_EMBOSS_SIZE);
+	            x2 += (pPb->hdr.top + GOL_EMBOSS_SIZE);	            
+	        }
+	        else
+	        { 
+	            x1 = ((DWORD) pPb->pos) * (pPb->hdr.right - pPb->hdr.left - (2 * GOL_EMBOSS_SIZE)) / pPb->range;
+	            x2 = ((DWORD) pPb->prevPos) * (pPb->hdr.right - pPb->hdr.left - (2 * GOL_EMBOSS_SIZE)) / pPb->range;
+	            x1 += (pPb->hdr.left + GOL_EMBOSS_SIZE);
+	            x2 += (pPb->hdr.left + GOL_EMBOSS_SIZE);
+         	}   
 
             if(pPb->prevPos > pPb->pos)
             {
-                SetColor(pPb->hdr.pGolScheme->Color0);
-                if(!Bar(x1, pPb->hdr.top + GOL_EMBOSS_SIZE, x2, pPb->hdr.bottom - GOL_EMBOSS_SIZE))
-                    return (0);
+	            SetColor(pPb->hdr.pGolScheme->Color0);
+	        	if(GetState(pPb, PB_VERTICAL))
+    	        {
+    	            if(!Bar(pPb->hdr.left + GOL_EMBOSS_SIZE, x1, pPb->hdr.right - GOL_EMBOSS_SIZE, x2))
+	                    return (0);
+	    	    } 
+                else
+                {
+	                if(!Bar(x1, pPb->hdr.top + GOL_EMBOSS_SIZE, x2, pPb->hdr.bottom - GOL_EMBOSS_SIZE))
+    	                return (0);
+	            } 
             }
             else
             {
                 SetColor(pPb->hdr.pGolScheme->Color1);
-                if(!Bar(x2, pPb->hdr.top + GOL_EMBOSS_SIZE, x1, pPb->hdr.bottom - GOL_EMBOSS_SIZE))
-                    return (0);
+	        	if(GetState(pPb, PB_VERTICAL))
+    	        {
+    	            if(!Bar(pPb->hdr.left + GOL_EMBOSS_SIZE, x2, pPb->hdr.right - GOL_EMBOSS_SIZE, x1))
+	                    return (0);
+	    	    } 
+                else
+                {
+	                if(!Bar(x2, pPb->hdr.top + GOL_EMBOSS_SIZE, x1, pPb->hdr.bottom - GOL_EMBOSS_SIZE))
+    	                return (0);
+    	        }     
             }
 
             state = TEXT_DRAW1;
 
         case TEXT_DRAW1:
-            SetColor(pPb->hdr.pGolScheme->Color1);
-            if
-            (
-                !Bar
-                    (
-                        (pPb->hdr.left + pPb->hdr.right - GetTextWidth(text, pPb->hdr.pGolScheme->pFont)) >> 1,
-                        pPb->hdr.top + GOL_EMBOSS_SIZE,
-                        x1,
-                        pPb->hdr.bottom - GOL_EMBOSS_SIZE
-                    )
-            ) return (0);
+        	if(GetState(pPb, PB_VERTICAL))
+   	        {
+	            SetColor(pPb->hdr.pGolScheme->Color0);
+	            if
+	            (
+	                !Bar
+	                    (
+	                        pPb->hdr.left + GOL_EMBOSS_SIZE,
+	                        (pPb->hdr.top + pPb->hdr.bottom - GetTextHeight(pPb->hdr.pGolScheme->pFont)) >> 1,
+	                        pPb->hdr.right - GOL_EMBOSS_SIZE,
+	                        x2
+	                    )
+	            ) return (0);
+			} 
+			else
+			{
+	            SetColor(pPb->hdr.pGolScheme->Color1);
+	            if
+	            (
+	                !Bar
+	                    (
+	                        (pPb->hdr.left + pPb->hdr.right - GetTextWidth(text, pPb->hdr.pGolScheme->pFont)) >> 1,
+	                        pPb->hdr.top + GOL_EMBOSS_SIZE,
+	                        x1,
+	                        pPb->hdr.bottom - GOL_EMBOSS_SIZE
+	                    )
+	            ) return (0);
+			}	
 
             state = TEXT_DRAW2;
 
         case TEXT_DRAW2:
-            SetColor(pPb->hdr.pGolScheme->Color0);
-            if
-            (
-                !Bar
-                    (
-                        x1,
-                        pPb->hdr.top + GOL_EMBOSS_SIZE,
-                        (pPb->hdr.left + pPb->hdr.right + GetTextWidth(text, pPb->hdr.pGolScheme->pFont)) >> 1,
-                        pPb->hdr.bottom - GOL_EMBOSS_SIZE
-                    )
-            ) return (0);
+        	if(GetState(pPb, PB_VERTICAL))
+   	        {
+	            SetColor(pPb->hdr.pGolScheme->Color1);
+	            if
+	            (
+	                !Bar
+	                    (
+	                        pPb->hdr.left + GOL_EMBOSS_SIZE,
+	                        x2,
+	                        pPb->hdr.right - GOL_EMBOSS_SIZE,
+	                        (pPb->hdr.top + pPb->hdr.bottom + GetTextHeight(pPb->hdr.pGolScheme->pFont)) >> 1
+	                    )
+	            ) return (0);
+			}
+			else 
+			{
+	            SetColor(pPb->hdr.pGolScheme->Color0);
+	            if
+	            (
+	                !Bar
+	                    (
+	                        x1,
+	                        pPb->hdr.top + GOL_EMBOSS_SIZE,
+	                        (pPb->hdr.left + pPb->hdr.right + GetTextWidth(text, pPb->hdr.pGolScheme->pFont)) >> 1,
+	                        pPb->hdr.bottom - GOL_EMBOSS_SIZE
+	                    )
+	            ) return (0);
+			}	 
 
             PbWordToString((DWORD) pPb->pos * 100 / pPb->range, text);
             SetColor(pPb->hdr.pGolScheme->TextColor0);

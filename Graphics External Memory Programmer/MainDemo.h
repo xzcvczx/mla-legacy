@@ -58,4 +58,5 @@
     #include "Beep.h"
     #include "SST39VF040.h" // memory on Graphics PICTail Board 2
     #include "SST25VF016.h" // memory on Graphics PICTail Board 3
+    #include "SST39LF400.h" // parallel flash memory on PIC24FJ256DA210 Development Board
 #endif // _MAINDEMO_H

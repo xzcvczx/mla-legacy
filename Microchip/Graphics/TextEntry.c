@@ -38,6 +38,7 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Harold Serrano		10/24/08	...
  * PAT					07/01/09	Updated for 2D accelerated primitive support.
+ * PAT					04/15/10	Corrected TeSetBuffer() issue on string max size.
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -71,7 +72,7 @@ TEXTENTRY *TeCreate
 )
 {
     TEXTENTRY   *pTe = NULL;                    //Text entry
-    pTe = (TEXTENTRY *)malloc(sizeof(TEXTENTRY));
+    pTe = (TEXTENTRY *)GFX_malloc(sizeof(TEXTENTRY));
     if(pTe == NULL)
         return (NULL);
 
@@ -109,7 +110,7 @@ TEXTENTRY *TeCreate
         //create the key members, return null if not successful
         if(TeCreateKeyMembers(pTe, pText) == 0)
         {
-            free(pTe);
+            GFX_free(pTe);
             return (NULL);
         }
     }
@@ -798,8 +799,7 @@ void TeSetBuffer(TEXTENTRY *pTe, XCHAR *pText, WORD MaxSize)
     *pTemp = 0;
 
     pTe->CurrentLength = count;
-    pTe->outputLenMax = MaxSize +
-    1;
+    pTe->outputLenMax = MaxSize-1;
     pTe->pTeOutput = pText;
 }
 
@@ -837,7 +837,7 @@ BOOL TeIsKeyPressed(TEXTENTRY *pTe, WORD index)
 }
 
 /*********************************************************************
-* Function: void TeSetKeyCommand(TEXTENTRY *pTe,WORD index,WORD command)
+* Function: BOOL TeSetKeyCommand(TEXTENTRY *pTe,WORD index,WORD command)
 *
 * Notes: This function will assign a command to a particular key. 
 *		 Returns TRUE if sucessful and FALSE if not.
@@ -890,6 +890,36 @@ WORD TeGetKeyCommand(TEXTENTRY *pTe, WORD index)
 }
 
 /*********************************************************************
+* Function: BOOL TeSetKeyText(TEXTENTRY *pTe,WORD index, XCHAR *pText)
+*
+* Notes: This function will set the string associated with the key 
+*		 with the new string pText. The key to be modified is determined 
+*        by the index. Returns TRUE if sucessful and FALSE if not.
+*
+********************************************************************/
+BOOL TeSetKeyText(TEXTENTRY *pTe, WORD index, XCHAR *pText)
+{
+    KEYMEMBER   *pTemp;
+
+    pTemp = pTe->pHeadOfList;
+
+    //search the key using the given index
+    while(index != pTemp->index)
+    {
+        // catch all check
+        if(pTemp == NULL)
+            return (FALSE);
+        pTemp = pTemp->pNextKey;
+    }
+
+	// Set the the text 
+    pTemp->pKeyName = pText;
+
+    return (TRUE);
+}
+
+
+/*********************************************************************
 * Function: KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe,XCHAR *pText[])
 *
 * Notes: This function will create the members of the list
@@ -914,10 +944,8 @@ KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[])
     //calculate the total number of keys, and width and height of each key
     NumberOfKeys = pTe->horizontalKeys *
     pTe->verticalKeys;
-    width = (pTe->hdr.right - keyLeft + 1) /
-    pTe->horizontalKeys;
-    height = (pTe->hdr.bottom - keyTop + 1) /
-    pTe->verticalKeys;
+    width = (pTe->hdr.right - keyLeft + 1) / pTe->horizontalKeys;
+    height = (pTe->hdr.bottom - keyTop + 1) / pTe->verticalKeys;
 
     /*create the list and calculate the coordinates of each bottom, and the textwidth/textheight of each font*/
 
@@ -928,7 +956,7 @@ KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[])
         {
 
             //get storage for new entry
-            pKl = (KEYMEMBER *)malloc(sizeof(KEYMEMBER));
+            pKl = (KEYMEMBER *)GFX_malloc(sizeof(KEYMEMBER));
             if(pKl == NULL)
                 return (NULL);
             if(pTe->pHeadOfList == NULL)
@@ -950,14 +978,10 @@ KEYMEMBER *TeCreateKeyMembers(TEXTENTRY *pTe, XCHAR *pText[])
             pKl->update = FALSE;
 
             //calculate the x-y coordinate for each key
-            pKl->left = keyLeft +
-            (rowcount * width);
-            pKl->top = keyTop +
-            (colcount * height);
-            pKl->right = keyLeft +
-            ((rowcount + 1) * width);
-            pKl->bottom = keyTop +
-            ((colcount + 1) * height);
+            pKl->left 	= keyLeft + (rowcount * width);
+            pKl->top 	= keyTop  + (colcount * height);
+            pKl->right 	= keyLeft + ((rowcount + 1) * width);
+            pKl->bottom = keyTop  + ((colcount + 1) * height);
 
             //Add the text to the list and increase the index
             pKl->pKeyName = pText[index++];
@@ -999,7 +1023,7 @@ void TeDelKeyMembers(TEXTENTRY *pTe)
     {
         pItem = pCurItem;
         pCurItem = pCurItem->pNextKey;
-        free(pItem);
+        GFX_free(pItem);
     }
 
     pTe->pHeadOfList = NULL;
@@ -1048,6 +1072,7 @@ void TeAddChar(TEXTENTRY *pTe)
     }
 
     (pTe->CurrentLength)++;
+    // add the string terminator 
     *(pTe->pTeOutput + pTe->CurrentLength) = 0;
 }
 

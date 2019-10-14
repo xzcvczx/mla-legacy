@@ -76,6 +76,6 @@ enum Markers
 
 /* Function prototype */
 /* This function must be called after setting proper values in the global variables of ImageDecoder.c */
-BYTE JPEG_bDecode(IMG_FILE *pfile);
+BYTE JPEG_bDecode(IMG_FILE *pfile, BOOL bFirstTime);
 
 #endif

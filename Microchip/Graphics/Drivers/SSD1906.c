@@ -39,6 +39,7 @@
  * Anton Alkhimenok     01/31/08    combined portrait and landscape, PIC32 support
  * Anton Alkhimenok     08/22/08    driver configuration is simplified,
  *                                  new image rotation modes
+ * PAT					03/26/10    Removed DelayMs() function.
  *****************************************************************************/
 #include "Graphics\Graphics.h"
 
@@ -85,56 +86,6 @@ void    PutImage16BPPExt(SHORT left, SHORT top, void *bitmap, BYTE stretch);
 
 #else
     #include "TCON_Custom.c"
-#endif
-
-/*********************************************************************
-* Function:  void  DelayMs(WORD time)
-*
-* PreCondition: none
-*
-* Input: time - delay in ms
-*
-* Output: none
-*
-* Side Effects: none
-*
-* Overview: delays execution on time specified in ms
-*
-* Note: delay is defined for 16MIPS
-*
-********************************************************************/
-#ifdef __PIC32MX
-
-/* */
-void DelayMs(WORD time)
-{
-    while(time--)
-    {
-        unsigned int    int_status;
-
-        int_status = INTDisableInterrupts();
-        OpenCoreTimer(GetSystemClock() / 2000); // core timer is at 1/2 system clock
-        INTRestoreInterrupts(int_status);
-
-        mCTClearIntFlag();
-
-        while(!mCTGetIntFlag());
-    }
-
-    mCTClearIntFlag();
-}
-
-#else
-    #define DELAY_1MS   16000 / 5               // for 16MIPS
-
-/* */
-void DelayMs(WORD time)
-{
-    unsigned    delay;
-    while(time--)
-        for(delay = 0; delay < DELAY_1MS; delay++);
-}
-
 #endif
 
 /*********************************************************************

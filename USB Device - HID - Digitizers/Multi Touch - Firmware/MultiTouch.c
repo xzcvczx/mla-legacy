@@ -36,7 +36,12 @@
   Rev   Description
   ----  -----------------------------------------
   2.5   Initial release.  Adapted from the mouse in a
-  					 circle demo firmware included in MCHPFSUSB v2.4a
+        circle demo firmware included in MCHPFSUSB v2.4a
+
+  2.7	Minor update.  Improved HID report descriptor in usb_descriptors.c.
+        This version fixes a USB20CV issue with the report descriptor. This
+        version also slightly modifies the interrupt handling on PIC18, for use
+        when clock switching to 31kHz INTRC during USB suspend. 
 ********************************************************************/
 
 /********************************************************************
@@ -86,7 +91,7 @@ with a multi-touch capable digitizer screen.
 
 The firmware will send traffic to emulate both single touch and multi-touch 
 (up to 2 simultaneous contacts) gestures, based on the number of times the
-pushbutton has been pressed.  Under Windows 7 (Vista will be soemwhat different),
+pushbutton has been pressed.  Under Windows 7 (Vista will be somewhat different),
 the following gestures will be sent and should be recognized by Internet Explorer:
 
 1.  Emulate a single touch "back" gesture operation.  
@@ -329,6 +334,7 @@ contact data is sent to the host for each HID report.
 
 /** VARIABLES ******************************************************/
 #pragma udata
+BYTE UIESave;
 WORD led_count;
 WORD DebounceCounter;
 BOOL SwitchDebouncing;
@@ -367,79 +373,30 @@ void YourLowPriorityISRCode();
 #if defined(__18CXX)
 	//On PIC18 devices, addresses 0x00, 0x08, and 0x18 are used for
 	//the reset, high priority interrupt, and low priority interrupt
-	//vectors.  However, the current Microchip USB bootloader 
-	//examples are intended to occupy addresses 0x00-0x7FF or
-	//0x00-0xFFF depending on which bootloader is used.  Therefore,
-	//the bootloader code remaps these vectors to new locations
-	//as indicated below.  This remapping is only necessary if you
-	//wish to program the hex file generated from this project with
-	//the USB bootloader.  If no bootloader is used, edit the
-	//usb_config.h file and comment out the following defines:
-	//#define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER
-	//#define PROGRAMMABLE_WITH_USB_LEGACY_CUSTOM_CLASS_BOOTLOADER
+	//vectors. However, if using the HID Bootloader, the bootloader
+	//firmware will occupy the 0x00-0xFFF region.  Therefore,
+	//the bootloader code remaps these vectors to new locations:
+	//0x1000, 0x1008, 0x1018 respectively.  This remapping is only necessary 
+	//if you wish to program the hex file generated from this project with
+	//the USB bootloader. 
 	
 	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
 		#define REMAPPED_RESET_VECTOR_ADDRESS			0x1000
-		#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x1008
-		#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x1018
-	#elif defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)	
-		#define REMAPPED_RESET_VECTOR_ADDRESS			0x800
-		#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x808
-		#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x818
-	#else	
-		#define REMAPPED_RESET_VECTOR_ADDRESS			0x00
-		#define REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS	0x08
-		#define REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS	0x18
+		extern void _startup (void);        // See c018i.c in your C18 compiler dir
+		#pragma code REMAPPED_RESET_VECTOR = REMAPPED_RESET_VECTOR_ADDRESS
+		void _reset (void)
+		{
+		    _asm goto _startup _endasm
+		}
 	#endif
-	
-	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)||defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)
-	extern void _startup (void);        // See c018i.c in your C18 compiler dir
-	#pragma code REMAPPED_RESET_VECTOR = REMAPPED_RESET_VECTOR_ADDRESS
-	void _reset (void)
-	{
-	    _asm goto _startup _endasm
-	}
-	#endif
-	#pragma code REMAPPED_HIGH_INTERRUPT_VECTOR = REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS
-	void Remapped_High_ISR (void)
-	{
-	     _asm goto YourHighPriorityISRCode _endasm
-	}
-	#pragma code REMAPPED_LOW_INTERRUPT_VECTOR = REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS
-	void Remapped_Low_ISR (void)
-	{
-	     _asm goto YourLowPriorityISRCode _endasm
-	}
-	
-	#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)||defined(PROGRAMMABLE_WITH_USB_MCHPUSB_BOOTLOADER)
-	//Note: If this project is built while one of the bootloaders has
-	//been defined, but then the output hex file is not programmed with
-	//the bootloader, addresses 0x08 and 0x18 would end up programmed with 0xFFFF.
-	//As a result, if an actual interrupt was enabled and occured, the PC would jump
-	//to 0x08 (or 0x18) and would begin executing "0xFFFF" (unprogrammed space).  This
-	//executes as nop instructions, but the PC would eventually reach the REMAPPED_RESET_VECTOR_ADDRESS
-	//(0x1000 or 0x800, depending upon bootloader), and would execute the "goto _startup".  This
-	//would effective reset the application.
-	
-	//To fix this situation, we should always deliberately place a 
-	//"goto REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS" at address 0x08, and a
-	//"goto REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS" at address 0x18.  When the output
-	//hex file of this project is programmed with the bootloader, these sections do not
-	//get bootloaded (as they overlap the bootloader space).  If the output hex file is not
-	//programmed using the bootloader, then the below goto instructions do get programmed,
-	//and the hex file still works like normal.  The below section is only required to fix this
-	//scenario.
-	#pragma code HIGH_INTERRUPT_VECTOR = 0x08
-	void High_ISR (void)
-	{
-	     _asm goto REMAPPED_HIGH_INTERRUPT_VECTOR_ADDRESS _endasm
-	}
-	#pragma code LOW_INTERRUPT_VECTOR = 0x18
-	void Low_ISR (void)
-	{
-	     _asm goto REMAPPED_LOW_INTERRUPT_VECTOR_ADDRESS _endasm
-	}
-	#endif	//end of "#if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)||defined(PROGRAMMABLE_WITH_USB_LEGACY_CUSTOM_CLASS_BOOTLOADER)"
+
+	//--------------------------------------------------------------------
+	//NOTE: See PIC18InterruptVectors.asm for important code and details
+	//relating to the interrupt vectors and interrupt vector remapping.
+	//Special considerations apply if clock switching to the 31kHz INTRC 
+	//during USB suspend.
+	//--------------------------------------------------------------------	
+
 
 	#pragma code
 	
@@ -788,8 +745,8 @@ void ProcessIO(void)
 		}	
 
 		//Emulated thumb finger contact point originating at center of screen
-		XOrigin1 = 2047u;	//From report descriptor, valid X-coordinate values are 0-4095
-		YOrigin1 = 1535u;	//From report descriptor, valid Y-coordinate values are 0-3071
+		XOrigin1 = 2400u;	//From report descriptor, valid X-coordinate values are 0-4800
+		YOrigin1 = 1500u;	//From report descriptor, valid Y-coordinate values are 0-3000
 		
 		//Emulated index finger positioned to upper right of thumb	
 		XOrigin2 = XOrigin1 + 400u;
@@ -922,7 +879,7 @@ void Emulate_Digitizer(void)
 					//This is done by pressing only one finger down, and by moving it right quickly (X plus)
 					SOFDelta = SOFDelta * 8;	//To get faster movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 + SOFDelta;
-					if(XCoordinate1 > (XOrigin1 + 210u))
+					if(XCoordinate1 > (XOrigin1 + 246u))
 						CoordinatesChanging = FALSE;
 					hid_report_in[13] = 1;		//Only the first contact point is valid	(this is a single touch gesture)
 					break;	
@@ -930,7 +887,7 @@ void Emulate_Digitizer(void)
 					//This is done by pressing only one finger down, and by moving it left quickly (X minus)
 					SOFDelta = SOFDelta * 8;	//To get faster movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 210u))
+					if(XCoordinate1 < (XOrigin1 - 246u))
 						CoordinatesChanging = FALSE;
 					hid_report_in[13] = 1;		//Only the first contact point is valid	(this is a single touch gesture)
 					break;	
@@ -938,14 +895,14 @@ void Emulate_Digitizer(void)
 					//Sweep Contact1 (emulated thumb finger) coordinates to move lower left (X minus, Y plus)
 					SOFDelta = SOFDelta >> 1;	//To get slower movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 300u))
+					if(XCoordinate1 < (XOrigin1 - 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate1 = YCoordinate1 + SOFDelta;
-					if(YCoordinate1 > (YOrigin1 + 300u))
+					if(YCoordinate1 > (YOrigin1 + 352u))
 						CoordinatesChanging = FALSE;	
 					//Sweep Contact2 (emulated index finger) coordinates to move upper right (X plus, Y minus)
 					XCoordinate2 = XCoordinate2 + SOFDelta;
-					if(XCoordinate2 > (XOrigin2 + 300u))
+					if(XCoordinate2 > (XOrigin2 + 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate2 = YCoordinate2 - SOFDelta;
 					if(YCoordinate2 < (YOrigin2 - 300u))
@@ -955,14 +912,14 @@ void Emulate_Digitizer(void)
 					//Sweep Contact1 (emulated thumb finger) coordinates to move lower left (X minus, Y plus)
 					SOFDelta = SOFDelta >> 1;	//To get slower movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 300u))
+					if(XCoordinate1 < (XOrigin1 - 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate1 = YCoordinate1 + SOFDelta;
 					if(YCoordinate1 > (YOrigin1 + 300u))
 						CoordinatesChanging = FALSE;	
 					//Sweep Contact2 (emulated index finger) coordinates to move upper right (X plus, Y minus)
 					XCoordinate2 = XCoordinate2 + SOFDelta;
-					if(XCoordinate2 > (XOrigin2 + 300u))
+					if(XCoordinate2 > (XOrigin2 + 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate2 = YCoordinate2 - SOFDelta;
 					if(YCoordinate2 < (YOrigin2 - 300u))
@@ -972,14 +929,14 @@ void Emulate_Digitizer(void)
 					//Sweep Contact1 (emulated thumb finger) coordinates to move lower left (X minus, Y plus)
 					SOFDelta = SOFDelta >> 1;	//To get slower movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 300u))
+					if(XCoordinate1 < (XOrigin1 - 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate1 = YCoordinate1 + SOFDelta;
 					if(YCoordinate1 > (YOrigin1 + 300u))
 						CoordinatesChanging = FALSE;	
 					//Sweep Contact2 (emulated index finger) coordinates to move upper right (X plus, Y minus)
 					XCoordinate2 = XCoordinate2 + SOFDelta;
-					if(XCoordinate2 > (XOrigin2 + 300u))
+					if(XCoordinate2 > (XOrigin2 + 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate2 = YCoordinate2 - SOFDelta;
 					if(YCoordinate2 < (YOrigin2 - 300u))
@@ -988,19 +945,19 @@ void Emulate_Digitizer(void)
 				case 6:	//Emulate a two-finger horizontal scroll right operation
 					//Tap both fingers down simultaneously and move them both to the left (X minus)
 					XCoordinate1 = XCoordinate1 - SOFDelta;
-					if(XCoordinate1 < (XOrigin1 - 500u))
+					if(XCoordinate1 < (XOrigin1 - 586u))
 						CoordinatesChanging = FALSE;
 					XCoordinate2 = XCoordinate2 - SOFDelta;
-					if(XCoordinate2 < (XOrigin2 - 500u))
+					if(XCoordinate2 < (XOrigin2 - 586u))
 						CoordinatesChanging = FALSE;
 					break;
 				case 7:	//Emulate a two-finger horizontal scroll left operation
 					//Tap both fingers down simultaneously and move them both to the right (X plus)
 					XCoordinate1 = XCoordinate1 + SOFDelta;
-					if(XCoordinate1 > (XOrigin1 + 500u))
+					if(XCoordinate1 > (XOrigin1 + 586u))
 						CoordinatesChanging = FALSE;
 					XCoordinate2 = XCoordinate2 + SOFDelta;
-					if(XCoordinate2 > (XOrigin2 + 500u))
+					if(XCoordinate2 > (XOrigin2 + 586u))
 						CoordinatesChanging = FALSE;
 					break;
 				case 8:	//Emulate a single touch scroll down operation.  
@@ -1021,14 +978,14 @@ void Emulate_Digitizer(void)
 					//Sweep Contact1 (emulated thumb) coordinates to move upper right (X plus, Y minus)
 					SOFDelta = SOFDelta >> 1;	//To get slower movement, we scale our time delay.
 					XCoordinate1 = XCoordinate1 + SOFDelta;
-					if(XCoordinate1 > (XOrigin1 + 300u))
+					if(XCoordinate1 > (XOrigin1 + 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate1 = YCoordinate1 - SOFDelta;
 					if(YCoordinate1 < (YOrigin1 - 300u))
 						CoordinatesChanging = FALSE;	
 					//Sweep Contact2 (emulated index finger) coordinates to move lower left (X minus, Y plus)
 					XCoordinate2 = XCoordinate2 - SOFDelta;
-					if(XCoordinate2 < (XOrigin2 - 300u))
+					if(XCoordinate2 < (XOrigin2 - 352u))
 						CoordinatesChanging = FALSE;	
 					YCoordinate2 = YCoordinate2 + SOFDelta;
 					if(YCoordinate2 > (YOrigin2 + 300u))
@@ -1106,14 +1063,14 @@ void CheckForOverUnderFlow(void)
 	
 	//Check for overflow conditions.  If overflow occurred, the coordinate will 
 	//be higher than the allowed values indicated in the report descriptor.
-	if(XCoordinate1 > 4095u)
-		XCoordinate1 = 4095u;
-	if(YCoordinate1 > 3071u)
-		YCoordinate1 = 3071u;				
-	if(XCoordinate2 > 4095u)
-		XCoordinate2 = 4095u;
-	if(YCoordinate2 > 3071u)
-		YCoordinate2 = 3071u;	
+	if(XCoordinate1 > 4800u)
+		XCoordinate1 = 4800u;
+	if(YCoordinate1 > 3000u)
+		YCoordinate1 = 3000u;				
+	if(XCoordinate2 > 4800u)
+		XCoordinate2 = 4800u;
+	if(YCoordinate2 > 3000u)
+		YCoordinate2 = 3000u;	
 }	
 
 
@@ -1267,6 +1224,12 @@ void USBCBSuspend(void)
 
 	//Alternatively, the microcontorller may use clock switching to reduce current consumption.
 	#if defined(__18CXX)
+	//Save state of enabled interrupt enable bits.
+	UIESave = UIE;
+	
+	//Disable all interrupt enable bits (except UIR, ACTVIF, and UIR, URSTIF for receiving the USB resume signalling)
+	UIE = 0x05;		//ACTVIF and URSTIF still enabled.  All others disabled.
+
 	//Configure device for low power consumption
 	mLED_1_Off();
 	mLED_2_Off();
@@ -1385,6 +1348,9 @@ void USBCBWakeFromSuspend(void)
         unsigned int pll_startup_counter = 800;	//Long delay at 31kHz, but ~0.8ms at 48MHz
         while(pll_startup_counter--);			//Clock will switch over while executing this delay loop
     }
+    //Now restore the interrupt enable bits that we previously disabled in the USBCBSuspend() function,
+    //when we first entered USB suspend state.
+    UIE = UIESave;
 	#endif
 
 }

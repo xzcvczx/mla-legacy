@@ -55,4 +55,5 @@
     #include "SST25VF016.h"    
     #include "TouchScreen.h"
     #include "Beep.h"
+    #include "cpld.h"
 #endif

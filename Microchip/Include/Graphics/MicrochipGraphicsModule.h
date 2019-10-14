@@ -584,6 +584,29 @@ void ResetDevice(void);
 ********************************************************************/
 WORD MoveBlock(DWORD srcAddr, DWORD dstAddr, DWORD srcOffset, DWORD dstOffset, 
 			   WORD srcType, WORD dstType, WORD width, WORD height);
+
+/*********************************************************************
+* Function: WORD ScrollLeft(SHORT left, SHORT top,  
+*							SHORT right, SHORT bottom, SHORT delta)
+*
+* PreCondition: none
+*
+* Input: left - left position of the scrolled rectangle
+*        top - top position of the scrolled rectangle
+*        right - right position of the scrolled rectangle
+*        bottom - bottom position of the scrolled rectangle
+*        delta - defines the scroll delta
+*
+* Output: none
+*
+* Side Effects: none
+*
+* Overview: Scrolls the rectangular area defined by left, top, right, bottom by delta pixels.
+*
+* Note: none
+*
+********************************************************************/
+WORD ScrollLeft(SHORT left, SHORT top, SHORT right, SHORT bottom, SHORT delta);
 			   				
 /*********************************************************************
 * Function: void PutPixel(SHORT x, SHORT y)

@@ -40,6 +40,8 @@
  * PAT					06/30/09	Added implementation of detecting continuous
  *									touch screen press on a button on left &
  *									right buttons that control the RED value.
+ * PAT					04/30/10	Fixed problem on polypoints when at the 
+ *									edge of the screen.
  *****************************************************************************/
 #include "MainDemo.h"
 
@@ -1979,9 +1981,15 @@ void UpdateColorPointer(SHORT center)
     PolyPoints[5] = PLTYPOS - 1;
 
     // all the rest will adjust to the center point
-    PolyPoints[0] = PolyPoints[4] - 4;
+    if (PolyPoints[4] - 4 < 0)
+    	PolyPoints[0] = 0;
+    else	
+   		PolyPoints[0] = PolyPoints[4] - 4;
     PolyPoints[1] = PLTYPOS - 8;
-    PolyPoints[2] = PolyPoints[0] + 8;
+    if (PolyPoints[4] + 4 > (GetMaxX()-1))
+    	PolyPoints[2] = (GetMaxX()-1);
+    else
+    	PolyPoints[2] = PolyPoints[4] + 4;
     PolyPoints[3] = PLTYPOS - 8;
     PolyPoints[6] = PolyPoints[0];
     PolyPoints[7] = PolyPoints[1];

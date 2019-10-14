@@ -54,4 +54,5 @@
     #include "SST25VF016.h"
     #include "SST39VF040.h"
     #include "JPEGImage.h"
+    #include <cpld.h>
 #endif // _MAINDEMO_H

@@ -87,7 +87,7 @@
 #define AAI     0x40    // Mask for Status Register BUSY bit
 #define BPL     0x80    // Mask for Status Register BUSY bit
 
-#if defined(__PIC24F__)
+#if defined(__PIC24F__) || defined(__PIC24FK__)
     #define PROPER_SPICON1  (0x001B | 0x0120)   // 1:1 primary prescale, 2:1 secondary prescale, CKE=1, MASTER mode
 #elif defined(__dsPIC33F__) || defined(__PIC24H__)
     #define PROPER_SPICON1  (0x000F | 0x0120)   // 1:1 primary prescale, 5:1 secondary prescale, CKE=1, MASTER mode
@@ -712,15 +712,15 @@ void SPIFlashEraseSector(DWORD dwAddr)
     WaitForDataByte();
     Dummy = SPIFLASH_SSPBUF;
 
-    SPIFLASH_SSPBUF = ((BYTE*)&dwWriteAddr)[2];
+    SPIFLASH_SSPBUF = ((BYTE*)&dwAddr)[2];
     WaitForDataByte();
     Dummy = SPIFLASH_SSPBUF;
 
-    SPIFLASH_SSPBUF = ((BYTE*)&dwWriteAddr)[1];
+    SPIFLASH_SSPBUF = ((BYTE*)&dwAddr)[1];
     WaitForDataByte();
     Dummy = SPIFLASH_SSPBUF;
 
-    SPIFLASH_SSPBUF = ((BYTE*)&dwWriteAddr)[0];
+    SPIFLASH_SSPBUF = ((BYTE*)&dwAddr)[0];
     WaitForDataByte();
     Dummy = SPIFLASH_SSPBUF;
 

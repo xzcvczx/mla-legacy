@@ -156,6 +156,12 @@ typedef void (*IMG_LOOP_CALLBACK)(void);
 
 #endif
 
+#ifndef __IMAGEDECODER_C__
+
+  extern IMG_FILE *IMG_pCurrentFile;
+
+#endif
+
 /* The individual image decoders use these defines instead of directly using those provided in the Display driver file */
 #define IMG_SCREEN_WIDTH         (GetMaxX()+1)
 #define IMG_SCREEN_HEIGHT        (GetMaxY()+1)
@@ -363,6 +369,29 @@ BYTE ImageDecode(IMG_FILE *pImageFile, IMG_FILE_FORMAT eImgFormat,
 ********************************************************************/
 #define ImageFullScreenDecode(pImageFile, eImgFormat, pFileAPIs, pPixelOutput) \
         ImageDecode(pImageFile, eImgFormat, 0, 0, IMG_SCREEN_WIDTH, IMG_SCREEN_HEIGHT, (IMG_ALIGN_CENTER | IMG_DOWN_SCALE), pFileAPIs, pPixelOutput)
+
+/*********************************************************************
+* Function: BYTE ImageDecodeTask(void)
+*
+* Overview: This function completes one small part of the image decode function
+*
+* Input: None
+*
+* Output: Status code - '1' means decoding is completed
+*                     - '0' means decoding is not yet completed, call this function again
+*
+* Example:
+*   <PRE>
+*
+*       IMG_bFullScreenDecode(pImageFile, IMG_JPEG, NULL, NULL);
+*       while(!ImageDecodeTask());
+*
+*	</PRE> 
+*
+* Side Effects: None
+*
+********************************************************************/
+BYTE ImageDecodeTask(void);
 
 /*********************************************************************
 * Function: void ImageAbort(void)

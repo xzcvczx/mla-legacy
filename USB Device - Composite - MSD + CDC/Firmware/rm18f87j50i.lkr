@@ -1,6 +1,8 @@
 // $Id: 18f87j50i.lkr,v 1.2 2006/10/25 17:31:45 nairnj Exp $
-// File: 18f87j50i.lkr
-// Sample ICD2 linker script for the PIC18F87J50 processor
+// File: rm18f87j50i.lkr
+// Modfied linker script for the PIC18F87J50 processor, for use
+// with the PIC18F87J50 PIM and the MSD+CDC composite demo.  Modifications
+// also (optionally) support programming with the HID bootloader.
 
 LIBPATH .
 
@@ -8,8 +10,8 @@ FILES c018i.o
 FILES clib.lib
 FILES p18f87j50.lib
 
-CODEPAGE   NAME=vectors    START=0x0            END=0x29           PROTECTED
-CODEPAGE   NAME=page       START=0x2A           END=0x1FFF7
+CODEPAGE   NAME=bootpage   START=0x0            END=0xFFF           PROTECTED
+CODEPAGE   NAME=page       START=0x1000         END=0x1FFF7
 CODEPAGE   NAME=config     START=0x1FFF8        END=0x1FFFD        PROTECTED
 CODEPAGE   NAME=devid      START=0x3FFFFE       END=0x3FFFFF       PROTECTED
 

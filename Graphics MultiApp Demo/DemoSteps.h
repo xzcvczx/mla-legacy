@@ -70,7 +70,7 @@ typedef struct
     #define THREESECDELAY   (ONESECDELAY * 3)
     #define FOURSECDELAY    (ONESECDELAY * 4)
     #define FIVESECDELAY    (ONESECDELAY * 5)
-    #define THIRTYSECDELAY  (ONESECDELAY * 30)
+    #define TWENTYSECDELAY  (ONESECDELAY * 20)
 
 /*********************************************************************
 * Function:  void UpdateDemoMode(GOL_MSG *pMsg)

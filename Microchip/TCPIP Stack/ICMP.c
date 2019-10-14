@@ -67,9 +67,9 @@ typedef struct
 {
 	BYTE vType;
 	BYTE vCode;
-	WORD_VAL wvChecksum;
-	WORD_VAL wvIdentifier;
-	WORD_VAL wvSequenceNumber;
+	WORD wChecksum;
+	WORD wIdentifier;
+	WORD wSequenceNumber;
 	WORD wData;
 } ICMP_PACKET;
 
@@ -163,7 +163,7 @@ void ICMPProcess(NODE_INFO *remote, WORD len)
 	    while(!IPIsTxReady());
 
 		// Position the write pointer for the next IPPutHeader operation
-		// NOTE: do not put this before the IPIsTxReady() call for ZG compatbility
+		// NOTE: do not put this before the IPIsTxReady() call for WF compatbility
 	    MACSetWritePtr(BASE_TX_ADDR + sizeof(ETHER_HEADER));
         	
 		// Create IP header in TX memory
@@ -375,12 +375,12 @@ LONG ICMPGetReply(void)
 			// Set up the ping packet
 			ICMPPacket.vType = 0x08;	// 0x08: Echo (ping) request
 			ICMPPacket.vCode = 0x00;
-			ICMPPacket.wvChecksum.Val = 0x0000;
-			ICMPPacket.wvIdentifier.Val = 0xEFBE;
+			ICMPPacket.wChecksum = 0x0000;
+			ICMPPacket.wIdentifier = 0xEFBE;
 			wICMPSequenceNumber++; 
-			ICMPPacket.wvSequenceNumber.Val = wICMPSequenceNumber;
+			ICMPPacket.wSequenceNumber = wICMPSequenceNumber;
 			ICMPPacket.wData = 0x2860;
-			ICMPPacket.wvChecksum.Val = CalcIPChecksum((BYTE*)&ICMPPacket, sizeof(ICMPPacket));
+			ICMPPacket.wChecksum = CalcIPChecksum((BYTE*)&ICMPPacket, sizeof(ICMPPacket));
 		
 			// Record the current time.  This will be used as a basis for 
 			// finding the echo response time, which exludes the ARP and DNS 

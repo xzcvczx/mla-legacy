@@ -139,7 +139,7 @@ void NextAnimation(DWORD tick)
     value = MtrGetVal(pMeter);
     if(value != 0)
     {
-        if((tick - prevTick) > ((450) - (3 * MtrGetVal(pMeter))))
+        if((tick - prevTick) > ((500) - (3 * MtrGetVal(pMeter))))
         {
             switch(animate)
             {

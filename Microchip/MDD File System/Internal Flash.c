@@ -39,6 +39,7 @@
   Rev    Description
   -----  -----------
   1.2.5  Fixed bug where sector address was calculated incorrectly
+  1.2.6  No change
 ********************************************************************/
 //DOM-IGNORE-END
 

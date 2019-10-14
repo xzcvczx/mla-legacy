@@ -32,6 +32,7 @@
  Change History:
   Rev   Description
   2.6   Initial release
+  2.7   No Change
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC18F46J50_PIM_H
@@ -130,6 +131,7 @@
     							 ANCON0bits.PCFG0 = 1;			\
     							 ADCON0=0x01;					\
     							 ADCON1=0x9E;}		// POT on HPC Explorer
+
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0

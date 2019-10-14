@@ -48,11 +48,13 @@ Pradeep Budagutta    06-Jun-2008    First release
 /* Comment out the image formats which are not required */
     #define IMG_SUPPORT_BMP
     #define IMG_SUPPORT_JPEG
-
 //#define IMG_SUPPORT_GIF
 
 /* Comment out if output has to be given through a callback function */
 
+/* If defined, the IMG_vDecode() will decode the image in steps. After calling the IMG_vDecode(), user must keep calling ImageDecodeTask() till the image is completely decoded */
+//    #define IMG_USE_NON_BLOCKING_DECODING
+    
 /* If defined, the code is optimized to use only the graphics driver, only 16-bit-565-color-format is supported */
     #define IMG_USE_ONLY_565_GRAPHICS_DRIVER_FOR_OUTPUT
 

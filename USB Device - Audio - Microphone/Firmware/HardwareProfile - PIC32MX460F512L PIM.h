@@ -36,7 +36,6 @@
                      coding style
   2.3   09/15/2008   Broke out each hardware platform into its own
                      "HardwareProfile - xxx.h" file
-  2.6   11/12/2009
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC32MX460F512L_PIM_H
@@ -60,7 +59,7 @@
 
     //#define USE_USB_BUS_SENSE_IO
     #define tris_usb_bus_sense  TRISBbits.TRISB5    // Input
-    #define USB_BUS_SENSE       1
+    #define USB_BUS_SENSE       1 
 
     /*******************************************************************/
     /*******************************************************************/
@@ -82,12 +81,12 @@
 
     /** LED ************************************************************/
     #define mInitAllLEDs()      LATA &= 0xFFC3; TRISA &= 0xFFC3;
-
+    
     #define mLED_1              LATAbits.LATA2
     #define mLED_2              LATAbits.LATA3
     #define mLED_3              LATAbits.LATA4
     #define mLED_4              LATAbits.LATA5
-
+    
     #define mGetLED_1()         mLED_1
     #define mGetLED_2()         mLED_2
     #define mGetLED_3()         mLED_3
@@ -97,17 +96,17 @@
     #define mLED_2_On()         mLED_2 = 1;
     #define mLED_3_On()         mLED_3 = 1;
     #define mLED_4_On()         mLED_4 = 1;
-
+    
     #define mLED_1_Off()        mLED_1 = 0;
     #define mLED_2_Off()        mLED_2 = 0;
     #define mLED_3_Off()        mLED_3 = 0;
     #define mLED_4_Off()        mLED_4 = 0;
-
+    
     #define mLED_1_Toggle()     mLED_1 = !mLED_1;
     #define mLED_2_Toggle()     mLED_2 = !mLED_2;
     #define mLED_3_Toggle()     mLED_3 = !mLED_3;
     #define mLED_4_Toggle()     mLED_4 = !mLED_4;
-
+    
     /** SWITCH *********************************************************/
     #define mInitSwitch2()      TRISDbits.TRISD6=1;
     #define mInitSwitch3()      TRISDbits.TRISD7=1;

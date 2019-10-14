@@ -88,8 +88,8 @@
     #elif (DISPLAY_CONTROLLER == ILI9320)
         #include "Graphics\drvTFT001.h"
 
-    #elif (DISPLAY_CONTROLLER == HX8347A)
-        #include "Graphics\HX8347A.h"
+    #elif (DISPLAY_CONTROLLER == HX8347A) || (DISPLAY_CONTROLLER == HX8347D)
+        #include "Graphics\HX8347.h"
 
     #elif (DISPLAY_CONTROLLER == SSD1289)
         #include "Graphics\drvTFT002.h"

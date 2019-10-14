@@ -49,12 +49,6 @@ rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\p
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\obj" /s /q
 rmdir "..\Microchip\TCPIP Stack\Utilities\Source\Microchip Ethernet Discoverer\bin\Debug" /s /q
 
-@echo off
-FOR /R "..\" %%s IN (RIStreaming.bin, RIUSBLogFile.txt, untitled.mcw) DO (
-IF EXIST "%%s" del "%%s" /f /q
-)
-@echo on
-
 
 IF %1==deletesvn (
 FOR /R "..\." %%s IN (.) DO rmdir "%%s\.svn" /s /q

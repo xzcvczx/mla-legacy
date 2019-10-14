@@ -79,22 +79,20 @@
     #define MTR_HALF_TYPE       1
     #define MTR_QUARTER_TYPE    2
 
-/* ************************************************************************** */
-
-// Overview: This is a compile time setting to select the type if meter shape.
-// There are three types:
-//	    - MTR_WHOLE_TYPE   - Meter drawn with 6 octants used.
-//		- MTR_HALF_TYPE    - Meter drawn with semi circle shape.
-//		- MTR_QUARTER_TYPE - Meter drawn with quarter circle shape.
-// Set only one value at a time. This is done to save code space.
-// User can define the colors of the arcs for each type.
-// MTR_WHOLE_TYPE will use all the arc colors (arcColor1 - arcColor6)
-// MTR_HALF_TYPE will use arc colors (arcColor5, arcColor4, arcColor3, arcColor2)
-// MTR_QUARTER_TYPE will use arc colors (arcColor3, arcColor2)
-// Set the meter type in Meter.h file and arc colors using
-// MtrSetScaleColors(pMtr, arc1, arc2, arc3, arc4, arc5, arc6) macro.
-
-/* ************************************************************************** */
+/*************************************************************************** 
+* Overview: This is a compile time setting to select the type if meter shape.
+*  There are three types:
+* 	    - MTR_WHOLE_TYPE   - Meter drawn with 6 octants used.
+* 		- MTR_HALF_TYPE    - Meter drawn with semi circle shape.
+* 		- MTR_QUARTER_TYPE - Meter drawn with quarter circle shape.
+*  Set only one value at a time. This is done to save code space.
+*  User can define the colors of the arcs for each type.
+*  MTR_WHOLE_TYPE will use all the arc colors (arcColor1 - arcColor6)
+*  MTR_HALF_TYPE will use arc colors (arcColor5, arcColor4, arcColor3, arcColor2)
+*  MTR_QUARTER_TYPE will use arc colors (arcColor3, arcColor2)
+*  Set the meter type in Meter.h file and arc colors using
+*  MtrSetScaleColors(pMtr, arc1, arc2, arc3, arc4, arc5, arc6) macro.
+***************************************************************************/
     #define METER_TYPE  MTR_WHOLE_TYPE
 
 //#define METER_TYPE					MTR_HALF_TYPE				// Meter drawn with semi circle shape.

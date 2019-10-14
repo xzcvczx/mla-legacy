@@ -35,9 +35,9 @@
  Change History:
   Rev   Description
   ----  -----------------------------------------
-  1.0   Initial release
-  2.1   Updated for simplicity and to use common
-                     coding style
+  2.6a  Added support for the PIC24FJ256GB210
+
+  2.7   No change
 ********************************************************************/
 
 /** INCLUDES *******************************************************/

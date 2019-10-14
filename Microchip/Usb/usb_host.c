@@ -52,6 +52,18 @@ Change History:
   Rev         Description
   ----------  ----------------------------------------------------------
   2.6 - 2.6a  No change
+  
+  2.7         Fixed an error where the USBHostClearEndpointErrors() function
+              didn't properly return USB_SUCCESS if the errors were successfully
+              cleared.
+              http://www.microchip.com/forums/fb.aspx?m=490651
+
+              Fixed an error where the DTS bits for the attached device could
+              be accidentally reset on a class specific request with the same
+              bRequest and wValue as a HALT_ENDPOINT request.
+
+              Fixed an error where device may never be able to enumerate if it
+              is already attached when the host stack initializes.
 
 *******************************************************************************/
 
@@ -62,7 +74,7 @@ Change History:
 #include "usb_host_local.h"
 #include "usb_hal_local.h"
 #include "HardwareProfile.h"
-#include "USB\usb_hal.h"
+//#include "USB\usb_hal.h"
 
 #if defined( USB_ENABLE_TRANSFER_EVENT )
     #include "struct_queue.h"
@@ -220,6 +232,8 @@ BYTE USBHostClearEndpointErrors( BYTE deviceAddress, BYTE endpoint )
     {
         ep->status.bfStalled    = 0;
         ep->status.bfError      = 0;
+
+        return USB_SUCCESS;
     }
     return USB_ENDPOINT_NOT_FOUND;
 }
@@ -681,7 +695,16 @@ BYTE USBHostIssueDeviceRequest( BYTE deviceAddress, BYTE bmRequestType, BYTE bRe
     // If the user is doing a CLEAR FEATURE(ENDPOINT_HALT), we must reset DATA0 for that endpoint.
     if ((bRequest == USB_REQUEST_CLEAR_FEATURE) && (wValue == USB_FEATURE_ENDPOINT_HALT))
     {
-        _USB_ResetDATA0( (BYTE)wIndex );
+        switch(bmRequestType)
+        {
+            case 0x00:
+            case 0x01:
+            case 0x02:
+                _USB_ResetDATA0( (BYTE)wIndex );
+                break;
+            default:
+                break;
+        }
     }
 
     // Set up the control packet.
@@ -1288,7 +1311,7 @@ void USBHostTasks( void )
             interrupt_mask = U1IE;
             U1IE = 0;
 
-            StructQueueRemove(&usbEventQueue, USB_EVENT_QUEUE_DEPTH);
+            item = StructQueueRemove(&usbEventQueue, USB_EVENT_QUEUE_DEPTH);
 
             // Re-enable USB interrupts
             U1IE = interrupt_mask;
@@ -1427,12 +1450,12 @@ void USBHostTasks( void )
                             #error Cannot enable USB interrupt.
                         #endif
 
-                        // Enable the ATTACH interrupt.
-                        U1IEbits.ATTACHIE = 1;
-
                         // Set the next substate.  We do this before we enable
                         // interrupts in case the interrupt changes states.
                         _USB_SetNextSubState();
+
+                        // Enable the ATTACH interrupt.
+                        U1IEbits.ATTACHIE = 1;
                     }
                     else
                     {
@@ -5020,10 +5043,8 @@ void _USB_SetBDT( BYTE token )
     // Load up the BDT address.
     if (token == USB_TOKEN_SETUP)
     {
-        #if defined(__C30__)
-            pBDT->ADR  = pCurrentEndpoint->pUserDataSETUP;
-        #elif defined(__PIC32MX__)
-            pBDT->ADR  = (BYTE *)KVA_TO_PA((DWORD)pCurrentEndpoint->pUserDataSETUP);
+        #if defined(__C30__) || defined(__PIC32MX__)
+            pBDT->ADR  = ConvertToPhysicalAddress(pCurrentEndpoint->pUserDataSETUP);
         #else
             #error Cannot set BDT address.
         #endif
@@ -5033,20 +5054,20 @@ void _USB_SetBDT( BYTE token )
         #if defined(__C30__)
             if (pCurrentEndpoint->bmAttributes.bfTransferType == USB_TRANSFER_TYPE_ISOCHRONOUS)
             {
-                pBDT->ADR  = ((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer;
+                pBDT->ADR  = ConvertToPhysicalAddress(((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer);
             }
             else
             {
-                pBDT->ADR  = (BYTE *)((WORD)pCurrentEndpoint->pUserData + (WORD)pCurrentEndpoint->dataCount);
+                pBDT->ADR  = ConvertToPhysicalAddress((WORD)pCurrentEndpoint->pUserData + (WORD)pCurrentEndpoint->dataCount);
             }
         #elif defined(__PIC32MX__)
             if (pCurrentEndpoint->bmAttributes.bfTransferType == USB_TRANSFER_TYPE_ISOCHRONOUS)
             {
-                pBDT->ADR  = (BYTE *)KVA_TO_PA(((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer);
+                pBDT->ADR  = ConvertToPhysicalAddress(((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->buffers[((ISOCHRONOUS_DATA *)(pCurrentEndpoint->pUserData))->currentBufferUSB].pBuffer);
             }
             else
             {
-                pBDT->ADR  = (BYTE *)KVA_TO_PA((DWORD)pCurrentEndpoint->pUserData + (DWORD)pCurrentEndpoint->dataCount);
+                pBDT->ADR  = ConvertToPhysicalAddress((DWORD)pCurrentEndpoint->pUserData + (DWORD)pCurrentEndpoint->dataCount);
             }
         #else
             #error Cannot set BDT address.

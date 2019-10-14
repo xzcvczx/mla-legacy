@@ -59,6 +59,7 @@ required.
 #include "boot_io.h"
 #include "boot_load.h"
 #include "boot_media.h"
+#include "boot_hal.h"
 
 
 //*****************************************************************************

@@ -55,6 +55,7 @@ Change History:
 
 #include <stdlib.h>
 #include <string.h>
+#include "Compiler.h"
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "FSconfig.h"

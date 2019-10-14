@@ -45,7 +45,7 @@ _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
@@ -85,6 +85,7 @@ extern const BITMAP_FLASH   flower1bit;
 
 #define WAIT_UNTIL_FINISH(x)    while(!x)
 #define MIN(x,y)                ((x > y)? y: x)
+#define DEMODELAY				1000
     /* */
     int main(void)
 {
@@ -125,9 +126,14 @@ extern const BITMAP_FLASH   flower1bit;
     #elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
     SYSTEMConfigPerformance(GetSystemClock());
+    #ifdef MULTI_MEDIA_BOARD_DM00123
+    CPLDInitialize();
+    CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+    CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+    #endif
     #endif
 
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #if defined (PIC24FJ256DA210_DEV_BOARD)
     
     // _ANSG8 = 0; /* S1 */
     // _ANSE9 = 0; /* S2 */
@@ -152,43 +158,42 @@ extern const BITMAP_FLASH   flower1bit;
 
     while(1)
     {
-	    #if defined(__PIC24FJ256DA210__) 
-	    	_DPTEST = 2;
-	        DelayMs(4000);
-	    	_DPTEST = 3;
-	        DelayMs(4000);
-	    	_DPTEST = 0;
-	    
-	    #else
-	        SetColor(BRIGHTRED);
-	        WAIT_UNTIL_FINISH(Line(0,0,GetMaxX(),0));
-	        SetColor(BRIGHTYELLOW);
-	        WAIT_UNTIL_FINISH(Line(GetMaxX(),0,GetMaxX(),GetMaxY()));
-	        SetColor(BRIGHTGREEN);
-	        WAIT_UNTIL_FINISH(Line(0,GetMaxY(),GetMaxX(),GetMaxY()));
-	        SetColor(BRIGHTBLUE);
-	        WAIT_UNTIL_FINISH(Line(0,0,0,GetMaxY()));
-	        DelayMs(4000);
-	    #endif    
+	    // draw border lines to show the limits of the 
+	    // left, right, top and bottom pixels of the screen
+	    // draw the top most horizontal line
+        SetColor(BRIGHTRED);
+        WAIT_UNTIL_FINISH(Line(0,0,GetMaxX(),0));
+        // draw the right most vertical line
+        SetColor(BRIGHTYELLOW);
+        WAIT_UNTIL_FINISH(Line(GetMaxX(),0,GetMaxX(),GetMaxY()));
+	    // draw the bottom most horizontal line
+        SetColor(BRIGHTGREEN);
+        WAIT_UNTIL_FINISH(Line(0,GetMaxY(),GetMaxX(),GetMaxY()));
+        // draw the left most vertical line
+        SetColor(BRIGHTBLUE);
+        WAIT_UNTIL_FINISH(Line(0,0,0,GetMaxY()));
 
+        DelayMs(DEMODELAY);
+
+		// draw WHITE lines intersecting in the middle of the screen
         SetColor(WHITE);
-
         for(counter = 0; counter < GetMaxX(); counter += 20)
         {
             WAIT_UNTIL_FINISH(Line(counter, 0, GetMaxX() - 1 - counter, GetMaxY() - 1));
         }
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
 
+		// draw concentric RED circles in the middle of the screen
         SetColor(BRIGHTRED);
-
         for(counter = 10; counter < MIN(GetMaxX(), GetMaxY()) >> 1; counter += 10)
         {
             WAIT_UNTIL_FINISH(Circle(GetMaxX() >> 1, GetMaxY() >> 1, counter));
         }
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
 
+		// draw concentric filled circles in the middle of the screen
         SetColor(BRIGHTBLUE);
         WAIT_UNTIL_FINISH(FillCircle(GetMaxX() >> 1, GetMaxY() >> 1, 60));
         SetColor(BRIGHTGREEN);
@@ -196,11 +201,12 @@ extern const BITMAP_FLASH   flower1bit;
         SetColor(BRIGHTRED);
         WAIT_UNTIL_FINISH(FillCircle(GetMaxX() >> 1, GetMaxY() >> 1, 20));
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
 
         SetColor(BLACK);
         ClearDevice();
 
+		// draw concentric beveled objects in the middle of the screen
         SetColor(BRIGHTBLUE);
         WAIT_UNTIL_FINISH(Bevel((GetMaxX() >> 1) - 60, (GetMaxY() >> 1) - 60, (GetMaxX() >> 1) + 60, (GetMaxY() >> 1) + 60, 30));
         SetColor(BRIGHTGREEN);
@@ -208,11 +214,12 @@ extern const BITMAP_FLASH   flower1bit;
         SetColor(BRIGHTRED);
         WAIT_UNTIL_FINISH(Bevel((GetMaxX() >> 1) - 20, (GetMaxY() >> 1) - 20, (GetMaxX() >> 1) + 20, (GetMaxY() >> 1) + 20, 30));
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
 
         SetColor(BLACK);
         ClearDevice();
 
+		// draw concentric thick beveled objects in the middle of the screen
         SetColor(BRIGHTBLUE);
         WAIT_UNTIL_FINISH
         (
@@ -256,8 +263,9 @@ extern const BITMAP_FLASH   flower1bit;
                 )
         );
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
 
+		// draw concentric filled beveled objects in the middle of the screen
         SetColor(BRIGHTBLUE);
         WAIT_UNTIL_FINISH
         (
@@ -295,11 +303,12 @@ extern const BITMAP_FLASH   flower1bit;
                 )
         );
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
 
         SetColor(BLACK);
         ClearDevice();
 
+		// draw concentric thick beveled objects in the middle of the screen
         SetColor(BRIGHTBLUE);
         WAIT_UNTIL_FINISH(Arc((GetMaxX() >> 1), (GetMaxY() >> 1) - 50, (GetMaxX() >> 1), (GetMaxY() >> 1) + 50, 50, 60, 0x11));
         SetColor(BRIGHTGREEN);
@@ -327,13 +336,14 @@ extern const BITMAP_FLASH   flower1bit;
         SetColor(BRIGHTYELLOW);
         WAIT_UNTIL_FINISH(Arc((GetMaxX() >> 1), (GetMaxY() >> 1), (GetMaxX() >> 1), (GetMaxY() >> 1), 20, 30, 0x88));
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
 
         SetColor(BLACK);
         ClearDevice();
 
-        SetColor(BRIGHTBLUE);
 
+		// draw rectangles in the middle of the screen
+        SetColor(BRIGHTBLUE);
         for(counter = 0; counter < MIN(GetMaxX(), GetMaxY()) >> 1; counter += 20)
         {
             WAIT_UNTIL_FINISH
@@ -348,7 +358,7 @@ extern const BITMAP_FLASH   flower1bit;
             );
         }
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
 
         SetColor(BRIGHTBLUE);
         WAIT_UNTIL_FINISH(Bar(GetMaxX() / 2 - 80, GetMaxY() / 2 - 80, GetMaxX() / 2 + 80, GetMaxY() / 2 + 80));
@@ -357,17 +367,19 @@ extern const BITMAP_FLASH   flower1bit;
         SetColor(BRIGHTRED);
         WAIT_UNTIL_FINISH(Bar(GetMaxX() / 2 - 40, GetMaxY() / 2 - 40, GetMaxX() / 2 + 40, GetMaxY() / 2 + 40));
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
         SetColor(BLACK);
         ClearDevice();
 
+		// draw ploygon shape in the middle of the screen
         SetColor(WHITE);
         WAIT_UNTIL_FINISH(DrawPoly(5, (SHORT *)polyPoints));
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
         SetColor(BLACK);
         ClearDevice();
 
+		// draw fonts in the screen
         SetFont((void *) &Font25);
         SetColor(BRIGHTGREEN);
         width = GetTextWidth("Microchip Technology Inc.", (void *) &Font25);
@@ -375,7 +387,7 @@ extern const BITMAP_FLASH   flower1bit;
 
         OutTextXY((GetMaxX() - width) >> 1, (GetMaxY() - height) >> 1, "Microchip Technology Inc.");
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
         SetColor(BLACK);
         ClearDevice();
 
@@ -386,35 +398,36 @@ extern const BITMAP_FLASH   flower1bit;
 
         OutTextXY((GetMaxX() - width) >> 1, (GetMaxY() - height) >> 1, "Microchip Tech.");
 
-        DelayMs(4000);
+        DelayMs(DEMODELAY);
         SetColor(BLACK);
         ClearDevice();
 
+		// draw pictures in the screen with different bits per pixel
         WAIT_UNTIL_FINISH(PutImage(0, 0, (void *) &flower1bit, 2));
         SetColor(WHITE);
         OutTextXY(200, 0, "1BPP");
-        DelayMs(8000);
+        DelayMs(DEMODELAY);
         SetColor(BLACK);
         ClearDevice();
 
         WAIT_UNTIL_FINISH(PutImage(0, 0, (void *) &flower4bit, 2));
         SetColor(WHITE);
         OutTextXY(200, 0, "4BPP");
-        DelayMs(8000);
+        DelayMs(DEMODELAY);
         SetColor(BLACK);
         ClearDevice();
 
         WAIT_UNTIL_FINISH(PutImage(0, 0, (void *) &flower8bit, 2));
         SetColor(WHITE);
         OutTextXY(200, 0, "8BPP");
-        DelayMs(8000);
+        DelayMs(DEMODELAY);
         SetColor(BLACK);
         ClearDevice();
 
         WAIT_UNTIL_FINISH(PutImage(0, 0, (void *) &flower16bit, 2));
         SetColor(WHITE);
         OutTextXY(200, 0, "16BPP");
-        DelayMs(8000);
+        DelayMs(DEMODELAY);
         SetColor(BLACK);
         ClearDevice();
 
@@ -425,7 +438,7 @@ extern const BITMAP_FLASH   flower1bit;
         WAIT_UNTIL_FINISH(PutImage((GetMaxX() + 1) / 2          , (GetMaxY() + 1) / 2 - height  , (void *) &flower4bit,  1));
         WAIT_UNTIL_FINISH(PutImage((GetMaxX() + 1) / 2 - width  , (GetMaxY() + 1) / 2           , (void *) &flower8bit,  1));
         WAIT_UNTIL_FINISH(PutImage((GetMaxX() + 1) / 2          , (GetMaxY() + 1) / 2           , (void *) &flower16bit, 1));
-        DelayMs(16000);
+        DelayMs(DEMODELAY*2);
         SetColor(BLACK);
         ClearDevice();
     }

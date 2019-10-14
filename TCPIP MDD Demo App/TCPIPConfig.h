@@ -14,7 +14,7 @@
  *
  * Software License Agreement
  *
- * Copyright (C) 2002-2009 Microchip Technology Inc.  All rights
+ * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
  *
  * Microchip licenses to you the right to use, modify, copy, and
@@ -78,6 +78,7 @@
 #define STACK_USE_TELNET_SERVER			// Telnet server
 #define STACK_USE_ANNOUNCE				// Microchip Embedded Ethernet Device Discoverer server/client
 //#define STACK_USE_DNS					// Domain Name Service Client for resolving hostname strings to IP addresses
+//#define STACK_USE_DNS_SERVER			// Domain Name Service Server for redirection to the local device
 //#define STACK_USE_NBNS					// NetBIOS Name Service Server for repsonding to NBNS hostname broadcast queries
 //#define STACK_USE_REBOOT_SERVER			// Module for resetting this PIC remotely.  Primarily useful for a Bootloader.
 //#define STACK_USE_SNTP_CLIENT			// Simple Network Time Protocol for obtaining current date/time from Internet
@@ -95,11 +96,10 @@
 #define STACK_USE_MDD
 
 
-#define MDD_ROOT_DIR_PATH "\\"
 
-/*If the web pages are required to be stored in diferent path, define as below.*/
-//#define MDD_ROOT_DIR_PATH "\\HOME1\\HOME2\\"
-
+// If the web pages are required to be stored in diferent path, define as below.
+#define MDD_ROOT_DIR_PATH	"\\WWW\\"
+//#define MDD_ROOT_DIR_PATH	"\\"		// root directory
 
 #define MAX_MPFS_HANDLES				(7ul)
 
@@ -116,7 +116,7 @@
 
 #define MY_DEFAULT_MAC_BYTE1            (0x00)	// Use the default of
 #define MY_DEFAULT_MAC_BYTE2            (0x04)	// 00-04-A3-00-00-00 if using
-#define MY_DEFAULT_MAC_BYTE3            (0xA3)	// an ENCX24J600 or ZeroG ZG2100
+#define MY_DEFAULT_MAC_BYTE3            (0xA3)	// an ENCX24J600 or MRF24WB0M
 #define MY_DEFAULT_MAC_BYTE4            (0x00)	// and wish to use the internal
 #define MY_DEFAULT_MAC_BYTE5            (0x00)	// factory programmed MAC
 #define MY_DEFAULT_MAC_BYTE6            (0x00)	// address instead.
@@ -146,6 +146,29 @@
 #define MY_DEFAULT_SECONDARY_DNS_BYTE3	(0ul)
 #define MY_DEFAULT_SECONDARY_DNS_BYTE4	(0ul)
 
+// =======================================================================
+//   PIC32MX7XX/6XX MAC Layer Options
+//   If not using a PIC32MX7XX/6XX device, ignore this section.
+// =======================================================================
+#define	ETH_CFG_LINK			0		// set to 1 if you need to config the link to specific following parameters
+										// otherwise the default connection will be attempted
+										// depending on the selected PHY
+	#define	ETH_CFG_AUTO		1		// use auto negotiation
+	#define	ETH_CFG_10			1		// use/advertise 10 Mbps capability
+	#define	ETH_CFG_100			1		// use/advertise 100 Mbps capability
+	#define	ETH_CFG_HDUPLEX		1		// use/advertise half duplex capability
+	#define	ETH_CFG_FDUPLEX		1		// use/advertise full duplex capability
+	#define	ETH_CFG_AUTO_MDIX	1		// use/advertise auto MDIX capability
+	#define	ETH_CFG_SWAP_MDIX	1		// use swapped MDIX. else normal MDIX
+
+#define EMAC_TX_DESCRIPTORS		2		// number of the TX descriptors to be created
+#define EMAC_RX_DESCRIPTORS		8		// number of the RX descriptors and RX buffers to be created
+
+#define	EMAC_RX_BUFF_SIZE		1536	// size of a RX buffer. should be multiple of 16
+										// this is the size of all receive buffers processed by the ETHC
+										// The size should be enough to accomodate any network received packet
+										// If the packets are larger, they will have to take multiple RX buffers
+										// The current implementation does not handle this situation right now and the packet is discarded.
 
 
 // =======================================================================
@@ -286,6 +309,18 @@
 	#define HTTP_SSL_ONLY_CHAR		(0xFF)	// Files beginning with this character will only be served over HTTPS
 											// Set to 0x00 to require for all files
 											// Set to 0xff to require for no files
+
+    // Define the listening port for the HTTP server
+  	#define HTTP_PORT               (80u)
+	
+    // Define the listening port for the HTTPS server (if STACK_USE_SSL_SERVER is enabled)
+	#define HTTPS_PORT				(443u)
+	
+    // Define the maximum data length for reading cookie and GET/POST arguments (bytes)
+	#define HTTP_MAX_DATA_LEN		(100u)
+	
+    // Define the minimum number of bytes free in the TX FIFO before executing callbacks
+	#define HTTP_MIN_CALLBACK_FREE	(16u)
 
 	#define STACK_USE_HTTP_APP_RECONFIG		// Use the AppConfig web page in the Demo App (~2.5kb ROM, ~0b RAM)
 	#define STACK_USE_HTTP_MD5_DEMO			// Use the MD5 Demo web page (~5kb ROM, ~160b RAM)

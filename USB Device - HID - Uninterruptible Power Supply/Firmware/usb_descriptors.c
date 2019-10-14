@@ -141,6 +141,16 @@ cfg01, cfg02,.., to the look-up table USB_CD_Ptr. USB_CD_Ptr[0]
 is a dummy place holder since configuration 0 is the un-configured
 state according to the definition in the USB specification.
 
+*********************************************************************
+
+ Change History:
+  Rev   Description
+  ----  -----------------------------------------
+  2.7   Fixed an error in the descriptors that specified that there
+        was only one endpoint where there are actually two.  Minor
+        changes to report descriptor and comments to make them more
+        consistent.
+
 ********************************************************************/
  
 /*********************************************************************
@@ -199,14 +209,14 @@ ROM BYTE configDescriptor1[]={
     1,                      // Index value of this configuration
     0,                      // Configuration string index
     _DEFAULT | _SELF,// Attributes, see usb_device.h
-    100,                     // Max power consumption (2X mA)
+    50,                     // Max power consumption (2X mA)
 
     /* Interface Descriptor */
     0x09,//sizeof(USB_INTF_DSC),   // Size of this descriptor in bytes
     USB_DESCRIPTOR_INTERFACE,               // INTERFACE descriptor type
     0,                      // Interface Number
     0,                      // Alternate Setting Number
-    1,                      // Number of endpoints in this intf
+    2,                      // Number of endpoints in this intf
     HID_INTF,               // Class code
     0x00,                   // Subclass code
     0x00,					// Protocol code (None)
@@ -215,7 +225,7 @@ ROM BYTE configDescriptor1[]={
     /* HID Class-Specific Descriptor */
     0x09,//sizeof(USB_HID_DSC)+3,    // Size of this descriptor in bytes RRoj hack
     DSC_HID,                // HID descriptor type
-    DESC_CONFIG_WORD(0x0100),                 // HID Spec Release Number in BCD format (1.11)
+    DESC_CONFIG_WORD(0x0111),                 // HID Spec Release Number in BCD format (1.11)
     0x00,                   // Country Code (0x00 for Not supported)
     HID_NUM_OF_DSC,         // Number of class descriptors, see usbcfg.h
     DSC_RPT,                // Report descriptor type
@@ -457,12 +467,12 @@ ROM struct{BYTE report[HID_RPT01_SIZE];}hid_rpt01={
 
     0x85, POWER_SUMMARY_RUN_TIME_TO_EMPTY,      //     REPORT_ID (POWER_SUMMARY_RUN_TIME_TO_EMPTY)
     0x09, 0x68,                                 //     USAGE (RunTimeToEmpty)
-    0x75, 0x18,                                 //     REPORT_SIZE (16)
+    0x75, 0x18,                                 //     REPORT_SIZE (24)
     0x95, 0x01,                                 //     REPORT_COUNT (1)
     0x66, 0x01, 0x10,                           //     UNIT (SI Lin:Time)
     0x55, 0x00,                                 //     UNIT_EXPONENT (0)
     0x15, 0x00,                                 //     LOGICAL_MINIMUM (0)
-    0x27, 0xff, 0xff, 0x00, 0x00,               //     LOGICAL_MAXIMUM (65535)
+    0x27, 0xff, 0xff, 0xff, 0x00,               //     LOGICAL_MAXIMUM (16777215)
     0xb1, 0x82,                                 //     FEATURE (Data,Var,Abs,Vol) 
     0x09, 0x68,                                 //     USAGE (RunTimeToEmpty)
     0x81, 0x82,                                 //     INPUT (Data,Var,Abs,Vol) 

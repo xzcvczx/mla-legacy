@@ -18,6 +18,8 @@
 #include "MDD File System\FSIO.h"
 #include "SSD1926_SDCard.h"
 #include "SSD1926_JPEG.h"
-
+#if defined (MULTI_MEDIA_BOARD_DM00123)
+	#include "cpld.h"
+#endif
 #endif
 

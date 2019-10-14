@@ -38,6 +38,7 @@
   1.0   Initial release
   2.1   Updated for simplicity and to use common
                      coding style
+  2.7   Minor change to POWER_SUMMARY_RUN_TIME_TO_EMPTY reporting.                   
 ********************************************************************/
 
 #ifndef MAIN_C
@@ -1195,18 +1196,22 @@ void UserGetReportHandler(void)
         //         |---------------------------------------------------------------|
         //      2  |                         RunTimeToEmpty (byte 1)               |
         //         -----------------------------------------------------------------
+        //      3  |                         RunTimeToEmpty (byte 2)               |
+        //         -----------------------------------------------------------------
         //*********************************************************************
         case POWER_SUMMARY_RUN_TIME_TO_EMPTY:
             {
                 WORD_VAL RunTimeToEmpty;
 
-                RunTimeToEmpty.Val = (60 * 60 * 1 * capacity)/100;
+                //RunTimeToEmpty.Val = (60u * 60u * 1u * capacity)/100u;	//Basically want this, but since runtime division is expensive, better to do the below instead.
+                RunTimeToEmpty.Val = (36u * (WORD)capacity);
                 //60 sec/min * 60 min/hr * 1hr capacity(typically) * current_capacity/100 = seconds of capacity left
 
                 hid_feature_data[0] = POWER_SUMMARY_RUN_TIME_TO_EMPTY;
                 hid_feature_data[1] = RunTimeToEmpty.v[0];
                 hid_feature_data[2] = RunTimeToEmpty.v[1];
-                USBEP0SendRAMPtr((BYTE*)&hid_feature_data,3,USB_EP0_NO_OPTIONS)
+                hid_feature_data[3] = 0u;
+                USBEP0SendRAMPtr((BYTE*)&hid_feature_data,4,USB_EP0_NO_OPTIONS)
             }
             break;
 
@@ -1417,19 +1422,23 @@ void ProcessIO(void)
             //         |---------------------------------------------------------------|
             //      2  |                         RunTimeToEmpty (byte 1)               |
             //         -----------------------------------------------------------------
+            //      3  |                         RunTimeToEmpty (byte 2)               |
+            //         -----------------------------------------------------------------
             //*********************************************************************
             case POWER_SUMMARY_RUN_TIME_TO_EMPTY:
             {
                 WORD_VAL RunTimeToEmpty;
 
-                RunTimeToEmpty.Val = (60 * 60 * 1 * capacity)/100;
+                //RunTimeToEmpty.Val = (60u * 60u * 1u * capacity)/100u;		//Want this but division is expensive, so we do the below instead.
+                RunTimeToEmpty.Val = (36u * (WORD)capacity);
                 //60 sec/min * 60 min/hr * 1hr capacity(typically) * current_capacity/100 = seconds of capacity left
 
                 ToSendDataBuffer[0] = reportToSend;
                 ToSendDataBuffer[1] = RunTimeToEmpty.v[0];
                 ToSendDataBuffer[2] = RunTimeToEmpty.v[1];
+                ToSendDataBuffer[3] = 0u;
 
-                USBInHandle = HIDTxPacket(HID_EP,(BYTE*)&ToSendDataBuffer[0],3);
+                USBInHandle = HIDTxPacket(HID_EP,(BYTE*)&ToSendDataBuffer[0],4);
 
                 reportToSend = POWER_SUMMARY_REMAINING_CAPACITY;
                 break;

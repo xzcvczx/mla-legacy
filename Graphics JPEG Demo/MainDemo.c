@@ -84,7 +84,7 @@ _FOSCSEL(FNOSC_PRI);
 _FOSC(FCKSM_CSECMD &OSCIOFNC_OFF &POSCMD_XT);
 _FWDT(FWDTEN_OFF);
 #elif defined(__PIC32MX__)
-    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_18, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
+    #pragma config FPLLODIV = DIV_1, FPLLMUL = MUL_20, FPLLIDIV = DIV_2, FWDTEN = OFF, FCKSM = CSECME, FPBDIV = DIV_1
     #pragma config OSCIOFNC = ON, POSCMOD = XT, FSOSCEN = ON, FNOSC = PRIPLL
     #pragma config CP = OFF, BWP = OFF, PWP = OFF
 #else
@@ -112,13 +112,11 @@ _CONFIG3( WPFP_WPFP255 & SOSCSEL_SOSC & WUTSEL_LEG & ALTPMP_ALTPMPEN & WPDIS_WPD
 	#endif	
 #endif
 
+
 /////////////////////////////////////////////////////////////////////////////
 // JPEG Files
 /////////////////////////////////////////////////////////////////////////////
 extern BITMAP_FLASH Logo;
-extern BITMAP_EXTERNAL  Scene05;
-extern BITMAP_EXTERNAL  Scene04;
-extern BITMAP_EXTERNAL  Scene03;
 extern BITMAP_EXTERNAL  Scene02;
 extern BITMAP_EXTERNAL  Scene01;
 
@@ -129,7 +127,7 @@ extern BITMAP_EXTERNAL  Scene01;
 int main(void)
 {
 
-    #if (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #if defined(PIC24FJ256DA210_DEV_BOARD)
     
     _ANSG8 = 0; /* S1 */
     _ANSE9 = 0; /* S2 */
@@ -178,18 +176,22 @@ int main(void)
     #elif defined(__PIC32MX__)
     INTEnableSystemMultiVectoredInt();
     SYSTEMConfigPerformance(GetSystemClock());
+    #ifdef MULTI_MEDIA_BOARD_DM00123
+        CPLDInitialize();
+        CPLDSetGraphicsConfiguration(GRAPHICS_HW_CONFIG);
+        CPLDSetSPIFlashConfiguration(SPI_FLASH_CHANNEL);
+    #endif
     #endif
 
     // Initialize external memory
-    #if (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V2)
+    #if defined (GFX_PICTAIL_V2) 
     SST39Init();
 	InitGraph();                    // Initialize graphics
-    #elif (GRAPHICS_HARDWARE_PLATFORM == GFX_PICTAIL_V3) || (GRAPHICS_HARDWARE_PLATFORM == DA210_DEV_BOARD)
+    #else 
 	InitGraph();                    // Initialize graphics
     SST25Init();
-    #else
-        #error Only Graphics PICtails 2, 3 and PIC24FJ256DA210 Development Board are supported
     #endif
+
     #if defined(__dsPIC33FJ128GP804__) || defined(__PIC24HJ128GP504__)
     AD1PCFGL = 0xffff;
     #endif
@@ -200,6 +202,7 @@ int main(void)
 
     while(1)
     {
+        #ifdef USE_JPEG_EXTERNAL
         // FROM EXTERNAL MEMORY
         JPEGPutImage(0, 0, &Scene01);
         SetColor(WHITE);
@@ -209,24 +212,15 @@ int main(void)
         SetColor(WHITE);
         OutTextXY(0, 0, "EXTERNAL MEMORY");
         DelayMs(DELAY_MS);
-        JPEGPutImage(0, 0, &Scene03);
-        SetColor(WHITE);
-        OutTextXY(0, 0, "EXTERNAL MEMORY");
-        DelayMs(DELAY_MS);
-        JPEGPutImage(0, 0, &Scene04);
-        SetColor(WHITE);
-        OutTextXY(0, 0, "EXTERNAL MEMORY");
-        DelayMs(DELAY_MS);
-        JPEGPutImage(0, 0, &Scene05);
-        SetColor(WHITE);
-        OutTextXY(0, 0, "EXTERNAL MEMORY");
-        DelayMs(DELAY_MS);
+        #endif
 
+        #ifdef USE_JPEG_FLASH
         // FROM INTERNAL FLASH
         JPEGPutImage(0, 0, &Logo);
         SetColor(WHITE);
         OutTextXY(0, 0, "INTERNAL FLASH");
         DelayMs(DELAY_MS);
+        #endif
     }
 
     return (0);

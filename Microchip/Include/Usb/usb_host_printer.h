@@ -81,12 +81,23 @@ PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. THE COMPANY SHALL NOT,
 IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL OR
 CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-Change History:
-  Rev    Description
-  ----   -------------------------------------
-  2.6a   No change
-
 *******************************************************************************/
+
+//DOM-IGNORE-BEGIN
+/********************************************************************
+ File Description:
+
+ Change History:
+  Rev           Description
+  ----------    -----------
+  2.6 - 2.6A    No chance except stack revision number
+
+  2.7           Minor updates to USBHostPrinterGetStatus() header
+                to better describe the function requirements and
+                operation.
+********************************************************************/
+//DOM-IGNORE-END
+
 #ifndef __USBHOSTPRINTER_H__
 #define __USBHOSTPRINTER_H__
 //DOM-IGNORE-END
@@ -1972,6 +1983,14 @@ DWORD USBHostPrinterGetRxLength( BYTE deviceAddress );
     * Bit 4 - Select; 1 = selected, 0 = not selected
     * Bit 3 - Not Error; 1 = no error, 0 = error
     * All other bits are reserved.
+
+    The *status parameter is not updated until the EVENT_PRINTER_REQUEST_DONE
+    event is thrown.  Until that point the value of *status is unknown.
+
+    The *status parameter will only be updated if this function returns
+    USB_SUCCESS.  If this function returns with any other error code then the
+    EVENT_PRINTER_REQUEST_DONE event will not be thrown and the status field
+    will not be updated.
 
   Preconditions:
     The device must be connected and enumerated.

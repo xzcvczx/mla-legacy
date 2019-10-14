@@ -512,20 +512,27 @@ WORD JPEGMsgCallback(WORD objMsg, OBJ_HEADER *pObj, GOL_MSG *pMsg)
                 }
             }
 
-            // The message was processed
+            // The message was processed. To avoid other objects processing the 
+            // processed message reset the message.
+            pMsg->uiEvent = EVENT_INVALID;
             return (0);
 
         case ID_SLD4LB:
+        	
+        	if((objMsg == SLD_MSG_INC) || (objMsg == SLD_MSG_DEC)) 
+            {   // check slider was touched.
 
-            // Process message by default
-            SldMsgDefault(objMsg, (SLIDER *)pObj, pMsg);
-
-            // Set new list box position
-            if(LbGetFocusedItem(pListBox) != LbGetCount(pListBox) - SldGetPos(pSlider))
-            {
-                LbSetFocusedItem(pListBox, LbGetCount(pListBox) - SldGetPos(pSlider));
-                SetState(pListBox, LB_DRAW_ITEMS);
-            }
+	            // Process message by default
+	            SldMsgDefault(objMsg, (SLIDER *)pObj, pMsg);
+	
+	            // Set new list box position
+	            if(LbGetFocusedItem(pListBox) != LbGetCount(pListBox) - SldGetPos(pSlider))
+	            {
+	                LbSetFocusedItem(pListBox, LbGetCount(pListBox) - SldGetPos(pSlider));
+	                SetState(pListBox, LB_DRAW_ITEMS);
+	            }
+	            
+	        }
 
             // The message was processed
             return (0);

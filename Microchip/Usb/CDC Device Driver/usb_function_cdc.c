@@ -73,14 +73,28 @@
     
     C:\\Microchip Solutions\\Microchip\\Include
     
-    C:\\Microchip Solutions\\My Demo Application  
-
-    Change History:
-     Rev    Description
-     -----  -----------
-     No change since v2.6
-                               
+    C:\\Microchip Solutions\\My Demo Application                                 
   ********************************************************************************/
+
+/********************************************************************
+ Change History:
+  Rev    Description
+  ----   -----------
+  2.3    Decricated the mUSBUSARTIsTxTrfReady() macro.  It is 
+         replaced by the USBUSARTIsTxTrfReady() function.
+
+  2.6    Minor definition changes
+
+  2.6a   No Changes
+
+  2.7    Fixed error in the part support list of the variables section
+         where the address of the CDC variables are defined.  The 
+         PIC18F2553 was incorrectly named PIC18F2453 and the PIC18F4558
+         was incorrectly named PIC18F4458.
+
+         http://www.microchip.com/forums/fb.aspx?m=487397
+
+********************************************************************/
 
 /** I N C L U D E S **********************************************************/
 #include "USB\usb.h"
@@ -93,7 +107,7 @@
 #if defined(__18F14K50) || defined(__18F13K50) || defined(__18LF14K50) || defined(__18LF13K50) 
     #pragma udata usbram2
 #elif defined(__18F2455) || defined(__18F2550) || defined(__18F4455) || defined(__18F4550)\
-    || defined(__18F2458) || defined(__18F2453) || defined(__18F4558) || defined(__18F4553)
+    || defined(__18F2458) || defined(__18F2553) || defined(__18F4458) || defined(__18F4553)
     #pragma udata USB_VARIABLES=0x500
 #elif defined(__18F4450) || defined(__18F2450)
 	#pragma udata USB_VARIABLES=0x480

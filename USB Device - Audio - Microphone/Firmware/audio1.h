@@ -38,10 +38,12 @@
  File Description:
 
  Change History:
-  Rev   Description
-  ----- -------------------------------
-  2.6   Initial release
-  2.6a  No change
+  Rev     Description
+  -----   -----------------------------------------------------
+  2.5     Initial release
+
+  2.5a-   No Change
+  2.7     
 
 ********************************************************************/
 ROM unsigned char audioSamples[9652] = {

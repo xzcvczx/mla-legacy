@@ -217,7 +217,7 @@ HTTP_IO_RESULT HTTPExecutePost(void)
 
 void HTTPPrint_version(void)
 {
-	TCPPutROMString(sktHTTP,(ROM void*)VERSION);
+	TCPPutROMString(sktHTTP,(ROM void*)TCPIP_STACK_VERSION);
 	return;
 }
 

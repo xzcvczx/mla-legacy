@@ -92,12 +92,29 @@ Description:
   ----   -----------
   2.6    Changed the inplementation of the interrupt clearing macro
          to be more efficient.  
+
   2.6a   Added DisableNonZeroEndpoints() function
+
+  2.7    Changed the definition of USB_PULLUP_ENABLE and USB_PULLUP_DISABLE
+         to be more useful.  
+
+         Added CovertToVirtualAddress() function for compatibility with PIC32.
+
+         Added USBDisableInterrupts() function that disables the USB
+         interrupts on the initialization function.  This is required if
+         running a dual role application where the host uses interrupts
+         and the device mode runs polling mode.  In this case the host
+         doesn't disable the interrupts so the first interrupt caused by
+         the USB device will incorrectly vector to the host interrupt
+         interrupt handler.
+
+         Modified the SetConfigurationOptions() function to explicitly 
+         reconfigure the pull-up/pull-down settings for the D+/D- pins
+         in case the host leaves the pull-downs enabled.
 
  *************************************************************************/
 
 #if !defined(USB_HAL_PIC32_H)
-#if defined(USB_SUPPORT_DEVICE) | defined(USB_SUPPORT_OTG)
 #include "Compiler.h"
 
 #define USB_HAL_PIC32_H
@@ -229,8 +246,8 @@ typedef union _POINTER
 #define _OEMON      0x00            // Use SIE output indicator
 //**********************************************************************
 
-#define USB_PULLUP_ENABLE 0x10
-#define USB_PULLUP_DISABLE 0x00
+#define USB_PULLUP_ENABLE 0x00
+#define USB_PULLUP_DISABLE 0x04
 
 #define USB_INTERNAL_TRANSCEIVER 0x00
 #define USB_EXTERNAL_TRANSCEIVER 0x01
@@ -242,7 +259,8 @@ typedef union _POINTER
     #error "Unsupported ping pong mode for this device"
 #endif
 
-#define ConvertToPhysicalAddress(a) KVA_TO_PA(a)
+#define ConvertToPhysicalAddress(a) ((DWORD)KVA_TO_PA(a))
+#define ConvertToVirtualAddress(a)  PA_TO_KVA1(a)
 
 /****************************************************************
     Function:
@@ -335,7 +353,14 @@ typedef union _POINTER
 #endif
 
 //STALLIE, IDLEIE, TRNIE, and URSTIE are all enabled by default and are required
-#define USBEnableInterrupts() {IEC1bits.USBIE = 1;IPC11CLR=0x0000FF00;IPC11SET=0x00001000;INTEnableSystemMultiVectoredInt(); INTEnableInterrupts();}
+#if defined(USB_INTERRUPT)
+    #define USBEnableInterrupts() {IEC1bits.USBIE = 1;IPC11CLR=0x0000FF00;IPC11SET=0x00001000;INTEnableSystemMultiVectoredInt(); INTEnableInterrupts();}
+#else
+    #define USBEnableInterrupts()
+#endif
+
+#define USBDisableInterrupts() {IEC1bits.USBIE = 0;}
+
 #if defined(USB_INTERRUPT)
     #define USBMaskInterrupts() {IEC1bits.USBIE = 0;}
     #define USBUnmaskInterrupts() {IEC1bits.USBIE = 1;}
@@ -365,10 +390,9 @@ typedef union _POINTER
 
     #define USB_STALL_ENDPOINT      0x02
 
-    #define SetConfigurationOptions()   {U1CNFG1 = 0;U1EIE = 0x9F;U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT;}
+    #define SetConfigurationOptions()   {U1CNFG1 = 0;U1EIE = 0x9F;U1IE = 0x99 | USB_SOF_INTERRUPT | USB_ERROR_INTERRUPT; U1OTGCON &= 0x000F;  U1OTGCON |= USB_PULLUP_OPTION;}
 
     #define USBClearInterruptRegister(reg) reg = 0xFF;
-#endif  //Device or OTG
 
 // Buffer Descriptor Status Register layout.
 typedef union __attribute__ ((packed)) _BD_STAT 
@@ -402,8 +426,8 @@ typedef union __attribute__ ((packed))__BDT
     struct __attribute__ ((packed))
     {
         BD_STAT     STAT;
-        WORD       CNT:10;
-        BYTE*       ADR;                      //Buffer Address
+        WORD        CNT:10;
+        DWORD       ADR;                      //Buffer Address
     };
     struct __attribute__ ((packed))
     {

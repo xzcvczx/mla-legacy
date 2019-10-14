@@ -41,7 +41,7 @@
  *****************************************************************************/
 #include "EEPROM.h"
 
-#if (GRAPHICS_HARDWARE_PLATFORM < GFX_PICTAIL_V3)
+#if defined (GFX_PICTAIL_V2)
 
 /************************************************************************
 * Function: EEPROMInit                                                  

@@ -39,7 +39,7 @@
   Rev     Description
   -----   -----------
   1.2.5   Fixed bug in the calculation of the capacity for v1.0 devices
-          
+  1.2.6   No change   
 ********************************************************************/
 
 #include "Compiler.h"

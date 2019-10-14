@@ -16,7 +16,7 @@
 * associated software agreement.  This software is protected by 
 * software and other intellectual property laws.  Any use in 
 * violation of the software license may subject the user to criminal 
-* sanctions as well as civil liability.  Copyright 2008 Microchip
+* sanctions as well as civil liability.  Copyright 2010 Microchip
 * Technology Inc.  All rights reserved.
 *
 * This software is provided "AS IS."  MICROCHIP DISCLAIMS ALL 
@@ -107,7 +107,7 @@
 
 // A generic structure representing the Ethernet header starting all Ethernet 
 // frames
-typedef struct _MAC_HEADER
+typedef struct
 {
 	BYTE			DestMAC[6];
 	BYTE			SourceMAC[6];
@@ -115,14 +115,14 @@ typedef struct _MAC_HEADER
 } MAC_HEADER;
 
 // A header appended at the start of all RX frames by the hardware
-typedef struct _ETH_HEADER
+typedef struct
 {
 	WORD			NextPacketPointer;
 	RXSTATUS		StatusVector;
 	MAC_HEADER		MACHeader;
 } ETH_HEADER;
 
-typedef struct _ARP_HEADER
+typedef struct
 {
 	WORD			HardwareType;
 	WORD			ProtocolType;
@@ -135,7 +135,7 @@ typedef struct _ARP_HEADER
 	DWORD_VAL		TargetIPAddr;
 } ARP_HEADER;
 
-typedef struct _IP_HEADER
+typedef struct
 {
 	BYTE			VersionLength;
 	BYTE			DifferentiatedServices;
@@ -149,7 +149,7 @@ typedef struct _IP_HEADER
 	DWORD_VAL		DestinationIP;
 } IP_HEADER;
 
-typedef struct _UDP_HEADER
+typedef struct
 {
 	WORD_VAL		SourcePort;
 	WORD_VAL		DestinationPort;
@@ -219,7 +219,7 @@ static BYTE vFlashSave[FLASH_ERASE_SIZE];
 static far rom DWORD dwJumpInstructions[2] = {0xFFFFFFFF, 0xFFFFFFFF};	// 0xF000EF02 is a goto 0x000004 instruction
 #pragma romdata
 
-typedef struct _CONFIG1Hbitsx
+typedef struct
 {
 	unsigned char 		: 2;
 	unsigned char CP0	: 1;
@@ -375,32 +375,32 @@ void main(void)
 
 	// Configure the MAC
 	// Enable the receive portion of the MAC
-	MACON1 = MACON1_TXPAUS | MACON1_RXPAUS | MACON1_MARXEN; Nop();
+	MACON1 = MACON1_TXPAUS | MACON1_RXPAUS | MACON1_MARXEN; //Nop();
 
 	// Pad packets to 60 bytes, add CRC, and check Type/Length field.
-	MACON3 = MACON3_PADCFG0 | MACON3_TXCRCEN | MACON3_FRMLNEN; Nop();
+	MACON3 = MACON3_PADCFG0 | MACON3_TXCRCEN | MACON3_FRMLNEN; //Nop();
 
 	// Allow infinite deferals if the medium is continuously busy 
 	// (do not time out a transmission if the half duplex medium is 
 	// completely saturated with other people's data)
-	MACON4 = MACON4_DEFER; Nop();
+	MACON4 = MACON4_DEFER; //Nop();
 
 	// Set non-back-to-back inter-packet gap to 9.6us.  The back-to-back 
 	// inter-packet gap (MABBIPG) is set by MACSetDuplex() which is called 
 	// later.
-	MAIPGL = 0x12; Nop();
-	MAIPGH = 0x0C; Nop();
+	MAIPGL = 0x12; //Nop();
+	MAIPGH = 0x0C; //Nop();
 
 	// Set the maximum packet size which the controller will accept
-	MAMXFLL = LOW(1518); Nop();
-	MAMXFLH = HIGH(1518); Nop();
+	MAMXFLL = LOW(1518); //Nop();
+	MAMXFLH = HIGH(1518); //Nop();
 
 	// Initialize physical MAC address registers
-	MAADR1 = MyAddress.vMAC[0]; Nop();
-	MAADR2 = MyAddress.vMAC[1]; Nop();
-	MAADR3 = MyAddress.vMAC[2]; Nop();
-	MAADR4 = MyAddress.vMAC[3]; Nop();
-	MAADR5 = MyAddress.vMAC[4]; Nop();
+	MAADR1 = MyAddress.vMAC[0]; //Nop();
+	MAADR2 = MyAddress.vMAC[1]; //Nop();
+	MAADR3 = MyAddress.vMAC[2]; //Nop();
+	MAADR4 = MyAddress.vMAC[3]; //Nop();
+	MAADR5 = MyAddress.vMAC[4]; //Nop();
 	MAADR6 = MyAddress.vMAC[5];
 
 	// Disable half duplex loopback and RXAP in PHY
@@ -408,12 +408,12 @@ void main(void)
 
 #if defined(FULL_DUPLEX)
 	WritePHYReg(PHCON1, PHCON1_PDPXMD);
-	MACON3bits.FULDPX = 1; Nop();
+	MACON3bits.FULDPX = 1; //Nop();
 	// Set the back-to-back inter-packet gap time to 9.6us in full duplex
-	MABBIPG = 0x15; Nop();
+	MABBIPG = 0x15; //Nop();
 #else
 	// Set the back-to-back inter-packet gap time to 9.6us in half duplex
-	MABBIPG = 0x12; Nop();
+	MABBIPG = 0x12; //Nop();
 #endif
 
 	// Enable packet reception
@@ -808,7 +808,7 @@ static void TFTPBootloadProcess(ETH_HEADER* ETHHeaderPtr, IP_HEADER* IPHeaderPtr
 			// Perform the decode and flash write
 			while(AppDataLen)
 			{
-				DWORD dwAddress;
+				static DWORD dwAddress;	// Doesn't need to be declared static, but done so to reduce code size.
 				WORD w;
 				CHAR cRet;
 	
@@ -1050,14 +1050,16 @@ static CHAR DecodeHex(BYTE *vHexData, WORD *wHexDataLen, BYTE *vMemoryData, DWOR
 	static DWORD_VAL dwvVolatileExtAddress;
 	static DWORD_VAL dwvLatchedExtAddress;
 	static DWORD dwTemp;
+	static DWORD dwLastWriteBlockAddress;
 	static BYTE vRecordType;
 	static BYTE vChecksum;
+	static BOOL bByteWritten;
 
 	BYTE vEncodedByte; 
 	BYTE vDecodedByte;
 	WORD w;
-	WORD wHexLen;
-	BOOL bByteWritten;
+	static WORD wHexLen;	// Doesn't need to be declared static, but done so to reduce code size.
+	WORD wHexDataLenLocal;
 
 	// Reset state machine if this is a first time
 	if(bInitialize)
@@ -1067,19 +1069,19 @@ static CHAR DecodeHex(BYTE *vHexData, WORD *wHexDataLen, BYTE *vMemoryData, DWOR
 		dwvVolatileExtAddress.Val = 0;
 		dwvLatchedExtAddress.Val = 0;
 		smRecordParser = GetColon;
+		bByteWritten = FALSE;
 		return DECODE_SUCCESS_NEED_MORE_HEXDATA;
 	}
 
-	bByteWritten = FALSE;
 	wHexLen = *wHexDataLen;
-	*wHexDataLen = 0;
-		
+	wHexDataLenLocal = 0;
 
 	while(wHexLen)
 	{
 		wHexLen--;
-		vEncodedByte = vHexData[*wHexDataLen];
-		*wHexDataLen += 1;
+		vEncodedByte = vHexData[wHexDataLenLocal];
+		wHexDataLenLocal++;
+		*wHexDataLen = wHexDataLenLocal;
 		vDecodedByte = HexToBin(vEncodedByte);
 		switch(smRecordParser)
 		{
@@ -1110,7 +1112,6 @@ static CHAR DecodeHex(BYTE *vHexData, WORD *wHexDataLen, BYTE *vMemoryData, DWOR
 				break;
 	
 			case GetAddress3:
-				wvVolatileAddress.Val = 0;
 				wvVolatileAddress.v[1] = vDecodedByte<<4;
 				smRecordParser = GetAddress2;
 				break;
@@ -1127,14 +1128,22 @@ static CHAR DecodeHex(BYTE *vHexData, WORD *wHexDataLen, BYTE *vMemoryData, DWOR
 				wvVolatileAddress.v[0] |= vDecodedByte;
 				vChecksum += wvVolatileAddress.v[0];
 				smRecordParser = GetRecordType1;
+				w = wvLatchedAddress.Val;
 				wvLatchedAddress.Val = wvVolatileAddress.Val;
 
 				// Make sure we haven't moved out of this flash write page
 				if(bByteWritten)
 				{
 					dwTemp = dwvLatchedExtAddress.Val + wvLatchedAddress.Val;
-					if((dwTemp >= *dwAddress + FLASH_WRITE_SIZE) || (dwTemp < *dwAddress))
+					if((dwTemp >= dwLastWriteBlockAddress + FLASH_WRITE_SIZE) || (dwTemp < dwLastWriteBlockAddress))
+					{
+						// Fill unprogramed locations in this write block with 0xFF bytes
+						w &= (FLASH_WRITE_SIZE-1);
+						memset(&vMemoryData[w], 0xFF, FLASH_WRITE_SIZE - w);
+						
+						bByteWritten = FALSE;
 						return DECODE_SUCCESS_NEW_ADDRESS;
+					}
 				}
 				break;
 	
@@ -1178,7 +1187,8 @@ static CHAR DecodeHex(BYTE *vHexData, WORD *wHexDataLen, BYTE *vMemoryData, DWOR
 					if(!bByteWritten)
 					{
 						dwTemp = dwvLatchedExtAddress.Val + wvLatchedAddress.Val;
-						*dwAddress = dwTemp & ~(FLASH_WRITE_SIZE-1ul);
+						dwLastWriteBlockAddress = dwTemp & ~(FLASH_WRITE_SIZE-1ul);
+						*dwAddress = dwLastWriteBlockAddress;
 						bByteWritten = TRUE;
 					}
 					vMemoryData[wvLatchedAddress.v[0] & (FLASH_WRITE_SIZE-1)] = vRecordByte;
@@ -1224,7 +1234,10 @@ static CHAR DecodeHex(BYTE *vHexData, WORD *wHexDataLen, BYTE *vMemoryData, DWOR
 				{
 					dwTemp = dwvLatchedExtAddress.Val + wvLatchedAddress.Val;
 					if((dwTemp >= *dwAddress + FLASH_WRITE_SIZE) || (dwTemp < *dwAddress))
+					{
+						bByteWritten = FALSE;
 						return DECODE_SUCCESS_NEW_ADDRESS;
+					}
 				}
 
 				break;
@@ -1279,8 +1292,8 @@ static CHAR DecodeHex(BYTE *vHexData, WORD *wHexDataLen, BYTE *vMemoryData, DWOR
 *****************************************************************************/
 static void EraseFlash(DWORD Address, DWORD EraseByteLength)
 {
-	DWORD ErasePageAddress;
-	DWORD ErasePageEndAddress;
+	static DWORD ErasePageAddress;		// Doesn't need to be declared static, but done so to reduce code size.
+	static DWORD ErasePageEndAddress;	// Doesn't need to be declared static, but done so to reduce code size.
 	DWORD dwBootloaderStart, dwBootloaderEnd;
 	WORD w;
 	BYTE vAndSum;
@@ -1363,7 +1376,7 @@ static void EraseFlash(DWORD Address, DWORD EraseByteLength)
 *****************************************************************************/
 static void RawEraseFlashBlock(DWORD dwAddress)
 {
-	DWORD dwBootloaderStart, dwBootloaderEnd;
+	static DWORD dwBootloaderStart, dwBootloaderEnd;	// Doesn't need to be declared static, but done so to reduce code size.
 	WORD w;
 	BYTE vAndSum;
 
@@ -1779,7 +1792,7 @@ static BOOL RawWriteFlashBlock(DWORD Address, BYTE *BlockData, BYTE *StatusData)
 *****************************************************************************/
 static DWORD GetTime(void)
 {
-	DWORD_VAL ret;
+	static DWORD_VAL ret;	// Doesn't need to be declared static, but done so to reduce code size.
 
 	if(INTCONbits.TMR0IF)
 	{
@@ -1814,7 +1827,7 @@ static DWORD GetTime(void)
 static WORD CalcIPChecksum(BYTE* Data, WORD Length)
 {
 	WORD_VAL Checksum;
-	WORD_VAL i;
+	static WORD_VAL i;	// Doesn't need to be declared static, but done so to reduce code size.
 
 	Checksum.Val = 0x0000;
 
@@ -1855,7 +1868,7 @@ static WORD CalcIPChecksum(BYTE* Data, WORD Length)
 *****************************************************************************/
 static void MACDiscardRx(void)
 {
-	WORD_VAL NewRXRDLocation;
+	static WORD_VAL NewRXRDLocation;	// Doesn't need to be declared static, but done so to reduce code size.
 
 	// Decrement the next packet pointer before writing it into 
 	// the ERXRDPT registers.  This is a silicon errata workaround.
@@ -1899,7 +1912,7 @@ static void MACDiscardRx(void)
 static WORD MACGetArray(BYTE *val, WORD len)
 {
 	WORD w;
-	volatile BYTE i;
+	static volatile BYTE i;	// Doesn't need to be declared static, but done so to reduce code size.
 
 	w = len;
 
@@ -1990,7 +2003,7 @@ static void MACFlush(void)
 
 	// Wait at least 1.6us after TX Reset before setting TXRTS.
 	// If you don't wait long enough, the TX logic won't be finished resetting.
-	{volatile BYTE i = 8; while(i--);}	
+	{static volatile BYTE i = 8; while(i--);}	
 	EIRbits.TXERIF = 0;
 
 	// Start the transmission
@@ -2025,7 +2038,7 @@ static void MACFlush(void)
 *****************************************************************************/
 static BOOL MACIsTxReady(void)
 {
-	WORD wTimerVal;
+	static WORD wTimerVal;	// Doesn't need to be declared static, but done so to reduce code size.
 
 	if(!ECON1bits.TXRTS)
 		return TRUE;

@@ -30,8 +30,8 @@
  File Description:
 
  Change History:
-  Rev   Date         Description
-  ?.?   09/15/2008   Initial revision
+  Rev   Description
+  2.6   Initial revision
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC24FJ256DA210_DEV_BOARD_H

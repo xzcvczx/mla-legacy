@@ -69,12 +69,15 @@ Change History:
   Rev         Description
   ----------  ----------------------------------------------------------
   2.6 - 2.6a  No change
+  2.7         Fixed issue where a transfer event is incorrectly sent when
+              transfer events are enabled.
 
 *******************************************************************************/
 
 
 #include <stdlib.h>
 #include <string.h>
+#include "Compiler.h"
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "USB\usb.h"
@@ -1392,7 +1395,7 @@ BOOL USBHostMSDInitialize( BYTE address, DWORD flags, BYTE clientDriverID )
                             errorCode = USBHostIssueDeviceRequest( deviceInfoMSD[device].deviceAddress,
                                     USB_SETUP_DEVICE_TO_HOST | USB_SETUP_TYPE_CLASS | USB_SETUP_RECIPIENT_INTERFACE,
                                     USB_MSD_GET_MAX_LUN, 0, deviceInfoMSD[device].interface, 1, deviceInfoMSD[device].blockData,
-                                    USB_DEVICE_REQUEST_GET, deviceInfoMSD[i].clientDriverID );
+                                    USB_DEVICE_REQUEST_GET, deviceInfoMSD[device].clientDriverID );
                             if (errorCode)
                             {
                                 #ifdef DEBUG_MODE

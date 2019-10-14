@@ -36,7 +36,6 @@
                      coding style
   2.3   09/15/2008   Broke out each hardware platform into its own
                      "HardwareProfile - xxx.h" file
-  2.6   11/12/2009
 ********************************************************************/
 
 #ifndef HARDWARE_PROFILE_PIC24F_STARTER_KIT_H
@@ -61,17 +60,17 @@
     //#define USE_USB_BUS_SENSE_IO
     #define tris_usb_bus_sense  U1OTGSTATbits.SESVD  //TRISBbits.TRISB5    // Input
     #define USB_BUS_SENSE       U1OTGSTATbits.SESVD
-
-    //Uncomment this to make the output HEX of this project
+   
+    //Uncomment this to make the output HEX of this project 
     //   to be able to be bootloaded using the HID bootloader
-    #define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER
+    #define PROGRAMMABLE_WITH_USB_HID_BOOTLOADER	
 
     //If the application is going to be used with the HID bootloader
-    //  then this will provide a function for the application to
+    //  then this will provide a function for the application to 
     //  enter the bootloader from the application (optional)
     #if defined(PROGRAMMABLE_WITH_USB_HID_BOOTLOADER)
         #define EnterBootloader() __asm__("goto 0x400")
-    #endif
+    #endif   
 
     /*******************************************************************/
     /*******************************************************************/
@@ -91,30 +90,30 @@
     #define DEMO_BOARD PIC24F_STARTER_KIT
     #define PIC24F_STARTER_KIT
     #define CLOCK_FREQ 32000000
-
+   
     /** LED ************************************************************/
     #define mInitAllLEDs()      LATG &= 0xFE1F; TRISG &= 0xFE1F; LATF &= 0xFFCF; TRISF &= 0xFFCF; //G6,7,8,9 and F4,5
-
+    
     #define mGetLED_1()         (TRISG & ~0x0180?1:0)
     #define mGetLED_2()         (TRISG & ~0x0060?1:0)
     #define mGetLED_3()         (TRISF & ~0x0030?1:0)
-    #define mGetLED_4()
+    #define mGetLED_4()              
 
-    #define mLED_1_On()         TRISG |= 0x0180;
-    #define mLED_2_On()         TRISG |= 0x0060;
-    #define mLED_3_On()         TRISF |= 0x0030;
-    #define mLED_4_On()
-
-    #define mLED_1_Off()        TRISG &= ~0x0180;
-    #define mLED_2_Off()        TRISG &= ~0x0060;
-    #define mLED_3_Off()        TRISF &= ~0x0030;
-    #define mLED_4_Off()
-
-    #define mLED_1_Toggle()     TRISG ^= 0x0180;
-    #define mLED_2_Toggle()     TRISG ^= 0x0060;
-    #define mLED_3_Toggle()     TRISF ^= 0x0030;
-    #define mLED_4_Toggle()
-
+    #define mLED_1_On()         TRISG |= 0x0180; 
+    #define mLED_2_On()         TRISG |= 0x0060; 
+    #define mLED_3_On()         TRISF |= 0x0030; 
+    #define mLED_4_On()          
+    
+    #define mLED_1_Off()        TRISG &= ~0x0180; 
+    #define mLED_2_Off()        TRISG &= ~0x0060;  
+    #define mLED_3_Off()        TRISF &= ~0x0030;  
+    #define mLED_4_Off()         
+    
+    #define mLED_1_Toggle()     TRISG ^= 0x0180; 
+    #define mLED_2_Toggle()     TRISG ^= 0x0060;  
+    #define mLED_3_Toggle()     TRISF ^= 0x0030; 
+    #define mLED_4_Toggle()      
+    
     /** SWITCH *********************************************************/
     #define mInitSwitch2()      TRISDbits.TRISD6=1;
     #define mInitSwitch3()      TRISDbits.TRISD7=1;
@@ -125,5 +124,5 @@
     /** I/O pin definitions ********************************************/
     #define INPUT_PIN 1
     #define OUTPUT_PIN 0
-
+    
 #endif  //HARDWARE_PROFILE_PIC24F_STARTER_KIT_H

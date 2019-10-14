@@ -50,172 +50,172 @@
 
 #define USE_GOL
 
-/*********************************************************************
-* Overview:
-*   Graphics PICtail Plus Board Version setting. The value assigned 
-*	to this macro determines the version of the PICtail Plus Board. 
-*	- 1 - Uses Graphics PICtail Plus Board Version 1    
-*	- 2 - Uses Graphics PICtail Plus Board Version 2    
-*	- 250 - Uses Graphics PICtail Plus Board Version 2 modified with 
-*           TB3012 instructions
-*                                        
-********************************************************************/
-#define GRAPHICS_PICTAIL_VERSION       3
-
-#if (GRAPHICS_PICTAIL_VERSION == 1)
-
-	#error This Demo cannot run on Graphics PICtail Version1!
-
-#elif (GRAPHICS_PICTAIL_VERSION == 2)
-
-	#error This Demo cannot run on Graphics PICtail Version2 that is not modified using TB3012 instructions!
-
-#elif (GRAPHICS_PICTAIL_VERSION == 250)
-
-// Use this display controller when using the TFT-G320240DTSW-69W-TP-E
-#define DISPLAY_CONTROLLER				SSD1906
-
+///*********************************************************************
+//* Overview:
+//*   Graphics PICtail Plus Board Version setting. The value assigned 
+//*	to this macro determines the version of the PICtail Plus Board. 
+//*	- 1 - Uses Graphics PICtail Plus Board Version 1    
+//*	- 2 - Uses Graphics PICtail Plus Board Version 2    
+//*	- 250 - Uses Graphics PICtail Plus Board Version 2 modified with 
+//*           TB3012 instructions
+//*                                        
+//********************************************************************/
+//#define GRAPHICS_PICTAIL_VERSION       3
+//
+//#if (GRAPHICS_PICTAIL_VERSION == 1)
+//
+//	#error This Demo cannot run on Graphics PICtail Version1!
+//
+//#elif (GRAPHICS_PICTAIL_VERSION == 2)
+//
+//	#error This Demo cannot run on Graphics PICtail Version2 that is not modified using TB3012 instructions!
+//
+//#elif (GRAPHICS_PICTAIL_VERSION == 250)
+//
+//// Use this display controller when using the TFT-G320240DTSW-69W-TP-E
+//#define DISPLAY_CONTROLLER				SSD1906
+//
 // Use this when using the smaller Truly Display TFT-G240320UTSW-92W-TP-E
 //#define DISPLAY_CONTROLLER				LGDP4531
 
-// Enable this line when using SSD1906 to set to the correct panel
-#define DISPLAY_PANEL                   TFT_G320240DTSW_69W_TP_E
-
-#if (DISPLAY_CONTROLLER == SSD1906)
-
-	// for GFX2_2 project
-	#define DISP_HOR_RESOLUTION				320
-	#define DISP_VER_RESOLUTION				240
-	#define COLOR_DEPTH		                16
-	#define DISP_ORIENTATION				0
-
-	/*********************************************************************
-	* Overview: Horizontal synchronization timing in pixels
-	*                  (from the glass datasheet).
-	*********************************************************************/
-	#define DISP_HOR_PULSE_WIDTH		    24
-	#define DISP_HOR_BACK_PORCH				8
-	#define DISP_HOR_FRONT_PORCH			8
-	/*********************************************************************
-	* Overview: Vertical synchronization timing in lines
-	*                  (from the glass datasheet).
-	*********************************************************************/
-	#define DISP_VER_PULSE_WIDTH		    8
-	#define DISP_VER_BACK_PORCH				7
-	#define DISP_VER_FRONT_PORCH			5
-
-
-#elif (DISPLAY_CONTROLLER == LGDP4531)
-	// for GFX2 project
-	#define DISP_HOR_RESOLUTION				240
-	#define DISP_VER_RESOLUTION				320
-	#define COLOR_DEPTH		                16
-	#define DISP_ORIENTATION				90
-
-#else
-	#error display controller not (yet) supported in this demo
-	
-#endif
-
-
-#elif (GRAPHICS_PICTAIL_VERSION == 3)
-
-#define GRAPHICS_HARDWARE_PLATFORM GFX_PICTAIL_V3
-
-/*********************************************************************
-* Overview: Defines color depth. 
-********************************************************************/
-#define COLOR_DEPTH						16
-
-/*********************************************************************
-* Overview: Display controller selection.
-*                                          
-********************************************************************/
-#define DISPLAY_CONTROLLER				SSD1926
-
-/*********************************************************************
-* Overview: Display panel selection.
-*                                          
-********************************************************************/
-//#define DISPLAY_PANEL                   TFT_G240320LTSW_118W_TP_E
-#define DISPLAY_PANEL                   TFT_G240320LTSW_118W_E
-
-#if (DISPLAY_PANEL==TFT_G240320LTSW_118W_E)
-/*********************************************************************
-* Overview: Horizontal and vertical display resolution
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_RESOLUTION				240
-#define DISP_VER_RESOLUTION				320
-/*********************************************************************
-* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
-*********************************************************************/
-#define DISP_ORIENTATION				90
-/*********************************************************************
-* Overview: Panel Data Width (can be 18 or 24 bits).
-*********************************************************************/
-#define DISP_DATA_WIDTH                 18
-/*********************************************************************
-* Overview: LSHIFT Polarity Swap
-* If defined LSHIFT is a falling trigger
-*********************************************************************/
-#define DISP_INV_LSHIFT
-/*********************************************************************
-* Overview: Horizontal synchronization timing in pixels
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_PULSE_WIDTH		    25
-#define DISP_HOR_BACK_PORCH				4
-#define DISP_HOR_FRONT_PORCH			0
-/*********************************************************************
-* Overview: Vertical synchronization timing in lines
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_VER_PULSE_WIDTH		    4
-#define DISP_VER_BACK_PORCH				0
-#define DISP_VER_FRONT_PORCH			0
-
-#elif (DISPLAY_PANEL==TFT_G320240DTSW_69W_TP_E)
-
-/*********************************************************************
-* Overview: Horizontal and vertical display resolution
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_RESOLUTION				320
-#define DISP_VER_RESOLUTION				240
-/*********************************************************************
-* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
-*********************************************************************/
-#define DISP_ORIENTATION				0
-/*********************************************************************
-* Overview: Panel Data Width (can be 18 or 24 bits).
-*********************************************************************/
-#define DISP_DATA_WIDTH                 18
-/*********************************************************************
-* Overview: LSHIFT Polarity Swap
-* If defined LSHIFT is a falling trigger
-*********************************************************************/
+//// Enable this line when using SSD1906 to set to the correct panel
+//#define DISPLAY_PANEL                   TFT_G320240DTSW_69W_TP_E
+//
+//#if (DISPLAY_CONTROLLER == SSD1906)
+//
+//	// for GFX2_2 project
+//	#define DISP_HOR_RESOLUTION				320
+//	#define DISP_VER_RESOLUTION				240
+//	#define COLOR_DEPTH		                16
+//	#define DISP_ORIENTATION				0
+//
+//	/*********************************************************************
+//	* Overview: Horizontal synchronization timing in pixels
+//	*                  (from the glass datasheet).
+//	*********************************************************************/
+//	#define DISP_HOR_PULSE_WIDTH		    24
+//	#define DISP_HOR_BACK_PORCH				8
+//	#define DISP_HOR_FRONT_PORCH			8
+//	/*********************************************************************
+//	* Overview: Vertical synchronization timing in lines
+//	*                  (from the glass datasheet).
+//	*********************************************************************/
+//	#define DISP_VER_PULSE_WIDTH		    8
+//	#define DISP_VER_BACK_PORCH				7
+//	#define DISP_VER_FRONT_PORCH			5
+//
+//
+//#elif (DISPLAY_CONTROLLER == LGDP4531)
+//	// for GFX2 project
+//	#define DISP_HOR_RESOLUTION				240
+//	#define DISP_VER_RESOLUTION				320
+//	#define COLOR_DEPTH		                16
+//	#define DISP_ORIENTATION				90
+//
+//#else
+//	#error display controller not (yet) supported in this demo
+//	
+//#endif
+//
+//
+//#elif (GRAPHICS_PICTAIL_VERSION == 3)
+//
+//#define GRAPHICS_HARDWARE_PLATFORM GFX_PICTAIL_V3
+//
+///*********************************************************************
+//* Overview: Defines color depth. 
+//********************************************************************/
+//#define COLOR_DEPTH						16
+//
+///*********************************************************************
+//* Overview: Display controller selection.
+//*                                          
+//********************************************************************/
+//#define DISPLAY_CONTROLLER				SSD1926
+//
+///*********************************************************************
+//* Overview: Display panel selection.
+//*                                          
+//********************************************************************/
+////#define DISPLAY_PANEL                   TFT_G240320LTSW_118W_TP_E
+//#define DISPLAY_PANEL                   TFT_G240320LTSW_118W_E
+//
+//#if (DISPLAY_PANEL==TFT_G240320LTSW_118W_E)
+///*********************************************************************
+//* Overview: Horizontal and vertical display resolution
+//*                  (from the glass datasheet).
+//*********************************************************************/
+//#define DISP_HOR_RESOLUTION				240
+//#define DISP_VER_RESOLUTION				320
+///*********************************************************************
+//* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
+//*********************************************************************/
+//#define DISP_ORIENTATION				90
+///*********************************************************************
+//* Overview: Panel Data Width (can be 18 or 24 bits).
+//*********************************************************************/
+//#define DISP_DATA_WIDTH                 18
+///*********************************************************************
+//* Overview: LSHIFT Polarity Swap
+//* If defined LSHIFT is a falling trigger
+//*********************************************************************/
 //#define DISP_INV_LSHIFT
-/*********************************************************************
-* Overview: Horizontal synchronization timing in pixels
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_HOR_PULSE_WIDTH		    25
-#define DISP_HOR_BACK_PORCH				8
-#define DISP_HOR_FRONT_PORCH			8
-/*********************************************************************
-* Overview: Vertical synchronization timing in lines
-*                  (from the glass datasheet).
-*********************************************************************/
-#define DISP_VER_PULSE_WIDTH		    8
-#define DISP_VER_BACK_PORCH				7
-#define DISP_VER_FRONT_PORCH			5
-
-#endif // (DISPLAY_PANEL== ...
-
-#else
-#error Graphics controller is not defined
-#endif
+///*********************************************************************
+//* Overview: Horizontal synchronization timing in pixels
+//*                  (from the glass datasheet).
+//*********************************************************************/
+//#define DISP_HOR_PULSE_WIDTH		    25
+//#define DISP_HOR_BACK_PORCH				4
+//#define DISP_HOR_FRONT_PORCH			0
+///*********************************************************************
+//* Overview: Vertical synchronization timing in lines
+//*                  (from the glass datasheet).
+//*********************************************************************/
+//#define DISP_VER_PULSE_WIDTH		    4
+//#define DISP_VER_BACK_PORCH				0
+//#define DISP_VER_FRONT_PORCH			0
+//
+//#elif (DISPLAY_PANEL==TFT_G320240DTSW_69W_TP_E)
+//
+///*********************************************************************
+//* Overview: Horizontal and vertical display resolution
+//*                  (from the glass datasheet).
+//*********************************************************************/
+//#define DISP_HOR_RESOLUTION				320
+//#define DISP_VER_RESOLUTION				240
+///*********************************************************************
+//* Overview: Image orientation (can be 0, 90, 180, 270 degrees).
+//*********************************************************************/
+//#define DISP_ORIENTATION				0
+///*********************************************************************
+//* Overview: Panel Data Width (can be 18 or 24 bits).
+//*********************************************************************/
+//#define DISP_DATA_WIDTH                 18
+///*********************************************************************
+//* Overview: LSHIFT Polarity Swap
+//* If defined LSHIFT is a falling trigger
+//*********************************************************************/
+////#define DISP_INV_LSHIFT
+///*********************************************************************
+//* Overview: Horizontal synchronization timing in pixels
+//*                  (from the glass datasheet).
+//*********************************************************************/
+//#define DISP_HOR_PULSE_WIDTH		    25
+//#define DISP_HOR_BACK_PORCH				8
+//#define DISP_HOR_FRONT_PORCH			8
+///*********************************************************************
+//* Overview: Vertical synchronization timing in lines
+//*                  (from the glass datasheet).
+//*********************************************************************/
+//#define DISP_VER_PULSE_WIDTH		    8
+//#define DISP_VER_BACK_PORCH				7
+//#define DISP_VER_FRONT_PORCH			5
+//
+//#endif // (DISPLAY_PANEL== ...
+//
+//#else
+//#error Graphics controller is not defined
+//#endif
 
 /*********************************************************************
 * Overview: Portrait orientation for LCD and touch screen. When this
@@ -323,5 +323,14 @@
 
 #define USE_USB_PICTAIL			// Option to enable the switching of LCD controller signals
 								// when USB PICtail is used with the graphics PICtail.
+
+/*********************************************************************
+* Overview: Define the malloc() and free() for versatility on OS 
+*           based systems. 
+*
+*********************************************************************/
+#define GFX_malloc(size)  malloc(size)
+#define GFX_free(pObj)    free(pObj)
+
 
 #endif // _GRAPHICSCONFIG_H

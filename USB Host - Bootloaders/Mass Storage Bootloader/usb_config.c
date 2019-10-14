@@ -35,6 +35,7 @@ DEFENSE THEREOF), OR OTHER SIMILAR COSTS.
 
 // Created by the Microchip USBConfig Utility, Version 0.0.8.0, 2/13/2008, 9:34:00
 
+#include "Compiler.h"
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "MDD File System\FSIO.h"
